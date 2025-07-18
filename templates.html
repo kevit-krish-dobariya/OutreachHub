@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Message Templates</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="./css/style.css">
+  <!-- <style>
+    * {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      outline: none;
+      border: none;
+      text-decoration: none;
+      text-transform: capitalize;
+      transition: all .2s linear;
+    }
+
+    body {
+      background-color: #f9f9f9;
+    }
+
+    .template-page {
+      display: none;
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 0 auto;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: auto;
+    }
+
+    .template-container {
+      max-width: 1000px;
+    }
+
+    .template-card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      overflow-x: auto;
+      padding: 16px;
+    }
+
+    .template-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .template-table th,
+    .template-table td {
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+
+    .template-table th {
+      background-color: #f2f2f2;
+    }
+
+    .template-heading {
+      font-size: 28px;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .template-btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .template-btn-primary {
+      background-color: #007bff;
+      color: #fff;
+    }
+
+    .template-btn-secondary {
+      background-color: #6c757d;
+      color: #fff;
+    }
+
+    .template-btn-danger {
+      background-color: #dc3545;
+      color: #fff;
+    }
+
+    .template-btn + .template-btn {
+      margin-left: 10px;
+    }
+
+    .template-form-group {
+      margin-bottom: 16px;
+    }
+
+    .template-label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #444;
+    }
+
+    .template-input,
+    .template-select,
+    .template-textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    .template-flex {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .template-justify-between {
+      justify-content: space-between;
+    }
+
+    .template-justify-end {
+      justify-content: flex-end;
+    }
+
+    .template-justify-center {
+      justify-content: center;
+    }
+
+    .template-items-center {
+      align-items: center;
+    }
+
+    .template-space-x-4 > * + * {
+      margin-left: 16px;
+    }
+
+    .template-space-y-4 > * + * {
+      margin-top: 16px;
+    }
+
+    .template-mb-6 {
+      margin-bottom: 24px;
+    }
+
+    .template-hidden {
+      display: none;
+    }
+
+    @media (max-width: 600px) {
+      .template-table th,
+      .template-table td {
+        padding: 8px;
+      }
+
+      .template-btn {
+        padding: 8px 12px;
+        font-size: 14px;
+      }
+
+      .template-heading {
+        font-size: 22px;
+      }
+    }
+  </style> -->
+</head>
+<body>
+  <header class="header" id="home">
+    <div class="header-1">
+      <img src="./img/symbol.png" style="bottom:899px; width:70px; position:absolute;">
+        <a href="#" class="logo" style="margin-left:66px;">Out<span>ReachHub</span></a>
+      <div>
+        <button id="login-btn" type="button" class="btn">Logout</button>
+      </div>
+    </div>
+    <div class="header-2">
+      <nav class="navbar">
+        <ul>
+          <li><a href="./index.html">Home</a></li>
+          <li><a href="./campaign.html">Campaigns</a></li>
+          <li><a href="./contacts.html">Contacts</a></li>
+          <li><a href="./templates.html">Message Templates</a></li>
+          <li><a href="#about">About Us</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <br><br>
+
+  <!-- Message Templates List Page -->
+   <!-- <div class="template-header1"> -->
+    <h1 class="template-header1">Message Templates</h1>
+  <section id="message-templates-list-page" class="template-page template-container">
+    <div class="template-flex template-justify-between template-items-center template-mb-6">
+      <button onclick="showPage('add-edit-message-template-page', 'add')" class="template-btn template-btn-primary">+ Add New Template</button>
+    </div>
+  </div>
+
+    <div class="template-card template-mb-6">
+      <table class="template-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Content Snippet</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Welcome</td>
+            <td>Text</td>
+            <td>Hello, welcome to our service...</td>
+            <td>
+              <button class="template-btn template-btn-secondary" onclick="showPage('message-template-details-page')">View</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="template-flex template-justify-center template-space-x-4">
+      <button class="template-btn template-btn-secondary" disabled>Previous</button>
+      <span>Page 1 of 1</span>
+      <button class="template-btn template-btn-secondary" disabled>Next</button>
+    </div>
+  </section>
+
+  <!-- Template Details Page -->
+ <section id="message-template-details-page" class="template-page template-container">
+  <h2 class="template-heading">Template Details</h2>
+  <div class="template-space-y-4">
+    <p id="template-detail-name"><strong>Name:</strong></p>
+    <p id="template-detail-type"><strong>Type:</strong></p>
+    <p id="template-detail-content"><strong>Content:</strong></p>
+  </div>
+  <div class="template-flex template-justify-end template-space-x-4 template-mt-6">
+    <button onclick="showPage('message-templates-list-page')" class="template-btn template-btn-secondary">Back</button>
+    <button id="edit-template-btn" class="template-btn template-btn-primary">Edit</button>
+    <button id="delete-template-btn" class="template-btn template-btn-danger">Delete</button>
+  </div>
+</section>
+
+  <!-- Add/Edit Template Page -->
+  <section id="add-edit-message-template-page" class="template-page template-container">
+    <h2 class="template-heading" id="message-template-form-title">Add New Template</h2>
+    <form id="message-template-form">
+      <div class="template-form-group">
+        <label for="template-name" class="template-label">Template Name</label>
+        <input type="text" id="template-name" name="name" class="template-input" required />
+      </div>
+      <div class="template-form-group">
+        <label for="template-type" class="template-label">Template Type</label>
+        <select id="template-type" name="type" class="template-select" onchange="toggleImageField()">
+          <option value="Text">Text</option>
+          <option value="Text & Image">Text & Image</option>
+        </select>
+      </div>
+      <div class="template-form-group">
+        <label for="template-content" class="template-label">Content</label>
+        <textarea id="template-content" name="content" rows="5" class="template-textarea" required></textarea>
+      </div>
+      <div id="template-image-field" class="template-form-group template-hidden">
+        <label for="template-image-url" class="template-label">Image URL</label>
+        <input type="url" id="template-image-url" name="imageUrl" class="template-input" />
+      </div>
+      <div class="template-flex template-justify-end template-space-x-4">
+        <button type="button" onclick="showPage('message-templates-list-page')" class="template-btn template-btn-secondary">Cancel</button>
+        <button type="submit" class="template-btn template-btn-primary">Save</button>
+      </div>
+    </form>
+  </section>
+
+  <script src="./js/template.js">
+     function showPage(pageId, mode = '') {
+       document.querySelectorAll('.template-page').forEach(page => page.style.display = 'none');
+       document.getElementById(pageId).style.display = 'block';
+
+       if (pageId === 'add-edit-message-template-page') {
+         document.getElementById('message-template-form-title').innerText =
+           mode === 'edit' ? 'Edit Template' : 'Add New Template';
+
+         if (mode === 'edit') {
+          document.getElementById('template-name').value = 'Welcome';
+          document.getElementById('template-type').value = 'Text';
+          document.getElementById('template-content').value = 'Hello and welcome!';
+           document.getElementById('template-image-url').value = '';
+           toggleImageField();
+        } else {
+         document.getElementById('message-template-form').reset();
+           toggleImageField();
+         }
+       }
+     }
+
+     function toggleImageField() {
+       const type = document.getElementById('template-type').value;
+       const imageField = document.getElementById('template-image-field');
+       imageField.classList.toggle('template-hidden', type !== 'Text & Image');
+     }
+
+     window.onload = () => {
+       showPage('message-templates-list-page');
+     };
+
+  </script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('form1');
-  const emailInput = document.getElementById('email1');
-  const passwordInput = document.getElementById('password1');
+  // const form = document.getElementById('form1');
+  // const emailInput = document.getElementById('email1');
+  // const passwordInput = document.getElementById('password1');
   const adminLoginBtn = document.getElementById('adminLoginBtn');
   const adminModal = document.getElementById('admin-login-modal');
   const adminForm = document.getElementById('admin-modal-form');
@@ -10,13 +10,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const adminErrorMessage = document.getElementById('admin-modal-message');
 
   // --- One-Time Setup of Predefined Users & Admin ---
-  if (!localStorage.getItem('users')) {
-    const users = [
-      { email: 'user1@example.com', password: 'user123', name: 'User One' },
-      { email: 'user2@example.com', password: 'user456', name: 'User Two' }
-    ];
-    localStorage.setItem('users', JSON.stringify(users));
-  }
+  // if (!localStorage.getItem('users')) {
+  //   const users = [
+  //     { email: 'user1@example.com', password: 'user123', name: 'User One' },
+  //     { email: 'user2@example.com', password: 'user456', name: 'User Two' }
+  //   ];
+  //   localStorage.setItem('users', JSON.stringify(users));
+  // }
 
   if (!localStorage.getItem('admin')) {
     const admin = { username: 'admin', password: 'admin123', name: 'Admin User' };
@@ -24,25 +24,25 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --- User Login ---
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
+  // form.addEventListener('submit', function (e) {
+  //   e.preventDefault();
 
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
+  //   const email = emailInput.value.trim();
+  //   const password = passwordInput.value.trim();
 
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    const matchedUser = users.find(
-      (user) => user.email === email && user.password === password
-    );
+  //   const users = JSON.parse(localStorage.getItem('users')) || [];
+  //   const matchedUser = users.find(
+  //     (user) => user.email === email && user.password === password
+  //   );
 
-    if (matchedUser) {
-      sessionStorage.setItem('loggedInUser', JSON.stringify({ name: matchedUser.name, role: 'User' }));
-      window.location.href = 'index.html'; // Redirect to user portal
-    } else {
-      showError(emailInput, 'Invalid email or password');
-      showError(passwordInput, '');
-    }
-  });
+  //   if (matchedUser) {
+  //     sessionStorage.setItem('loggedInUser', JSON.stringify({ name: matchedUser.name, role: 'User' }));
+  //     window.location.href = 'index.html'; // Redirect to user portal
+  //   } else {
+  //     showError(emailInput, 'Invalid email or password');
+  //     showError(passwordInput, '');
+  //   }
+  // });
 
   // --- Show Error Message ---
   function showError(inputElement, message) {

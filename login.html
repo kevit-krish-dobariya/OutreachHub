@@ -216,6 +216,7 @@
     .btn-cancel:hover {
       background-color: #dc2626;
     }
+     .error { color: red; font-size: 0.9em; }
   </style>
 </head>
 
@@ -233,19 +234,19 @@
 
     <!-- Login Form -->
     <div class="login-form-container">
-      <form id="form1">
+      <form id="form1">  <!--onsubmit="return handleLogin(event)-->
         <h3>User Login</h3>
 
         <div class="input-control">
           <label>Enter Email:</label>
-          <input type="text" name="email" placeholder="Enter your Email" id="email1">
-          <small>Error Message</small>
+          <input type="text" name="email" placeholder="Enter your Email" id="loginemail">
+          <div class="error" id="loginEmailError"></div>
         </div>
 
         <div class="input-control">
           <label>Enter Password:</label>
-          <input type="password" name="password" placeholder="Password" id="password1">
-          <small>Error Message</small>
+          <input type="password" name="password" placeholder="Password" id="loginpassword">
+           <div class="error" id="loginPasswordError"></div>
         </div>
 
         <p>Forget your password? <a href="#">Click here</a></p>
@@ -283,9 +284,67 @@
       </div>
     </div>
   </div>
-
+  
   <!-- Script -->
-<script src="./js/login.js"></script>
- 
+<!-- <script>
+      function handleLogin(event) {
+      event.preventDefault();
+      document.getElementById('loginEmailError').textContent = '';
+      document.getElementById('loginPasswordError').textContent = '';
+
+      const loginEmail = document.getElementById('loginemail').value.trim();
+      const loginPassword = document.getElementById('loginpassword').value;
+
+      const storedUser = JSON.parse(localStorage.getItem('user'));
+
+      if (!storedUser || storedUser.email !== loginEmail) {
+        document.getElementById('loginEmailError').textContent = 'Email not found. Please sign up.';
+        return false;
+      }
+
+      if (storedUser.password !== loginPassword) {
+        document.getElementById('loginPasswordError').textContent = 'Incorrect password';
+        return false;
+      }
+      sessionStorage.setItem('loggedInUser', JSON.stringify(storedUser));
+      alert("Login successful! Redirecting to home...");
+      window.location.href = "./index.html";
+    }
+</script> -->
+
+  <script>
+     document.getElementById('form1').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const username = document.getElementById('loginemail').value;
+      const password = document.getElementById('loginpassword').value;
+
+      try {
+        const response = await fetch('http://localhost:3000/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        if (!response.ok) {
+          alert('Login failed');
+          return;
+        }
+
+        const data = await response.json();
+        const token = data.access_token;
+
+        // Store token in localStorage
+        localStorage.setItem('jwt_token', token);
+
+        // Redirect to contacts page
+        window.location.href = 'contacts.html';
+      } catch (err) {
+        console.error('Login error:', err);
+        alert('Login error. See console for details.');
+      }
+    });
+  </script>
+ <script src="./js/login.js"></script>
 </body>
 </html>

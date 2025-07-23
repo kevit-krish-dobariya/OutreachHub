@@ -222,6 +222,7 @@
     .btn-cancel:hover {
       background-color: #dc2626;
     }
+    .error { color: red; font-size: 0.9em; }
   </style>
 </head>
 
@@ -239,34 +240,34 @@
 
     <!-- Signup Form -->
     <div class="login-form-container">
-      <form id="signupForm">
+      <form id="signupForm"  onsubmit="return handleSignup(event)"">
         <h3>Create Account</h3>
 
         <div class="input-control">
-          <label>Full Name:</label>
-          <input type="text" name="name" placeholder="Enter your Name" id="name">
-          <small>Error Message</small>
+          <label>Username:</label>
+          <input type="text" name="username" placeholder="Enter your Name" id="username">
+              <div class="error" id="usernameError"></div>
         </div>
 
         <div class="input-control">
           <label>Email Address:</label>
           <input type="email" name="email" placeholder="Enter your Email" id="email">
-          <small>Error Message</small>
+              <div class="error" id="emailError"></div>
         </div>
 
         <div class="input-control">
           <label>Password:</label>
           <input type="password" name="password" placeholder="Create Password" id="password">
-          <small>Error Message</small>
+              <div class="error" id="passwordError"></div>
         </div>
 
         <div class="input-control">
           <label>Confirm Password:</label>
           <input type="password" name="confirmPassword" placeholder="Confirm Password" id="confirmPassword">
-          <small>Error Message</small>
+              <div class="error" id="confirmpasswordError"></div>
         </div>
 
-        <input type="submit" value="Sign Up" id="signupBtn" class="btn">
+        <input type="submit"  value="Sign Up" id="signupBtn" class="btn">
 
         <p>Already have an account? <a href="login.html">Login here</a></p>
       </form>
@@ -275,29 +276,49 @@
 
   <!-- Optional: JS file -->
   <script>
-    const form = document.getElementById('signupForm');
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
+     function handleSignup(event) {
+      event.preventDefault();
+      let isValid = true;
+      document.querySelectorAll('.error').forEach(el => el.textContent = '');
 
-      const name = document.getElementById('name').value.trim();
+      const userName = document.getElementById('username').value.trim();
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
 
-      if (!name || !email || !password || !confirmPassword) {
-        alert("All fields are required!");
-        return;
+      // Full Name Validation
+      if (!/^[A-Za-z ]{3,}$/.test(userName)) {
+        document.getElementById('usernameError').textContent = 'Enter valid full name (min 3 letters)';
+        isValid = false;
       }
 
+      // Email Validation
+      if (!/^\S+@\S+\.\S+$/.test(email)) {
+        document.getElementById('emailError').textContent = 'Enter valid email';
+        isValid = false;
+      }
+
+      // Password Validation
+      if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/.test(password)) {
+        document.getElementById('passwordError').textContent =
+          'Password must be 6+ chars with uppercase, lowercase, number, symbol';
+        isValid = false;
+      }
+
+      // Confirm Password
       if (password !== confirmPassword) {
-        alert("Passwords do not match!");
-        return;
+        document.getElementById('confirmpasswordError').textContent = 'Passwords do not match';
+        isValid = false;
       }
 
-      // You can replace this with actual API or storage logic
-      alert("Account created successfully!");
-      form.reset();
-    });
+      if (isValid) {
+        // Store user data in localStorage
+        const user = { userName, email, password };
+        localStorage.setItem('user', JSON.stringify(user));
+        alert("Signup successful! Redirecting to login...");
+        window.location.href = "login.html";
+      }
+    }
   </script>
 </body>
 </html>

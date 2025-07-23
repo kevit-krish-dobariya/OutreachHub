@@ -13,7 +13,7 @@
    
     <header class="header" id="home">
         <div class="header-1">
-        <img src="./img/symbol.png" style="bottom:899px; width:70px; position:absolute;">
+         <img src="./img/symbol.png" style="bottom:900px; width:70px; position:absolute;">
         <a href="#" class="logo" style="margin-left:66px;">Out<span>ReachHub</span></a>
             <!-- navbar section -->
        
@@ -118,9 +118,9 @@
 <script>
   // Assuming username is stored in localStorage after login
   const welcomeUserName = document.getElementById('welcomeUserName');
-const user = JSON.parse(sessionStorage.getItem('loggedInUser'));
+    const user = JSON.parse(sessionStorage.getItem('loggedInUser'));
 if (welcomeUserName && user) {
-  welcomeUserName.innerHTML = `Hi <span style="color:#417acf;">${user.name}</span>, everything’s ready—start engaging smarter!`;
+  welcomeUserName.innerHTML = `Hi <span style="color:#417acf;">${user.userName}</span>, everything’s ready—start engaging smarter!`;
 }
  document.addEventListener('DOMContentLoaded', () => {
     const logoutBtn = document.getElementById('login-btn');

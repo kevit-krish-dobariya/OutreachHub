@@ -1,8 +1,10 @@
 import jwt from "jsonwebtoken";
 import User from "../models/userModel.js";
 import TokenBlacklist from "../models/blacklistModel.js";
+import dotenv from "dotenv";
+dotenv.config();
 
-const JWT_SECRET="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4OGIxMjM0ZjMwYWY4Njk0ZjMzNDdjZCIsInJvbGUiOiJ2aWV3ZXIiLCJpYXQiOjE3NTM5NTIzODIsImV4cCI6MTc1Mzk1NTk4Mn0.-LC44yQGsUeeG0opWhVnBB5HI2zVh2_8YMa71aD5s0c"
+const JWT_SECRET = process.env.JWT_SECRET ;
 
 const verifyToken = async (req, res, next) => {
   try {

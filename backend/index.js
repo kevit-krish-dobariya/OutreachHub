@@ -9,9 +9,11 @@ import messageTemplateRoutes from './routes/messageTemplateRoutes.js'
 import campaignsRoutes from './routes/campaignsRoutes.js'
 import mongoose from 'mongoose';
 import cors from 'cors';
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
-const port = 5000;
+const PORT = process.env.PORT || 3000;
 // app.use(bodyParser.json());
 
 app.use(cors());
@@ -23,13 +25,11 @@ app.use("/outreachhub",contactRoutes,messageTemplateRoutes,campaignsRoutes,analy
 
 
 
-const Conn_URL =
-  "mongodb+srv://krishdobariya:HXa5SASHyO8rmXZD@cluster0.uxlm8xp.mongodb.net/Demo?retryWrites=true&w=majority&appName=Cluster0";
-
-mongoose.connect(Conn_URL).then(() => {
+const MONGODB_URI = process.env.MONGODB_URI;
+mongoose.connect(MONGODB_URI).then(() => {
   console.log("Connected to MongoDB Database successfully!");
-  app.listen(port, () => {
-    console.log(`Server is running on port: http://localhost:${port}`);
+  app.listen(PORT, () => {
+    console.log(`Server is running on port: http://localhost:${PORT}`);
   });
 });
 

@@ -22,7 +22,7 @@ router.get("/workspaces/:id", authMiddleware, adminOnly('admin'), viewWorkspace)
 router.put("/workspaces/:id", authMiddleware, adminOnly('admin'), updateWorkspace);
 router.delete("/workspaces/:id", authMiddleware, adminOnly('admin'), deleteWorkspace);
 
-// // Workspace Users CRUD
+// Workspace Users CRUD
 router.get("/workspaces/:id/users", authMiddleware, adminOnly('admin'),listWorkspaceUsers);
 router.post("/workspaces/:id/users", authMiddleware, adminOnly('admin'),addWorkspaceUser);
 router.get("/workspaces/:id/users/:userId", authMiddleware, adminOnly('admin'), viewWorkspaceUser);

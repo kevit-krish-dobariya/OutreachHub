@@ -3,6 +3,10 @@ import bodyParser from 'body-parser';
 import authRoutes from './routes/authRoutes.js'
 import userRoutes from './routes/userRoutes.js'
 import adminRoutes from './routes/adminRoutes.js'
+import contactRoutes from './routes/contactRoutes.js'
+import analyticRoutes from './routes/analyticsRoutes.js'
+import messageTemplateRoutes from './routes/messageTemplateRoutes.js'
+import campaignsRoutes from './routes/campaignsRoutes.js'
 import mongoose from 'mongoose';
 import cors from 'cors';
 
@@ -15,11 +19,12 @@ app.use(express.json());
 app.use('/auth',authRoutes)
 app.use('/users',userRoutes)
 app.use("/users/admin", adminRoutes);
+app.use("/outreachhub",contactRoutes,messageTemplateRoutes,campaignsRoutes,analyticRoutes);
 
 
 
 const Conn_URL =
-  "mongodb+srv://krishdobariya:8mXFa9LiYRGNZCAL@cluster0.uxlm8xp.mongodb.net/Demo?retryWrites=true&w=majority&appName=Cluster0";
+  "mongodb+srv://krishdobariya:HXa5SASHyO8rmXZD@cluster0.uxlm8xp.mongodb.net/Demo?retryWrites=true&w=majority&appName=Cluster0";
 
 mongoose.connect(Conn_URL).then(() => {
   console.log("Connected to MongoDB Database successfully!");

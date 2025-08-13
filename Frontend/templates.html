@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>templates Manager</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9fafb;
+            margin: 0;
+            padding: 0;
+        }
+
+        .page {
+            display: none;
+            padding: 2rem;
+            margin: auto;
+        }
+
+        .active-page {
+            display: block;
+        }
+
+        .header1 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        h1{
+            font-size: 2.2em;
+            font-weight: 1000;
+            background-color: #ffdd6d;
+            padding:10px;
+            border-radius:10px;
+            text-decoration:underline;
+        }
+
+        /* .title {
+            font-size: 2.2em;
+            font-weight: 1000;
+            background-color: #ffdd6d;
+            padding:10px;
+            border-radius:10px;
+            text-decoration:underline;
+        } */
+
+
+        .btn-primary {
+            background-color: #ff4027;
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background-color: #e5e7eb;
+            color: #111827;
+        }
+
+        .btn-danger {
+            background-color: #ef4444;
+            color: #fff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+            width: 20%;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+        .template-form-group {
+          margin-bottom: 1rem;
+}
+
+      .template-label {
+          display: block;
+          margin-bottom: 0.4rem;
+          font-weight: 600;
+      }
+
+      .template-input, .template-select {
+          width: 100%;
+          padding: 0.5rem;
+          border: 1px solid #d1d5db;
+          border-radius: 4px;
+      }
+
+      .template-preview {
+          margin-top: 0.5rem;
+          max-width: 200px;
+          border-radius: 6px;
+      }
+
+      .template-hidden {
+          display: none;
+      }
+
+    </style>
+</head>
+<body>
+    <header class="header" id="home">
+    <div class="header-1">
+      <img src="./img/symbol.png" style="bottom:900px; width:70px; position:absolute;">
+        <a href="#" class="logo" style="margin-left:66px;">Out<span>ReachHub</span></a>
+      <div>
+        <a href="./login.html"><button id="login-btn" type="button" class="btn">Logout</button></a>
+      </div>
+    </div>
+    <div class="header-2">
+      <nav class="navbar">
+        <ul>
+          <li><a href="./index.html">Home</a></li>
+          <li><a href="./campaign.html">Campaigns</a></li>
+          <li><a href="./contacts.html">Contacts</a></li>
+          <li><a href="./templates.html">Message Templates</a></li>
+          <li><a href="#about">About Us</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <br><br>
+    <section id="templates-list-page" class="page active-page">
+        <div class="header1">
+            <h1 class="title">Message Templates</h1>
+            <button onclick="addtemplate()" class="btn btn-primary">+ Add Template</button>
+        </div>
+
+        <table id="templates-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <!-- <th>Email</th> -->
+                    <th>Type</th>
+                     <th>Content</th> 
+
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <div class="pagination">
+            <button onclick="prevPage()" id="prev-page-btn" class="btn btn-secondary" disabled>Previous</button>
+            <span id="page-info">Page 1 of 1</span>
+            <button onclick="nextPage()" id="next-page-btn" class="btn btn-secondary" disabled>Next</button>
+        </div>
+    </section>
+
+    <section id="template-details-page" class="page">
+        <h2 class="title">Template Details</h2>
+        <div id="template-details-content"></div>
+        <div class="form-actions">
+            <button onclick="navigateTo('templates-list-page')" class="btn btn-secondary">Back</button>
+            <button onclick="edittemplate()" class="btn btn-primary">Edit</button>
+            <button onclick="showDeleteConfirmation('template', currenttemplateId)" class="btn btn-danger">Delete</button>
+        </div>
+    </section>
+
+    <section id="add-edit-template-page" class="page">
+        <h2 id="template-form-title" class="title">Add New Template</h2>
+        <form id="template-form">
+            <div class="form-group">
+                <label for="template-name" class="form-label">Template Name</label>
+                <input type="text" id="template-name" class="form-input" required>
+            </div>
+             
+            <div class="template-form-group">
+            <label for="template-type" class="template-label">Template Type</label>
+            <select id="template-type" onchange="toggleImageField()" class="template-select">
+              <option value="Text">Text</option>
+              <option value="Text & Image">Text & Image</option>
+            </select>
+          </div>
+            <div class="form-group">
+                <label for="template-notes" class="form-label">Content</label>
+                <textarea id="template-notes" rows="4" class="form-input"></textarea>
+            </div>
+             <div id="template-image-field" class="template-form-group template-hidden">
+            <label for="template-image-url" class="template-label">Image URL</label>
+            <input type="url" id="template-image-url" class="template-input" />
+            <img id="image-preview" class="template-preview template-hidden" />
+          </div>
+            <div class="form-actions">
+                <button type="button" onclick="navigateTo('templates-list-page')" class="btn btn-secondary">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Template</button>
+            </div>
+        </form>
+    </section>
+     <script>
+      document.addEventListener('DOMContentLoaded', function () {
+  const TEMPLATES_KEY = 'messageTemplates';
+  const ITEMS_PER_PAGE = 5;
+  let templates = JSON.parse(localStorage.getItem(TEMPLATES_KEY)) || [];
+  let currentPage = 1;
+  let currentTemplateId = null;
+
+  // Navigation
+  function navigateTo(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+    document.getElementById(pageId).classList.add('active-page');
+  }
+
+  // Render Table
+  function renderTable() {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    const paginated = templates.slice(start, start + ITEMS_PER_PAGE);
+    const tbody = document.querySelector('#templates-table tbody');
+    tbody.innerHTML = '';
+
+    paginated.forEach((t, i) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${t.name}</td>
+        <td>${t.type}</td>
+        <td>${t.content.length > 50 ? t.content.substring(0, 50) + '...' : t.content}</td>
+        <td>
+          <button class="btn btn-primary" onclick="viewTemplate(${start + i})">View</button>
+          <button class="btn btn-danger" onclick="deleteTemplate(${start + i})">Delete</button>
+        </td>`;
+      tbody.appendChild(row);
+    });
+
+    const pageInfo = document.getElementById('page-info');
+    const totalPages = Math.ceil(templates.length / ITEMS_PER_PAGE);
+    pageInfo.textContent = `Page ${currentPage} of ${Math.max(totalPages, 1)}`;
+
+    document.getElementById('prev-page-btn').disabled = currentPage === 1;
+    document.getElementById('next-page-btn').disabled = currentPage >= totalPages;
+  }
+
+  // Pagination
+  window.prevPage = function () {
+    if (currentPage > 1) {
+      currentPage--;
+      renderTable();
+    }
+  };
+
+  window.nextPage = function () {
+    const totalPages = Math.ceil(templates.length / ITEMS_PER_PAGE);
+    if (currentPage < totalPages) {
+      currentPage++;
+      renderTable();
+    }
+  };
+
+  // Add Template
+  window.addtemplate = function () {
+    currentTemplateId = null;
+    document.getElementById('template-form-title').textContent = 'Add New Template';
+    document.getElementById('template-form').reset();
+    document.getElementById('template-image-url').value = '';
+    document.getElementById('template-image-field').classList.add('template-hidden');
+    document.getElementById('image-preview').classList.add('template-hidden');
+    navigateTo('add-edit-template-page');
+  };
+
+  // View Template
+  window.viewTemplate = function (index) {
+    currentTemplateId = index;
+    const t = templates[index];
+    const container = document.getElementById('template-details-content');
+
+    container.innerHTML = `
+      <p><strong>Name:</strong> ${t.name}</p>
+      <p><strong>Type:</strong> ${t.type}</p>
+      <p><strong>Content:</strong><br>${t.content}</p>
+      ${t.image ? `<p><strong>Image:</strong><br><img src="${t.image}" style="max-width:200px;"></p>` : ''}
+      <div style="margin-top: 1rem;">
+        <button class="btn btn-secondary" onclick="edittemplate()">Edit</button>
+        <button class="btn btn-primary" onclick="navigateTo('templates-list-page')">Back</button>
+      </div>
+    `;
+
+    navigateTo('template-details-page');
+  };
+
+  // Edit Template
+  window.edittemplate = function () {
+    const t = templates[currentTemplateId];
+    document.getElementById('template-form-title').textContent = 'Edit Template';
+    document.getElementById('template-name').value = t.name;
+    document.getElementById('template-type').value = t.type;
+    document.getElementById('template-notes').value = t.content;
+    document.getElementById('template-image-url').value = t.image || '';
+    toggleImageField();
+
+    if (t.image) {
+      const preview = document.getElementById('image-preview');
+      preview.src = t.image;
+      preview.classList.remove('template-hidden');
+    }
+
+    navigateTo('add-edit-template-page');
+  };
+
+  // Delete Template
+  window.deleteTemplate = function (index) {
+    if (confirm('Are you sure you want to delete this template?')) {
+      templates.splice(index, 1);
+      localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
+      renderTable();
+    }
+  };
+
+  // Show/hide image input based on type
+  window.toggleImageField = function () {
+    const type = document.getElementById('template-type').value;
+    const imageField = document.getElementById('template-image-field');
+    if (type === 'Text & Image') {
+      imageField.classList.remove('template-hidden');
+    } else {
+      imageField.classList.add('template-hidden');
+    }
+  };
+
+  // Live Image Preview
+  document.getElementById('template-image-url').addEventListener('input', function () {
+    const preview = document.getElementById('image-preview');
+    const url = this.value;
+    if (url) {
+      preview.src = url;
+      preview.classList.remove('template-hidden');
+    } else {
+      preview.classList.add('template-hidden');
+    }
+  });
+
+  window.navigateTo = function (pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+  const page = document.getElementById(pageId);
+  if (page) page.classList.add('active-page');
+};
+
+  
+
+  // Handle Save Template (form submission)
+  document.getElementById('template-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const name = document.getElementById('template-name').value.trim();
+    const type = document.getElementById('template-type').value;
+    const content = document.getElementById('template-notes').value.trim();
+    const image = type === 'Text & Image' ? document.getElementById('template-image-url').value.trim() : '';
+
+    if (!name || !content) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    const newTemplate = { name, type, content, image };
+
+    if (currentTemplateId !== null) {
+      templates[currentTemplateId] = newTemplate;
+    } else {
+      templates.push(newTemplate);
+    }
+
+    localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
+    navigateTo('templates-list-page');
+    renderTable();
+  });
+
+  // Initial load
+  renderTable();
+});
+
+     </script>
+     
+
+</body>
+</html>

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Contacts Manager</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9fafb;
+            margin: 0;
+            padding: 0;
+        }
+
+        .page {
+            display: none;
+            padding: 2rem;
+            margin: auto;
+        }
+
+        .active-page {
+            display: block;
+        }
+
+        .header1 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        h1{
+            font-size: 2.2em;
+            font-weight: 1000;
+            background-color: #ffdd6d;
+            padding:10px;
+            border-radius:10px;
+            text-decoration:underline;
+        }
+
+        /* .title {
+            font-size: 2.2em;
+            font-weight: 1000;
+            background-color: #ffdd6d;
+            padding:10px;
+            border-radius:10px;
+            text-decoration:underline;
+        } */
+
+
+        .btn-primary {
+            background-color: #ff4027;
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background-color: #e5e7eb;
+            color: #111827;
+        }
+
+        .btn-danger {
+            background-color: #ef4444;
+            color: #fff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header" id="home">
+    <div class="header-1">
+      <img src="./img/symbol.png" style="bottom:900px; width:70px; position:absolute;">
+        <a href="#" class="logo" style="margin-left:66px;">Out<span>ReachHub</span></a>
+      <div>
+        <a href="./login.html"><button id="login-btn" type="button" class="btn">Logout</button></a>
+      </div>
+    </div>
+    <div class="header-2">
+      <nav class="navbar">
+        <ul>
+          <li><a href="./index.html">Home</a></li>
+          <li><a href="./campaign.html">Campaigns</a></li>
+          <li><a href="./contacts.html">Contacts</a></li>
+          <li><a href="./templates.html">Message Templates</a></li>
+          <li><a href="#about">About Us</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <br><br>
+    <section id="contacts-list-page" class="page active-page">
+        <div class="header1">
+            <h1 class="title">Your Contacts</h1>
+            <button onclick="addContact()" class="btn btn-primary">+ Add Contact</button>
+        </div>
+
+        <table id="contacts-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <!-- <th>Email</th> -->
+                    <th>Phone</th>
+                    <!-- <th>Company</th> -->
+                    <th>Tags</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <div class="pagination">
+            <button onclick="prevPage()" id="prev-page-btn" class="btn btn-secondary" disabled>Previous</button>
+            <span id="page-info">Page 1 of 1</span>
+            <button onclick="nextPage()" id="next-page-btn" class="btn btn-secondary" disabled>Next</button>
+        </div>
+    </section>
+
+    <section id="contact-details-page" class="page">
+        <h2 class="title">Contact Details</h2>
+        <div id="contact-details-content"></div>
+        <div class="form-actions">
+            <button onclick="navigateTo('contacts-list-page')" class="btn btn-secondary">Back</button>
+            <button onclick="editContact()" class="btn btn-primary">Edit</button>
+            <button onclick="showDeleteConfirmation('contact', currentContactId)" class="btn btn-danger">Delete</button>
+        </div>
+    </section>
+
+    <section id="add-edit-contact-page" class="page">
+        <h2 id="contact-form-title" class="title">Add New Contact</h2>
+        <form id="contact-form">
+            <div class="form-group">
+                <label for="contact-name" class="form-label">Name</label>
+                <input type="text" id="contact-name" class="form-input" required>
+            </div>
+            <!-- <div class="form-group">
+                <label for="contact-email" class="form-label">Email</label>
+                <input type="email" id="contact-email" class="form-input">
+            </div> -->
+            <div class="form-group">
+                <label for="contact-phone" class="form-label">Phone</label>
+                <input type="text" id="contact-phone" class="form-input" required>
+            </div>
+            <!-- <div class="form-group">
+                <label for="contact-company" class="form-label">Company</label>
+                <input type="text" id="contact-company" class="form-input">
+            </div> -->
+            <div class="form-group">
+                <label for="contact-tags" class="form-label">Tags(Comma separated)</label>
+                <input type="text" id="contact-tags" class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="contact-notes" class="form-label">Notes</label>
+                <textarea id="contact-notes" rows="4" class="form-input"></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="button" onclick="navigateTo('contacts-list-page')" class="btn btn-secondary">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Contact</button>
+            </div>
+        </form>
+    </section>
+
+    <script>
+
+  const API_URL = 'http://localhost:3000/contacts';
+let contacts = [];
+let currentPage = 1;
+const itemsPerPage = 5;
+let currentContactId = null;
+
+const token = localStorage.getItem('jwt_token');
+
+if (!token) {
+    alert('You must log in first.');
+    window.location.href = 'login.html';
+}
+
+const navigateTo = (pageId) => {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+    document.getElementById(pageId).classList.add('active-page');
+};
+
+const fetchContacts = async () => {
+    try {
+        const res = await fetch(API_URL, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        contacts = json.data || json; // handles both `{ data: [...] }` and `[...]`
+
+        renderContacts();
+    } catch (err) {
+        console.error('Fetch contacts failed:', err);
+        alert('Failed to fetch contacts. Please log in again.');
+        localStorage.removeItem('jwt_token');
+        window.location.href = 'login.html';
+    }
+};
+
+const renderContacts = () => {
+    const tbody = document.querySelector('#contacts-table tbody');
+    tbody.innerHTML = '';
+
+    const start = (currentPage - 1) * itemsPerPage;
+    const paginated = contacts.slice(start, start + itemsPerPage);
+
+    paginated.forEach((c, i) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${c.name}</td>
+            <td>${c.phoneNumber}</td>
+            <td>${Array.isArray(c.tags) ? c.tags.join(', ') : ''}</td>
+            <td>
+                <button onclick="viewContact(${start + i})" class="btn btn-secondary">View</button>
+                <button onclick="editContact(${start + i})" class="btn btn-primary">Edit</button>
+                <button onclick="deleteContact(${start + i})" class="btn btn-danger">Delete</button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    const totalPages = Math.ceil(contacts.length / itemsPerPage);
+    document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
+    document.getElementById('prev-page-btn').disabled = currentPage === 1;
+    document.getElementById('next-page-btn').disabled = currentPage === totalPages;
+};
+
+const prevPage = () => {
+    if (currentPage > 1) {
+        currentPage--;
+        renderContacts();
+    }
+};
+
+const nextPage = () => {
+    if ((currentPage * itemsPerPage) < contacts.length) {
+        currentPage++;
+        renderContacts();
+    }
+};
+
+const addContact = () => {
+    currentContactId = null;
+    document.getElementById('contact-form').reset();
+    document.getElementById('contact-form-title').textContent = 'Add New Contact';
+    navigateTo('add-edit-contact-page');
+};
+
+const viewContact = (index) => {
+    const contact = contacts[index];
+    currentContactId = contact.id;
+    const content = document.getElementById('contact-details-content');
+    content.innerHTML = `
+        <p><strong>Name:</strong> ${contact.name}</p>
+        <p><strong>Phone:</strong> ${contact.phoneNumber}</p>
+        <p><strong>Tags:</strong> ${contact.tags.join(', ')}</p>
+    `;
+    navigateTo('contact-details-page');  //// <p><strong>Notes:</strong> ${contact.notes || ''}</p>
+};
+
+const editContact = (index) => {
+    const contact = contacts[index];
+    currentContactId = contact.id;
+    document.getElementById('contact-form-title').textContent = 'Edit Contact';
+    document.getElementById('contact-name').value = contact.name;
+    document.getElementById('contact-phone').value = contact.phoneNumber;
+    document.getElementById('contact-tags').value = contact.tags.join(', ');
+    // document.getElementById('contact-notes').value = contact.notes || '';
+    navigateTo('add-edit-contact-page');
+};
+
+const deleteContact = async (index) => {
+    const contact = contacts[index];
+    if (confirm('Are you sure you want to delete this contact?')) {
+        try {
+            await fetch(`${API_URL}/${contact.id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            await fetchContacts();
+        } catch (err) {
+            console.error('Delete failed:', err);
+            alert('Delete failed.');
+        }
+    }
+};
+
+document.getElementById('contact-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const contactData = {
+        name: document.getElementById('contact-name').value.trim(),
+        phoneNumber: document.getElementById('contact-phone').value.trim(),
+        tags: document.getElementById('contact-tags').value.split(',').map(tag => tag.trim()).filter(Boolean),
+        // notes: document.getElementById('contact-notes').value.trim()
+    };
+
+    const method = currentContactId ? 'PUT' : 'POST';
+    const url = currentContactId ? `${API_URL}/${currentContactId}` : API_URL;
+
+    try {
+        await fetch(url, {
+            method,
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(contactData)
+        });
+
+        currentContactId = null;
+        navigateTo('contacts-list-page');
+        await fetchContacts();
+    } catch (err) {
+        console.error(`${method} failed:`, err);
+        alert('Failed to save contact.');
+    }
+});
+
+window.onload = async () => {
+    navigateTo('contacts-list-page');
+    await fetchContacts();
+};
+</script>
+
+</body>
+</html>

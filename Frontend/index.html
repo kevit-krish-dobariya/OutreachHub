@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/style.css">
+    <title>OutreachHub</title>
+    <script src="https://kit.fontawesome.com/ca9a6c5a17.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    
+   
+    <header class="header" id="home">
+        <div class="header-1">
+         <img src="./img/symbol.png" style="bottom:900px; width:70px; position:absolute;">
+        <a href="#" class="logo" style="margin-left:66px;">Out<span>ReachHub</span></a>
+            <!-- navbar section -->
+       
+       <div>
+            <button id="login-btn" type="button" class="btn">Logout</button>
+            <!-- <button id="signup-btn" type="button" class="btn">Signup</button> -->
+        </div>
+        </div>
+       
+        <div class="header-2"> 
+             <nav class="navbar">
+            
+            <ul>
+             <li><a href="./index.html">Home</a></li>
+          <li><a href="./campaign.html">Campaigns</a></li>
+          <li><a href="./contacts.html">Contacts</a></li>
+          <li><a href="./templates.html">Message Templates</a></li>
+          <li><a href="#about">About Us</a></li>
+            </ul>
+        </nav>
+            <div id="menu-btn" class="fa-solid fa-bars"></div> 
+        </div>
+        <div id="homebg">
+        <img class="home-parallax" id="bgimage" data-speed="5" src="./img/saas1.png" alt="">
+        <div class="text-container">
+            <h1 style="font-size: 6.0vw;">Saas PLATFORM</h1>
+            <h2>"The Ultimate place for personalized outreach"</h2><br>
+            <p id="welcomeUserName" class="welcome-message">Hi <span style="color:rgba(65, 122, 207, 0.966);">[UserName]</span>, everything’s ready—start engaging smarter!</p><br>
+            <a href="#" class="btn home-parallax" data-speed="9">EXPLORE NOW</a>
+        </div> 
+        </div>
+    </header>
+    <br>
+    <!--Demo Graphs-->
+      <h1 class="heading">Demographics</h1>
+        <div class="grid-container">
+    <!-- First column (Single card) -->
+    <div class="card">
+        <h3 class="card-title">Engagement Overview</h3>
+        <img src="./img/bargraph.png" alt="Analytics Chart 1" class="card-image">
+        <p class="card-text">Daily active users and engagement trends.</p>
+    </div>
+
+    <!-- Second column (Two stacked cards) -->
+    <div class="second-column">
+        <div class="card">
+            <h3 class="card-title">Campaign Performance</h3>
+            <img src="./img/linechart.png" alt="Analytics Chart 2" class="card-image">
+            <p class="card-text">Conversion rates and campaign effectiveness.</p>
+        </div>
+        <div class="card">
+            <h3 class="card-title">Audience Demographics</h3>
+            <img src="./img/piechart.png" alt="Analytics Chart 3" class="card-image">
+            <p class="card-text">Insights into your target audience.</p>
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    <!--Recent Activities-->
+      <h3 class="heading" style="text-align:left">Recent Activities</h3>
+         <div class="activity-box-modern">
+    <div class="table-wrapper-modern">
+        <table class="activity-table-modern">
+            <thead>
+                <tr>
+                    <th>Activity Type</th>
+                    <th>Description</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Email Sent</td>
+                    <td>Campaign 'Spring Sale' sent to 1,500 contacts.</td>
+                    <td>2024-07-10</td>
+                </tr>
+                <tr>
+                    <td>Contact Added</td>
+                    <td>New contact 'Jane Doe' added to 'Leads' list.</td>
+                    <td>2024-07-09</td>
+                </tr>
+                <tr>
+                    <td>Report Generated</td>
+                    <td>Monthly performance report for June 2024.</td>
+                    <td>2024-07-08</td>
+                </tr>
+                <tr>
+                    <td>Task Completed</td>
+                    <td>Follow-up call with 'Acme Corp' completed.</td>
+                    <td>2024-07-07</td>
+                </tr>
+                </tbody>
+            </table>
+     </div>
+    </div>
+
+            <footer>
+
+            </footer>
+<script>
+  // Assuming username is stored in localStorage after login
+  const welcomeUserName = document.getElementById('welcomeUserName');
+    const user = JSON.parse(sessionStorage.getItem('loggedInUser'));
+if (welcomeUserName && user) {
+  welcomeUserName.innerHTML = `Hi <span style="color:#417acf;">${user.userName}</span>, everything’s ready—start engaging smarter!`;
+}
+ document.addEventListener('DOMContentLoaded', () => {
+    const logoutBtn = document.getElementById('login-btn');
+
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        sessionStorage.removeItem('loggedInUser'); // Clear session
+        window.location.href = 'login.html'; // Redirect to login page
+      });
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -16,27 +16,6 @@ export class WorkspaceUsersService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
-//   async addUserToWorkspace(workspaceId: string, userId: string, role: string) {
-//   const workspace = await this.workspaceModel.findById(workspaceId);
-//   if (!workspace) throw new NotFoundException('Workspace not found');
-
-//   const user = await this.userModel.findById(userId);
-//   if (!user) throw new NotFoundException('User not found');
-
-//   const workspaceUser = new this.workspaceUserModel({
-//     workspace: workspace._id,
-//     user: user._id, // store as reference
-//     role,
-//   });
-
-//   await workspaceUser.save();
-
-//   // Return with populated details
-//   return this.workspaceUserModel
-//     .findById(workspaceUser._id)
-//     .populate('user', 'name email') // choose fields to include
-//     .populate('workspace', 'name createdBy');
-// }
 
 async addUserToWorkspace(workspaceId: string, userId: string, role: string) {
   // 1. Fetch user
@@ -53,8 +32,8 @@ async addUserToWorkspace(workspaceId: string, userId: string, role: string) {
 
   // 3. Add to workspaceUsers table
   const workspaceUser = await this.workspaceUserModel.create({
-    workspace: workspaceId,
-    user: userId,
+    workspace: new mongoose.Types.ObjectId(workspaceId),
+    user: new mongoose.Types.ObjectId(userId),
     role,
   });
 

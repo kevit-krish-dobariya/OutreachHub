@@ -6,6 +6,7 @@ import { WorkspacesModule } from './workspaces/workspaces.module';
 import { WorkspaceUsersModule } from './workspace-users/workspace-users.module';
 import { ContactsModule } from './contacts/contacts.module';
 import { CampaignsModule } from './campaigns/campaigns.module';
+import { MessageTemplateModule } from './message-template/message-template.module';
 
 @Module({
   controllers: [],
@@ -17,6 +18,7 @@ import { CampaignsModule } from './campaigns/campaigns.module';
     WorkspacesModule,
     WorkspaceUsersModule,
     ContactsModule,
-    CampaignsModule],
+    CampaignsModule,
+    MessageTemplateModule],
 })
 export class AppModule {}

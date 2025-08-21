@@ -7,16 +7,17 @@ import { WorkspaceUser, WorkspaceUserSchema } from 'src/workspace-users/schemas/
 import { User, UserSchema } from 'src/auth/schemas/user.schema';
 import { Campaign, CampaignSchema } from './schemas/campaigns.schema';
 import { Contact, ContactSchema } from 'src/contacts/schemas/contacts.schema';
+import { AuthModule } from 'src/auth/auth.module';
 
 
 @Module({
   imports:[
+    AuthModule,
     MongooseModule.forFeature([
       { name: Workspace.name, schema: WorkspaceSchema },
             { name: WorkspaceUser.name, schema: WorkspaceUserSchema },
             { name: User.name, schema: UserSchema },
-            { name: Campaign.name , schema: CampaignSchema},
-            { name: Contact.name , schema: ContactSchema}
+            { name: Campaign.name , schema: CampaignSchema}
     ])
   ],
   controllers: [CampaignsController],

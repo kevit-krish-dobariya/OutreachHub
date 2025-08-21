@@ -6,9 +6,12 @@ import { MessageTemplate, MessageTemplateSchema } from './schemas/message-templa
 import { Workspace, WorkspaceSchema } from 'src/workspaces/schemas/workspaces.schema';
 import { User, UserSchema } from 'src/auth/schemas/user.schema';
 import { Contact, ContactSchema } from 'src/contacts/schemas/contacts.schema';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  imports:[MongooseModule.forFeature([
+  imports:[
+    AuthModule,
+    MongooseModule.forFeature([
     { name: MessageTemplate.name, schema: MessageTemplateSchema },
     { name: Workspace.name, schema: WorkspaceSchema }, // ✅ Added
           { name: User.name, schema: UserSchema }, 

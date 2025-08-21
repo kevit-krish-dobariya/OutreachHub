@@ -1,10 +1,14 @@
-import { Controller, Post, Body, Get, Param, Put, Delete, Req, UseGuards } from '@nestjs/common';
+// campaigns/campaigns.controller.ts
+import { 
+  Controller, Get, Post, Body, Param, Put, Delete, 
+  UseGuards, Request 
+} from '@nestjs/common';
 import { CampaignsService } from './campaigns.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/roles/role.guard';
-import { Roles } from '../auth/roles/roles.decorator';
 import { CreateCampaignDto } from './dto/campaigns.dto';
 import { UpdateCampaignDto } from './dto/update-campaign.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/roles/role.guard';
+import { Roles } from 'src/auth/roles/roles.decorator';
 
 @Controller('outreachhub/:workspaceId/campaigns')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -13,40 +17,50 @@ export class CampaignsController {
 
   @Post()
   @Roles('editor')
-  createCampaign(
+  create(
     @Param('workspaceId') workspaceId: string,
     @Body() dto: CreateCampaignDto,
-    @Req() req,
+    @Request() req: any,
   ) {
-    return this.campaignsService.createCampaign(workspaceId, dto, req.user);
+    const userId = req.user._id; // extracted from JWT payload
+    return this.campaignsService.create(workspaceId, dto, userId);
   }
 
   @Get()
   @Roles('editor', 'viewer')
-  getAllCampaigns(@Param('workspaceId') workspaceId: string) {
-    return this.campaignsService.getAllCampaigns(workspaceId);
+  findAll(@Param('workspaceId') workspaceId: string) {
+    return this.campaignsService.findAll(workspaceId);
   }
 
   @Get(':id')
   @Roles('editor', 'viewer')
-  getCampaignById(@Param('workspaceId') workspaceId: string, @Param('id') id: string) {
-    return this.campaignsService.getCampaignById(workspaceId, id);
+  findOne(
+    @Param('workspaceId') workspaceId: string,
+    @Param('id') id: string,
+  ) {
+    return this.campaignsService.findOne(workspaceId, id);
   }
 
-   @Put(':id')
+  @Put(':id')
   @Roles('editor')
-  updateCampaign(
+  update(
     @Param('workspaceId') workspaceId: string,
     @Param('id') id: string,
     @Body() dto: UpdateCampaignDto,
-    @Req() req
+    @Request() req: any,
   ) {
-    return this.campaignsService.updateCampaign(workspaceId, id, dto, req.user.userId);
+    const userId = req.user.userId;
+    return this.campaignsService.update(workspaceId, id, dto, userId);
   }
 
   @Delete(':id')
   @Roles('editor')
-  deleteCampaign(@Param('workspaceId') workspaceId: string, @Param('id') id: string, @Req() req) {
-    return this.campaignsService.deleteCampaign(workspaceId, id, req.user.userId);
+  remove(
+    @Param('workspaceId') workspaceId: string,
+    @Param('id') id: string,
+    @Request() req: any,
+  ) {
+    const userId = req.user.userId;
+    return this.campaignsService.remove(workspaceId, id, userId);
   }
 }

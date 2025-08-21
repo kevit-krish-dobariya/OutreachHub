@@ -19,7 +19,7 @@ export class WorkspaceUsersController {
     @Body() body: { userId: string; role: WorkspaceRole }
   ) {
     return this.workspaceUsersService.addUserToWorkspace(workspaceId, body.userId, body.role);
-    console.log('User found:');
+
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

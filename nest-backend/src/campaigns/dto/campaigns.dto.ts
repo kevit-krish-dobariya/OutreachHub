@@ -1,8 +1,9 @@
-import { IsString, IsOptional, IsArray, IsEnum } from 'class-validator';
-import { CampaignStatus } from '../schemas/campaigns.schema';
+// campaigns/dto/create-campaign.dto.ts
+import { IsNotEmpty, IsString, IsOptional, IsArray } from 'class-validator';
 
 export class CreateCampaignDto {
   @IsString()
+  @IsNotEmpty()
   name: string;
 
   @IsOptional()
@@ -11,14 +12,14 @@ export class CreateCampaignDto {
 
   @IsOptional()
   @IsArray()
-  @IsString({ each: true })
-  tags?: string[];
+  selectedTags?: string[];
 
   @IsOptional()
-  @IsArray()
-  contacts?: string[];
+  templateId?: string;
 
-  @IsOptional()
-  @IsEnum(CampaignStatus)
-  status?: CampaignStatus;
+  //@IsNotEmpty()
+  workspaceId: string;
+
+  //@IsNotEmpty()
+  createdBy: string;
 }

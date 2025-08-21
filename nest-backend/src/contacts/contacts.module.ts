@@ -6,9 +6,11 @@ import { Workspace, WorkspaceSchema } from 'src/workspaces/schemas/workspaces.sc
 import { WorkspaceUser, WorkspaceUserSchema } from '../workspace-users/schemas/workspace-user.schema'
 import { User, UserSchema } from 'src/auth/schemas/user.schema';
 import { Contact,ContactSchema } from './schemas/contacts.schema';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports:[
+    AuthModule,
     MongooseModule.forFeature([{ name: WorkspaceUser.name, schema: WorkspaceUserSchema },
            { name: Workspace.name, schema: WorkspaceSchema }, // ✅ Added
       { name: User.name, schema: UserSchema }, 

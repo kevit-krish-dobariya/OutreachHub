@@ -18,14 +18,22 @@ export class WorkspaceUsersService {
 
 
 async addUserToWorkspace(workspaceId: string, userId: string, role: string) {
-  // 1. Fetch user
-  const user = await this.userModel.findById(userId);
-  if (!user) throw new NotFoundException('User not found');
+  console.log('Looking for userId:', userId);
+
+  // 1. Fetch user safely
+  let user;
+  try {
+    user = await this.userModel.findById(new mongoose.Types.ObjectId(userId));
+  } catch (err) {
+    throw new BadRequestException('Invalid userId format');
+  }
+
+  if (!user) throw new NotFoundException('User not found in DB');
 
   // 2. Update user's role if different
   if (user.role !== role) {
     await this.userModel.updateOne(
-      { _id: userId },
+      { _id: user._id },
       { $set: { role: role } }
     );
   }
@@ -33,7 +41,7 @@ async addUserToWorkspace(workspaceId: string, userId: string, role: string) {
   // 3. Add to workspaceUsers table
   const workspaceUser = await this.workspaceUserModel.create({
     workspace: new mongoose.Types.ObjectId(workspaceId),
-    user: new mongoose.Types.ObjectId(userId),
+    user: user._id,
     role,
   });
 

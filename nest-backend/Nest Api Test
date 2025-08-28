@@ -1,0 +1,145 @@
+STEP-1: User Signup : localhost:3000/auth/signup (POST)
+enter user details : {
+	"username":"Rahuljain123",
+	"email": "Rahul@gmail.com",
+	"phoneNumber": "9865467865",
+	"password":"Rahul@123",
+	"role":"editor"	
+}
+
+RESULT: {"message":"Signup successful","user":{"username":"Rahuljain123","email":"Rahul@gmail.com","phoneNumber":"9865467865","role":"editor","_id":"68a4043a623a149ac80f2fbd","createdAt":"2025-08-19T04:57:30.993Z","updatedAt":"2025-08-19T04:57:30.993Z","__v":0}}
+
+STEP-2: Admin Login : localhost:3000/auth/login (POST)
+enter admin credentials : {
+	"username":"admin",
+	"password":"admin123"
+}
+
+RESULT: {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzU1NTc5NjYzLCJleHAiOjE3NTU2NjYwNjN9.46N_TpSuSnasiJH2P5DmvDMVYF_1MSW-qehRc6NwESk","role":"admin"} (REDIRECTED TO ADMIN PORTAL)
+
+STEP-3: 
+
+Get all Workspaces : localhost:3000/workspaces (GET)
+
+RESULT: [{"_id":"689c24b6b6bfe5c6ea40008f","name":"Kevit Technologies","description":"This is a workspace for project Alpha.","createdBy":"66bc1234abcd5678ef901234","createdAt":"2025-08-13T05:37:58.502Z","updatedAt":"2025-08-13T05:47:31.322Z","__v":0}]
+
+Create New Workspace : localhost:3000/workspaces (POST)
+enter workspace details: {
+    "name":"XYZ Technologies",
+    "description":"This is CRM Platform"
+}
+
+RESULT: {"name":"XYZ Technologies","description":"This is CRM Platform","createdBy":"66bc1234abcd5678ef901234","_id":"68a40700623a149ac80f2fc0","createdAt":"2025-08-19T05:09:20.477Z","updatedAt":"2025-08-19T05:09:20.477Z","__v":0}
+
+Get Workspace by Id : localhost:3000/workspaces/:id (PUT)
+update workspace details: {
+	"name":"ABCD Technologies"
+}
+
+RESULT: {"_id":"68a40700623a149ac80f2fc0","name":"ABCD Technologies","description":"This is CRM Platform","createdBy":"66bc1234abcd5678ef901234","createdAt":"2025-08-19T05:09:20.477Z","updatedAt":"2025-08-19T05:16:53.767Z","__v":0}
+
+Delete Workspace by Id : localhost:3000/workspaces/:id (DELETE)
+
+STEP-4:
+
+Add all Workspace Users: localhost:3000/workspace-users (POST)
+Add users to workspace: {
+    "userId": "68a4043a623a149ac80f2fbd",
+    "role":"editor"
+}
+RESULT:{"workspace":"68a40700623a149ac80f2fc0","user":"68a4043a623a149ac80f2fbd","role":"editor","_id":"68a41a7c7eb83cc5e2b777b2","createdAt":"2025-08-19T06:32:28.382Z","updatedAt":"2025-08-19T06:32:28.382Z","__v":0}
+
+Edit user Role: localhost:3000/workspace-users/:id (PUT)
+Remove User from workspace: localhost:3000/workspace-users/:id (DELETE)
+
+STEP-5: 
+
+User Login with Specific Role : localhost:3000/auth/login
+{
+	"username":"Rahuljain123",
+	"password":"Rahul@123"
+}
+RESULT: {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OGE0MDQzYTYyM2ExNDlhYzgwZjJmYmQiLCJ1c2VybmFtZSI6IlJhaHVsamFpbjEyMyIsInJvbGUiOiJlZGl0b3IiLCJpYXQiOjE3NTU1ODYwMjYsImV4cCI6MTc1NTY3MjQyNn0.jQGRbdxiWBtGk9UiNXMU9r07E-QX74ymp2ZMlPtmh00","role":"editor","user":{"_id":"68a4043a623a149ac80f2fbd","username":"Rahuljain123","email":"Rahul@gmail.com","phoneNumber":"9865467865","role":"editor","createdAt":"2025-08-19T04:57:30.993Z","updatedAt":"2025-08-19T04:57:30.993Z","__v":0}}
+
+STEP-6: Redirect User to Outreachhub Portal and list contacts : localhost:3000/:WorkspaceId/contacts (GET)
+
+RESULT: []
+
+Add user to contacts : localhost:3000/:workspaceId/contacts (POST)
+{
+    "name":"Aman Gupta",
+    "phoneNumber":"9876523456",
+    "tags":["vip","user"]
+}
+
+RESULT: {"name":"Aman Gupta","phoneNumber":"9876523456","tags":["vip","user"],"workspaceId":"68a40700623a149ac80f2fc0","createdBy":"68a4043a623a149ac80f2fbd","_id":"68a4200c7eb83cc5e2b777b8","createdAt":"2025-08-19T06:56:12.787Z","updatedAt":"2025-08-19T06:56:12.787Z","__v":0}
+
+Get User Contact by Id: localhost:3000/:workspaceId/contacts/:id (GET)
+Update User Contact by Id: localhost:3000/:workspaceId/contacts/:id (PATCH)
+Delete User Contact by Id: localhost:3000/:workspaceId/contacts/:id (DELETE)
+
+STEP-7: Message-Templates Module : localhost:3000/outreachhub/:workspaceId/templates (GET)
+RESULT: []
+
+Add New Message-Templates: localhost:3000/outreachhub/:workspaceId/templates (POST)
+{
+  "name": "Welcome Message",
+  "type": "Text-Image",
+  "messageText":  "Hello User Welcome",
+    "imageUrl": "https://www.demoimage.com/welcome.png"
+}
+
+RESULT: {"name":"Welcome Message","type":"Text-Image","message":{"text":"Hello User Welcome","imageUrl":"https://www.demoimage.com/welcome.png","_id":"68a4273e7eb83cc5e2b777c3"},"workspaceId":"68a40700623a149ac80f2fc0","createdBy":"68a4043a623a149ac80f2fbd","_id":"68a4273e7eb83cc5e2b777c2","createdAt":"2025-08-19T07:26:54.160Z","updatedAt":"2025-08-19T07:26:54.160Z","__v":0} 
+
+Get Message-template by ID: localhost:3000/outreachhub/:workspaceId/templates (GET)	
+Update Message-template by ID: localhost:3000/outreachhub/:workspaceId/templates (PUT)	
+Delete Message-template by ID: localhost:3000/outreachhub/:workspaceId/templates (DELETE)	
+
+STEP-8: Campaigns Module : localhost:3000/outreachhub/:workspaceId/campaigns (GET)
+RESULT : []
+
+Add new Campaigns :  localhost:3000/outreachhub/:workspaceId/campaigns (POST)
+{
+  "name":"Latest Campaign",
+  "description":"This Campaign is to spread awareness",
+  "status":"Draft",
+  "selectedTags": ["vip","lead"],
+  "templateId":"68a4273e7eb83cc5e2b777c2"
+
+}
+
+RESULT : {"name":"Latest Campaign","description":"This Campaign is to spread awareness","status":"Draft","selectedTags":["vip","lead"],"templateId":"68a4273e7eb83cc5e2b777c2","workspaceId":"68a40700623a149ac80f2fc0","createdBy":"68a4043a623a149ac80f2fbd","_id":"68a438c87a9f052c264175c9","createdAt":"2025-08-19T08:41:44.132Z","updatedAt":"2025-08-19T08:41:44.132Z","__v":0}
+
+Get Campaigns by Id : localhost:3000/outreachhub/:workspaceId/campaigns/:id (GET)
+Update Campaigns by Id : localhost:3000/outreachhub/:workspaceId/campaigns/:id (PUT)
+Delete Campaigns by Id : localhost:3000/outreachhub/:workspaceId/campaigns/:id (DELETE)
+
+STEP-9: Campaign-message Module : localhost:3000/outreachhub/:workspaceId/campaign/:campaignId/messages (GET)
+RESULT: []
+
+Add Campaign-message Modules : localhost:3000/outreachhub/:workspaceId/campaign/:campaignId/messages (POST)
+{
+  "contactIds": [
+    "68a40700623a149ac80f2fc0",
+    "68a438c87a9f052c264175c9",
+    "68a4f2e28c4f052c264178a1"
+  ],
+  "messageContent": "Hello, this is our campaign message!"
+}
+
+RESULT: {"workspace":"68a40700623a149ac80f2fc0","campaign":"68a438c87a9f052c264175c9","contactIds":["68a40700623a149ac80f2fc0","68a438c87a9f052c264175c9","68a4f2e28c4f052c264178a1"],"createdBy":"68a4043a623a149ac80f2fbd","messageContent":"Hello, this is our campaign message!","_id":"68a441d2e50944737217bc6c","sentAt":"2025-08-19T09:20:18.064Z","createdAt":"2025-08-19T09:20:18.070Z","updatedAt":"2025-08-19T09:20:18.070Z","__v":0}
+
+Get messages by Id : localhost:3000/outreachhub/:workspaceId/campaign/:campaignId/messages/:id (GET)
+Update messages by Id : localhost:3000/outreachhub/:workspaceId/campaign/:campaignId/messages/:id (PUT)
+Delete messages by Id : localhost:3000/outreachhub/:workspaceId/campaign/:campaignId/messages/:id (DELETE)
+
+
+
+
+
+
+
+
+
+
+

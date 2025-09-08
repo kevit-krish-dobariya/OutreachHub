@@ -1,0 +1,184 @@
+<div class="p-6 bg-gray-50 min-h-screen">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-semibold">Contacts</h1>
+    <div class="flex space-x-2">
+      <button
+        *ngIf="isEditor"
+        class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+        (click)="openAddContact()">
+        + Add Contact
+      </button>
+      <label class="cursor-pointer bg-gray-100 px-3 py-2 rounded-md border border-gray-300 hover:bg-gray-200">
+        Import CSV
+        <input type="file" accept=".csv" hidden (change)="importCSV($event)" />
+      </label>
+    </div>
+  </div>
+
+  <!-- Filters & Search -->
+  <div class="flex justify-between items-center mb-4">
+    <div class="flex space-x-2">
+      <select class="border px-3 py-2 rounded-md" [(ngModel)]="filters.date">
+        <option value="">Created date</option>
+        <option value="asc">Oldest first</option>
+        <option value="desc">Newest first</option>
+      </select>
+
+      <select class="border px-3 py-2 rounded-md" [(ngModel)]="filters.tag">
+        <option value="">All Tags</option>
+        <option *ngFor="let tag of tags" [value]="tag">{{tag}}</option>
+      </select>
+    </div>
+
+    <input
+      type="text"
+      placeholder="Search..."
+      [(ngModel)]="searchQuery"
+      (input)="applySearch()"
+      class="border px-3 py-2 rounded-md w-64"
+    />
+  </div>
+
+  <!-- Contacts Table -->
+  <div class="bg-white rounded-lg shadow overflow-hidden">
+    <table class="w-full border-collapse">
+      <thead class="bg-gray-100 text-gray-600 text-sm uppercase">
+        <tr>
+          <th class="p-3 text-left">Name</th>
+          <th class="p-3 text-left">Email</th>
+          <th class="p-3 text-left">Phone Number</th>
+          <th class="p-3 text-left">Tags</th>
+          <th class="p-3 text-left">Created At</th>
+          <th class="p-3 text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let contact of paginatedContacts" class="border-b hover:bg-gray-50">
+          <td class="p-3">{{contact.name}}</td>
+          <td class="p-3">{{contact.email}}</td>
+          <td class="p-3">{{contact.phoneNumber}}</td>
+          <td class="p-3">
+            <span *ngFor="let tag of contact.tags" class="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-xs mr-1">
+              {{tag}}
+            </span>
+          </td>
+          <td class="p-3">{{contact.createdAt | date:'mediumDate'}}</td>
+          <td class="p-3 text-right">
+            <button *ngIf="isEditor" class="text-blue-600 hover:underline mr-2" (click)="editContact(contact)">Edit</button>
+            <button *ngIf="isEditor" class="text-red-600 hover:underline" (click)="deleteContact(contact._id)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="flex justify-between items-center mt-4">
+    <span>Showing {{startIndex+1}} - {{endIndex}} of {{contacts.length}}</span>
+    <div class="flex space-x-1">
+      <button
+        class="px-3 py-1 border rounded"
+        [disabled]="currentPage === 1"
+        (click)="prevPage()">
+        Prev
+      </button>
+      <button
+        class="px-3 py-1 border rounded"
+        [disabled]="endIndex >= contacts.length"
+        (click)="nextPage()">
+        Next
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Contact Modal -->
+<div
+  *ngIf="showModal"
+  class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+>
+  <div class="bg-white rounded-xl shadow-lg w-full max-w-lg p-6 relative">
+    <!-- Close Button -->
+    <button
+      type="button"
+      class="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+      (click)="closeModal()"
+    >
+      ✕
+    </button>
+
+    <!-- Modal Header -->
+    <h2 class="text-xl font-semibold mb-4">
+      {{ editingContact ? 'Edit Contact' : 'Add New Contact' }}
+    </h2>
+
+    <!-- Form -->
+    <form (ngSubmit)="saveContact()" #form="ngForm" class="space-y-4">
+      <!-- Name -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+        <input
+          type="text"
+          [(ngModel)]="contactForm.name"
+          name="name"
+          required
+          class="w-full border px-3 py-2 rounded-md focus:ring focus:ring-blue-200"
+        />
+      </div>
+
+      <!-- Email -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <input
+          type="email"
+          [(ngModel)]="contactForm.email"
+          name="email"
+          class="w-full border px-3 py-2 rounded-md focus:ring focus:ring-blue-200"
+        />
+      </div>
+
+      <!-- Phone Number -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+        <input
+          type="text"
+          [(ngModel)]="contactForm.phoneNumber"
+          name="phoneNumber"
+          required
+          class="w-full border px-3 py-2 rounded-md focus:ring focus:ring-blue-200"
+        />
+      </div>
+
+      <!-- Tags -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Tags (comma separated)</label>
+        <input
+          type="text"
+          [(ngModel)]="contactForm.tags"
+          name="tags"
+          placeholder="vip, user"
+          class="w-full border px-3 py-2 rounded-md focus:ring focus:ring-blue-200"
+        />
+      </div>
+
+      <!-- Actions -->
+      <div class="flex justify-end space-x-3 mt-6">
+        <button
+          type="button"
+          class="px-4 py-2 rounded-md border hover:bg-gray-100"
+          (click)="closeModal()"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          [disabled]="form.invalid"
+          class="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700"
+        >
+          {{ editingContact ? 'Update' : 'Save' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

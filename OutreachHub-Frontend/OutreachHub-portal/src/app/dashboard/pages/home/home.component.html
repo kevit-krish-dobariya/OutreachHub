@@ -1,0 +1,223 @@
+
+<!-- Hero Section -->
+<section class="relative bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white">
+  <div class="max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-10 items-center">
+    <!-- Left Content -->
+    <div class="space-y-6">
+      <h1 class="text-5xl font-bold leading-tight">
+        Supercharge Your Outreach with <span class="text-yellow-300">OutreachHub</span>
+      </h1>
+      <p class="text-lg opacity-90">
+        Manage contacts, launch campaigns, and track performance with AI-driven insights.
+        Designed for teams that want to grow 🚀.
+      </p>
+      <button
+        class="bg-yellow-400 hover:bg-yellow-500 text-indigo-900 px-6 py-3 rounded-xl font-semibold shadow-lg transition">
+        Explore Now
+      </button>
+    </div>
+
+    <!-- Right Image -->
+    <div class="relative">
+      <img src="assets/dashboard.jpg" alt="SaaS Dashboard"
+           class="rounded-xl shadow-2xl transform hover:scale-105 transition" />
+      <!-- Decorative SVG -->
+      <svg class="absolute -top-6 -left-6 w-32 h-32 text-yellow-300 opacity-30" fill="currentColor" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section class="py-20 bg-gray-50">
+  <div class="max-w-7xl mx-auto px-6">
+    <h2 class="text-3xl font-bold text-center mb-12">Campaign Analytics 📊</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <!-- Chart 1: Campaigns Per Day (Bar) -->
+      <div class="bg-white rounded-xl shadow p-6 flex flex-col justify-between">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-semibold">Campaigns Done Per Day</h3>
+          <input type="date" [(ngModel)]="campaignsDateRange" class="border rounded px-2 py-1" />
+        </div>
+        <canvas baseChart
+          [data]="campaignsChartData"
+          [options]="chartOptions"
+          [type]="'bar'">
+        </canvas>
+      </div>
+
+      <!-- Chart 2: Campaign Messages Sent (Pie) -->
+      <div class="bg-white rounded-xl shadow p-6 flex flex-col justify-between">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-semibold">Campaign Messages Sent Per Type</h3>
+          <input type="date" [(ngModel)]="messagesDateRange" class="border rounded px-2 py-1" />
+        </div>
+        <canvas baseChart
+          [data]="messagesChartData"
+          [options]="pieChartOptions"
+          [type]="'pie'">
+        </canvas>
+      </div>
+
+      <!-- Chart 3: Contacts Reached (Line) -->
+      <div class="bg-white rounded-xl shadow p-6 flex flex-col justify-between">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-semibold">Contacts Reached Per Day</h3>
+          <input type="date" [(ngModel)]="contactsDateRange" class="border rounded px-2 py-1" />
+        </div>
+        <canvas baseChart
+          [data]="contactsChartData"
+          [options]="chartOptions"
+          [type]="'line'">
+        </canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contacts Table -->
+
+<section class="py-20">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-16">
+      <!-- Recent Contacts Table -->
+      <div class="bg-white rounded-2xl shadow-xl p-8 flex flex-col items-center transition-transform hover:scale-105">
+        <h2 class="text-2xl font-bold mb-8 text-indigo-700">Recent Contacts</h2>
+        <div class="w-full overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-indigo-100">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Name</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Email</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Company</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-100">
+              <tr *ngFor="let contact of contacts" class="hover:bg-indigo-50 transition">
+                <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ contact.name }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-gray-600">{{ contact.email }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-gray-600">{{ contact.company }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Active Campaigns Table -->
+      <div class="bg-white rounded-2xl shadow-xl p-8 flex flex-col items-center transition-transform hover:scale-105">
+        <h2 class="text-2xl font-bold mb-8 text-pink-700">Active Campaigns</h2>
+        <div class="w-full overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-pink-100">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-pink-700 uppercase tracking-wider">Campaign</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-pink-700 uppercase tracking-wider">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-pink-700 uppercase tracking-wider">Leads</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-100">
+              <tr *ngFor="let campaign of campaigns" class="hover:bg-pink-50 transition">
+                <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ campaign.name }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="px-3 py-1 rounded-full text-white text-xs font-semibold"
+                    [ngClass]="campaign.status === 'Active' ? 'bg-green-500' : 'bg-gray-400'">
+                    {{ campaign.status }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-gray-600">{{ campaign.leads }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Image Showcase -->
+<section class="py-20 px-8">
+  <div class="flex flex-wrap justify-around gap-8">
+
+    <!-- Card 1: Automation -->
+    <div class="bg-gray-100 text-gray-800 p-8 rounded-xl shadow-lg flex flex-col space-y-6 w-full sm:w-80
+                transform transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:scale-105
+                hover:bg-indigo-700 hover:text-white cursor-pointer">
+      <div class="bg-white rounded-full w-14 h-14 flex items-center justify-center">
+        <!-- Gear Icon SVG -->
+        <svg class="w-8 h-8 text-indigo-700 hover:text-white transition-colors duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-1.007 1.11-.95.59.052 1.02.599 1.02 1.205v.706a1.703 1.703 0 0 1 .145.241l.05.088c.02.036.04.07.06.105a2.5 2.5 0 0 1 .305.622V8.5h2.5a.75.75 0 0 1 0 1.5h-2.5v1.25a2.5 2.5 0 0 1-.305.622A2.49 2.49 0 0 1 15 12.5l-.05.088a1.703 1.703 0 0 1-.145.241v.706c0 .606-.43.1.153-1.02 1.205-.052.59-.448 1.007-1.11.95L14.406 20.06c-.09.542-.56 1.007-1.11.95-.59-.052-1.02-.599-1.02-1.205v-.706a1.703 1.703 0 0 1-.145-.241l-.05-.088a2.5 2.5 0 0 1-.305-.622V15.5h-2.5a.75.75 0 0 1 0-1.5h2.5v-1.25a2.5 2.5 0 0 1 .305-.622A2.49 2.49 0 0 1 9 8.5l.05-.088a1.703 1.703 0 0 1 .145-.241v-.706c0-.606.43-1.153 1.02-1.205.59-.052.448-.557 1.11-.95L9.594 3.94Z" />
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold">Automation That Just Works</h3>
+      <p>Set up email follow-ups, assignments, and workflows in minutes - no code needed.</p>
+    </div>
+
+    <!-- Card 2: AI Agents -->
+    <div class="bg-gray-100 text-gray-800 p-8 rounded-xl shadow-lg flex flex-col space-y-6 w-full sm:w-80
+                transform transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:scale-105
+                hover:bg-indigo-700 hover:text-white cursor-pointer">
+      <div class="bg-white rounded-full w-14 h-14 flex items-center justify-center shadow-sm">
+        <svg class="w-8 h-8 text-indigo-700 hover:text-white transition-colors duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5M19.5 8.25h-1.5m-15 3.75h1.5m15 0h1.5m-15 3.75h1.5m15 0h1.5M12 6.75h.008v.008H12V6.75Zm-.008 3h.008v.008H11.992V9.75Zm.008 3h.008v.008H12v-.008Zm.008 3h.008v.008H12v-.008Z" />
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold">AI Agents That Do The Heavy Lifting</h3>
+      <p>AI handles emails, follow-ups, and tracking-so you can focus on relationships and closing deals.</p>
+    </div>
+
+    <!-- Card 3: Pipeline -->
+    <div class="bg-gray-100 text-gray-800 p-8 rounded-xl shadow-lg flex flex-col space-y-6 w-full sm:w-80
+                transform transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:scale-105
+                hover:bg-indigo-700 hover:text-white cursor-pointer">
+      <div class="bg-white rounded-full w-14 h-14 flex items-center justify-center shadow-sm">
+        <svg class="w-8 h-8 text-indigo-700 hover:text-white transition-colors duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h12M3.75 3h16.5M3.75 3v1.5M16.5 3v1.5m0 9.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Zm-.75 4.5-4.5-4.5" />
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold">Pipeline You Can Actually Use</h3>
+      <p>Track every deal with our drag-and-drop pipeline. Know what's moving and what's stuck.</p>
+    </div>
+
+    <!-- Card 4: Connect Anything -->
+    <div class="bg-gray-100 text-gray-800 p-8 rounded-xl shadow-lg flex flex-col space-y-6 w-full sm:w-80
+                transform transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:scale-105
+                hover:bg-indigo-700 hover:text-white cursor-pointer">
+      <div class="bg-white rounded-full w-14 h-14 flex items-center justify-center shadow-sm">
+        <svg class="w-8 h-8 text-indigo-700 hover:text-white transition-colors duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold">Connect Anything, Anywhere</h3>
+      <p>Plug in your forms, tools, or landing pages easily - with or without code.</p>
+    </div>
+
+  </div>
+</section>
+
+
+
+<!-- Reviews -->
+<section class="py-20 bg-gray-100">
+  <div class="max-w-6xl mx-auto px-6">
+    <h2 class="text-3xl font-bold text-center mb-12">What Our Users Say 💬</h2>
+    <div class="grid md:grid-cols-3 gap-8">
+      <div class="bg-white p-6 rounded-xl shadow text-center">
+        <p class="italic">"OutreachHub doubled our conversions in 2 months!"</p>
+        <h4 class="mt-4 font-semibold">- Sarah, Marketing Lead</h4>
+      </div>
+      <div class="bg-white p-6 rounded-xl shadow text-center">
+        <p class="italic">"The analytics dashboard is a game-changer for our team."</p>
+        <h4 class="mt-4 font-semibold">- Rajesh, Sales Manager</h4>
+      </div>
+      <div class="bg-white p-6 rounded-xl shadow text-center">
+        <p class="italic">"Easy to use and the support is fantastic!"</p>
+        <h4 class="mt-4 font-semibold">- Emily, Startup Founder</h4>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-indigo-700 text-white py-8 text-center">
+  <p>&copy; 2025 OutreachHub. All rights reserved.</p>
+</footer>
+

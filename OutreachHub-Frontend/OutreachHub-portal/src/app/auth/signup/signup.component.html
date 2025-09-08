@@ -1,0 +1,95 @@
+<div class="bg-animate min-h-screen flex items-center justify-center">
+
+  <div class="bg-white rounded-2xl shadow-lg flex overflow-hidden max-w-5xl w-full">
+
+    <!-- Left: Illustration -->
+    <div class="hidden md:flex w-1/2 items-center justify-center bg-indigo-50">
+      <img src="assets/vector.png" alt="Signup Illustration" class="object-contain max-h-[80%]" />
+    </div>
+
+    <!-- Right: Signup Form -->
+    <div class="w-full md:w-1/2 p-10">
+      <!-- Logo -->
+      <div class="flex justify-center items-center my-4">
+        <img src="assets/symbol.png" alt="OutreachHub Logo" class="h-12 w-12 mr-2">
+        <h1 class="text-3xl font-bold text-indigo-700">OutreachHub</h1>
+      </div>
+
+      <p class="text-gray-500 mb-6 text-center">Get started with a free account.</p>
+
+      <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="space-y-4">
+
+        <!-- Username -->
+        <div>
+          <input formControlName="username" type="text" placeholder="Username"
+            class="w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+          <div *ngIf="signupForm.get('username')?.invalid && signupForm.get('username')?.touched"
+               class="text-red-500 text-sm mt-1">
+            Username is required.
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div>
+          <input formControlName="email" type="email" placeholder="Email"
+            class="w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+          <div *ngIf="signupForm.get('email')?.invalid && signupForm.get('email')?.touched"
+               class="text-red-500 text-sm mt-1">
+            Please enter a valid email.
+          </div>
+        </div>
+
+        <!-- Phone -->
+        <div>
+          <input formControlName="phoneNumber" type="text" placeholder="Phone Number"
+            class="w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+          <div *ngIf="signupForm.get('phoneNumber')?.invalid && signupForm.get('phoneNumber')?.touched"
+               class="text-red-500 text-sm mt-1">
+            Please enter a valid 10-digit phone number.
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="relative">
+          <input [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="Password"
+            class="w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+          <button type="button" (click)="togglePassword()" class="absolute right-3 top-2.5 text-gray-500">
+            <i [ngClass]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+          </button>
+          <div *ngIf="signupForm.get('password')?.invalid && signupForm.get('password')?.touched"
+               class="text-red-500 text-sm mt-1">
+            Password must be at least 6 characters.
+          </div>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="relative">
+          <input [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPassword" placeholder="Confirm Password"
+            class="w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none" />
+          <button type="button" (click)="toggleConfirmPassword()" class="absolute right-3 top-2.5 text-gray-500">
+            <i [ngClass]="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+          </button>
+          <div *ngIf="signupForm.hasError('mismatch') && signupForm.get('confirmPassword')?.touched"
+               class="text-red-500 text-sm mt-1">
+            Passwords must match.
+          </div>
+        </div>
+
+        <!-- Hidden Role -->
+        <!-- <input type="hidden" formControlName="role" value="editor" /> -->
+
+        <!-- Submit -->
+        <button type="submit"
+          class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-indigo-700 transition">
+          SIGN UP
+        </button>
+      </form>
+
+      <!-- Footer -->
+      <p class="text-sm text-gray-500 mt-6 text-center">
+        Already have an account?
+        <a routerLink="/auth/login" class="text-indigo-600 font-medium hover:underline">Log in</a>
+      </p>
+    </div>
+  </div>
+</div>

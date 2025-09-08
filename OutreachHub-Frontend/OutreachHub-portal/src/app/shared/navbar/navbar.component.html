@@ -1,0 +1,67 @@
+<nav class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 shadow-md">
+  <div class="max-w-screen-xl mx-auto px-6 py-3 flex items-center justify-between">
+
+    <!-- Logo -->
+    <a routerLink="/" class="flex items-center space-x-2 text-white font-bold text-2xl">
+      <img src="https://flowbite.com/docs/images/logo.svg" class="h-8" alt="Logo" />
+      <span>OutreachHub</span>
+    </a>
+
+    <!-- Center Nav Links (hidden on mobile) -->
+    <div class="hidden md:flex flex-grow justify-center">
+      <ul class="flex space-x-8 text-white font-medium">
+        <li><a routerLink="/dashboard" class="hover:text-yellow-300 transition">Home</a></li>
+        <li><a routerLink="/dashboard/contacts" class="hover:text-yellow-300 transition">Contacts</a></li>
+        <li><a routerLink="/dashboard/templates" class="hover:text-yellow-300 transition">Message Templates</a></li>
+        <li><a routerLink="/dashboard/campaigns" class="hover:text-yellow-300 transition">Campaigns</a></li>
+        <li><a routerLink="/dashboard/about" class="hover:text-yellow-300 transition">About</a></li>
+      </ul>
+    </div>
+
+    <!-- Right Profile + Logout (hidden on mobile) -->
+    <div class="hidden md:flex items-center space-x-6">
+      <!-- Profile Dropdown with Username -->
+      <div class="flex items-center space-x-3 relative" (click)="toggleDropdown()">
+        <button type="button" class="flex items-center text-sm bg-white rounded-full focus:ring-2 focus:ring-yellow-300">
+          <img class="w-8 h-8 rounded-full" src="assets/profile.jpg" alt="user photo">
+        </button>
+        <span class="text-white font-medium">{{ username }}</span>
+
+        <!-- Dropdown -->
+        <div *ngIf="dropdownOpen"
+             class="absolute right-0 top-10 w-48 bg-white rounded-lg shadow-lg py-2 text-sm text-gray-700">
+          <a routerLink="/dashboard" class="block px-4 py-2 hover:bg-gray-100">Dashboard</a>
+          <a routerLink="/settings" class="block px-4 py-2 hover:bg-gray-100">Settings</a>
+          <a routerLink="/profile" class="block px-4 py-2 hover:bg-gray-100">Profile</a>
+        </div>
+      </div>
+
+      <!-- Logout Button -->
+      <button (click)="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-lg shadow">
+        Logout
+      </button>
+    </div>
+
+    <!-- Mobile Hamburger -->
+    <button class="md:hidden text-white focus:outline-none" (click)="toggleMobileMenu()">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+  </div>
+
+
+  <!-- Mobile Menu -->
+  <div *ngIf="mobileMenuOpen" class="md:hidden px-6 pb-4">
+    <ul class="flex flex-col space-y-4 text-white font-medium">
+      <li><a routerLink="/dashboard" class="hover:text-yellow-300 transition">Home</a></li>
+      <li><a routerLink="/about" class="hover:text-yellow-300 transition">About</a></li>
+      <li><a routerLink="/services" class="hover:text-yellow-300 transition">Services</a></li>
+      <li><a routerLink="/pricing" class="hover:text-yellow-300 transition">Pricing</a></li>
+      <li><a routerLink="/contacts" class="hover:text-yellow-300 transition">Contact</a></li>
+      <li><a routerLink="/settings" class="hover:text-yellow-300 transition">Settings</a></li>
+      <li><button (click)="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow w-full text-left">Logout</button></li>
+    </ul>
+  </div>
+</nav>

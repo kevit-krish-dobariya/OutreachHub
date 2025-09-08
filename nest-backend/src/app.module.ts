@@ -14,7 +14,7 @@ import { CampaignMessageModule } from './campaign-message/campaign-message.modul
   providers: [],
   imports: [
      ConfigModule.forRoot({ isGlobal: true }),
-    MongooseModule.forRoot('mongodb+srv://krishdobariya:cg6FcbCGLWauHIIW@cluster0.uxlm8xp.mongodb.net/OutreachHub'),
+    MongooseModule.forRoot('mongodb+srv://krishdobariya:wy9YXUvqIjlthJjz@cluster0.uxlm8xp.mongodb.net/OutreachHub'),
     AuthModule,
     WorkspacesModule,
     WorkspaceUsersModule,

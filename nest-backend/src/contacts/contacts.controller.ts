@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete, UseGuards, Req, Put } from '@nestjs/common';
 import { ContactsService } from './contacts.service';
 import { CreateContactDto } from './dtos/contacts.dto';
 import { UpdateContactDto } from './dtos/update-contacts.dto';
@@ -29,7 +29,7 @@ export class ContactsController {
     return this.contactsService.findOne(workspaceId, id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @Roles('editor')
   update(@Param('workspaceId') workspaceId: string, @Param('id') id: string, @Body() updateContactDto: UpdateContactDto, @Req() req) {
     return this.contactsService.update(workspaceId, id, updateContactDto, req.user);

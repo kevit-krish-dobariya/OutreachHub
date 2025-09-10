@@ -8,11 +8,15 @@ import { User, UserSchema } from './schemas/user.schema';
 import { JwtStrategy } from './jwt.strategy';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { BlacklistedToken, BlacklistedTokenSchema } from './schemas/blacklist.schema';
+import { Workspace, WorkspaceSchema } from 'src/workspaces/schemas/workspaces.schema';
+import { WorkspaceUser, WorkspaceUserSchema } from 'src/workspace-users/schemas/workspace-user.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema },
-       { name: BlacklistedToken.name, schema: BlacklistedTokenSchema }
+       { name: BlacklistedToken.name, schema: BlacklistedTokenSchema },
+       {name : Workspace.name , schema:WorkspaceSchema},
+       {name: WorkspaceUser.name, schema:WorkspaceUserSchema}
     ]),
     JwtModule.register({
       secret: "abc123",

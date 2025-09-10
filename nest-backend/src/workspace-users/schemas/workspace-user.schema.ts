@@ -13,10 +13,10 @@ export enum WorkspaceRole {
 @Schema({ timestamps: true })
 export class WorkspaceUser {
   @Prop({ type: Types.ObjectId, ref: 'Workspace', required: true })
-  workspace: Workspace;
+  workspace: Types.ObjectId | Workspace;
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  user: User;
+  user: Types.ObjectId | User;
 
   @Prop({ type: String, enum: WorkspaceRole, default: WorkspaceRole.VIEWER })
   role: WorkspaceRole;

@@ -7,12 +7,16 @@ import { User, UserDocument, UserRole } from './schemas/user.schema';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import { BlacklistedToken } from './schemas/blacklist.schema';
+import { Workspace, WorkspaceDocument } from 'src/workspaces/schemas/workspaces.schema';
+import { WorkspaceUser, WorkspaceUserDocument } from 'src/workspace-users/schemas/workspace-user.schema';
 
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Workspace.name) private workspaceModel: Model<WorkspaceDocument>,
+        @InjectModel(WorkspaceUser.name) private workspaceUserModel: Model<WorkspaceUserDocument>,
     private jwtService: JwtService,
       @InjectModel(BlacklistedToken.name)
     private readonly blacklistedTokenModel: Model<BlacklistedToken>,
@@ -61,6 +65,9 @@ export class AuthService {
   const adminUser = process.env.ADMIN_USERNAME;
   const adminPass = process.env.ADMIN_PASSWORD;
 
+  // -----------------
+  // 1) Admin login
+  // -----------------
   if (adminUser && adminPass && username === adminUser) {
     if (password !== adminPass) throw new UnauthorizedException('Invalid credentials');
     const payload = { username: adminUser, role: 'admin' };
@@ -68,9 +75,12 @@ export class AuthService {
       secret: process.env.JWT_SECRET || 'supersecret',
       expiresIn: '1h',
     });
-    return { access_token: token, role: 'admin' };
+    return { access_token: token, role: 'admin', workspaces: [] }; // admins may not have workspaces
   }
 
+  // -----------------
+  // 2) Normal user login
+  // -----------------
   const user = await this.userModel.findOne({ username }).exec();
   if (!user) throw new UnauthorizedException('Invalid credentials');
 
@@ -84,8 +94,31 @@ export class AuthService {
   });
 
   const { password: _p, ...safe } = user.toObject();
-  return { access_token: token, role: user.role, user: safe };
+
+  // -----------------
+  // 3) Fetch user workspaces
+  // -----------------
+  // ✅ Fetch workspaces assigned to this user
+  const workspaceUsers = await this.workspaceUserModel
+    .find({ user: user._id })
+    .populate('workspace') // so we get workspace details, not just ID
+    .exec();
+
+  const workspaces = workspaceUsers.map(wu => ({
+      id: (wu.workspace as any)._id.toString(),
+      name: (wu.workspace as any).name,
+  }));
+  // -----------------
+  // 4) Return all
+  // -----------------
+  return {
+    access_token: token,
+    role: user.role,
+    user: safe,
+    workspaces,
+  };
 }
+
 
  async validatePayload(payload: any) {
     if (!payload) return null;

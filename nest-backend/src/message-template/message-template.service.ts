@@ -25,7 +25,7 @@ export class MessageTemplatesService {
         imageUrl: createDto.imageUrl || null,
       },
       workspaceId: new Types.ObjectId(workspaceId),
-      createdBy: new Types.ObjectId(user._id),
+      createdBy: new Types.ObjectId(user.sub),
     });
 
     return newTemplate.save();

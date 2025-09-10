@@ -29,7 +29,7 @@ export class ContactsController {
     return this.contactsService.findOne(workspaceId, id);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @Roles('editor')
   update(@Param('workspaceId') workspaceId: string, @Param('id') id: string, @Body() updateContactDto: UpdateContactDto, @Req() req) {
     return this.contactsService.update(workspaceId, id, updateContactDto, req.user);

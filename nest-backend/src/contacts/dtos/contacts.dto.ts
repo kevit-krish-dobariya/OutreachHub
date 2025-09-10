@@ -26,5 +26,5 @@ export class CreateContactDto {
 
 //   @IsMongoId()
 //   @IsNotEmpty()
-  createdBy: string;
+  //createdBy: string;
 }

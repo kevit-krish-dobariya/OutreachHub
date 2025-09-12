@@ -1,0 +1,57 @@
+<!-- Sidebar Wrapper -->
+<div class="flex h-screen bg-gray-100">
+  <!-- Sidebar -->
+  <aside
+    class="w-64 bg-gradient-to-b from-indigo-600 to-purple-700 text-white flex flex-col transition-all duration-300"
+    [class.w-20]="collapsed"
+  >
+    <!-- Logo / Brand -->
+    <div class="flex items-center justify-between p-4">
+      <h1
+        class="text-2xl font-bold tracking-wide"
+        *ngIf="!collapsed"
+      >
+        OutreachHub
+      </h1>
+      <button
+        (click)="toggleSidebar()"
+        class="text-white focus:outline-none"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="flex-1 px-2 space-y-2 mt-6">
+      <a
+        *ngFor="let link of navLinks"
+        [routerLink]="link.path"
+        routerLinkActive="bg-white/20"
+        class="flex items-center gap-3 px-4 py-3 rounded-lg transition hover:bg-white/10"
+      >
+        <span [innerHTML]="link.icon"></span>
+        <span *ngIf="!collapsed" class="font-medium">{{ link.label }}</span>
+      </a>
+    </nav>
+
+    <!-- Footer -->
+    <div class="p-4 border-t border-white/20">
+      <button
+        class="w-full flex items-center justify-center gap-2 py-2 px-4 bg-red-400 text-indigo-900 font-semibold rounded-lg hover:bg-yellow-500 transition"
+      >
+        <span *ngIf="!collapsed">Logout</span>
+        <span *ngIf="collapsed">🚪</span>
+      </button>
+    </div>
+  </aside>
+
+  

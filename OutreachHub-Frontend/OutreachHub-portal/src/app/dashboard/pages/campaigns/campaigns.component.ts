@@ -18,8 +18,10 @@ export class CampaignsComponent implements OnInit {
 
   showModal = false;
   showDeleteModal = false;
+   showContactsModal = false; // ✅ New: s
   modalMode: 'create' | 'edit' | 'view' = 'create';
   selectedCampaign: Campaign | null = null;
+    selectedContact: Contact | null = null; // ✅ New: single contact details for info popup
 
   charCount = 0;
   startNow = false;
@@ -37,11 +39,47 @@ export class CampaignsComponent implements OnInit {
   }
 
   /** Load campaigns from API */
-  loadCampaigns(): void {
-  //const wsId = this.getWorkspaceId();
+//   loadCampaigns(): void {
+//   //const wsId = this.getWorkspaceId();
+//   this.campaignService.getCampaigns().subscribe({
+//     next: (data) => {
+//       this.campaigns = data.map(c => this.evaluateStatus(c));
+//     },
+//     error: (err) => console.error('Error fetching campaigns:', err)
+//   });
+// }
+
+// 
+loadCampaigns(): void {
+  const wsId = this.getWorkspaceId();
+
   this.campaignService.getCampaigns().subscribe({
     next: (data) => {
-      this.campaigns = data.map(c => this.evaluateStatus(c));
+      this.campaigns = data.map(c =>
+        this.evaluateStatus({
+          ...c,
+          targetedContacts: c.targetedContacts ?? [], // always array
+          contacts: c.contacts ?? []                  // ensure defined
+        })
+      );
+
+      // Fetch and store audience per campaign
+      this.campaigns.forEach(campaign => {
+        if (campaign.selectedTags && campaign.selectedTags.length > 0) {
+          this.campaignService.getTargetContacts(wsId, campaign.selectedTags).subscribe({
+            next: (contacts: Contact[]) => {
+              campaign.audience = contacts.length;
+              campaign.targetedContacts = contacts;
+              campaign.contacts = contacts; // ✅ always set contacts
+            },
+            error: (err) => console.error(`Error fetching audience for ${campaign._id}:`, err)
+          });
+        } else {
+          campaign.audience = 0;
+          campaign.targetedContacts = [];
+          campaign.contacts = []; // ✅ make sure contacts exists
+        }
+      });
     },
     error: (err) => console.error('Error fetching campaigns:', err)
   });
@@ -134,7 +172,6 @@ export class CampaignsComponent implements OnInit {
       endDate: getInputValue('end-date'),
       endTime: getInputValue('end-time'),
     };
-
     
     
     if (!this.selectedCampaign) {
@@ -234,6 +271,53 @@ export class CampaignsComponent implements OnInit {
     this.selectedCampaign = null;
   }
 
+  openContactsModal(campaign: Campaign): void {
+  this.selectedCampaign = {
+    ...campaign,
+    contacts: campaign.contacts ?? [] // ✅ safe default
+  };
+  this.showContactsModal = true;
+
+  this.fetchCampaignContacts(campaign);
+}
+
+  /** ✅ Close contacts modal */
+  closeContactsModal(): void {
+    this.showContactsModal = false;
+    this.selectedCampaign = null;
+    this.targetContacts = [];
+  }
+
+   private fetchCampaignContacts(campaign: Campaign): void {
+  const wsId = this.getWorkspaceId();
+  if (!campaign.selectedTags || campaign.selectedTags.length === 0) {
+    this.targetContacts = [];
+    if (this.selectedCampaign) {
+      this.selectedCampaign.contacts = []; // ✅ ensure defined
+    }
+    return;
+  }
+
+    this.campaignService.getTargetContacts(wsId, campaign.selectedTags).subscribe({
+    next: (contacts: Contact[]) => {
+      this.targetContacts = contacts;
+      if (this.selectedCampaign) {
+        this.selectedCampaign.contacts = contacts; // ✅ assign here too
+      }
+    },
+    error: (err) => console.error(`Error fetching contacts for ${campaign._id}:`, err)
+  });
+}
+
+
+  /** ✅ Get unique audience size across all campaigns */
+  getUniqueAudienceSize(): number {
+    const unique = new Set<string>();
+    this.campaigns.forEach(c => (c.targetedContacts || []).forEach(ct => unique.add(ct._id!)));
+    return unique.size;
+  }
+
+
   /** Add tag and fetch contacts */
   addTag(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -285,9 +369,15 @@ export class CampaignsComponent implements OnInit {
     return this.campaigns.filter(c => c.status === 'Completed' || c.status === 'Failed').length;
   }
 
-  totalTargetedAudience(): number {
-    return this.campaigns.reduce((acc, c) => acc + (c.audience || 0), 0);
-  }
+totalTargetedAudience(): number {
+  const uniqueContacts = new Set<string>();
+
+  this.campaigns.forEach(campaign => {
+    (campaign.targetedContacts || []).forEach(c => uniqueContacts.add(c._id!));
+  });
+
+  return uniqueContacts.size;
+}
 
   totalTagsTargeted(): number {
     const allTags = this.campaigns.flatMap(c => c.selectedTags || []);

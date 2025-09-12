@@ -1,3 +1,5 @@
+import { Contact } from "./contact.interface";
+
 export interface Campaign {
   _id?: string;
   name: string;
@@ -13,6 +15,9 @@ export interface Campaign {
   endTime?: string;
   workspaceId: string;
   createdBy: string;
+
+  targetedContacts?: Contact[];
+  contacts? : Contact[]
 }
 
 

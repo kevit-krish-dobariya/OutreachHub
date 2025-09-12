@@ -1,7 +1,10 @@
-<div class="bg-gray-100 text-gray-800 min-h-screen p-8">
-
+<div class="bg-gray-100 text-gray-800 min-h-screen p-8 pt-24">
+<div class="w-full px-4 sm:px-6 lg:px-8 pt-5">
       <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-        <h1 class="text-4xl font-extrabold text-blue-600">Contact Management</h1>
+        <div class="mb-4 sm:mb-0">
+        <h1 class="text-4xl font-bold text-gray-900">Contacts</h1>
+        <p class="text-gray-500 mt-1">"Manage your contacts, amplify your outreach."</p>
+      </div>
         <div class="flex space-x-3 mt-4 sm:mt-0">
           <button
             *ngIf="isEditor"
@@ -209,4 +212,5 @@
           OK
         </button>
       </div>
+    </div>
     </div>

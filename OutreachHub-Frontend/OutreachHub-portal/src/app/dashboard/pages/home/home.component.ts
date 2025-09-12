@@ -1,46 +1,126 @@
-import { Component } from '@angular/core';
-import { ChartOptions, ChartData, ChartConfiguration, ChartType } from 'chart.js';
-
-
-//   lineChartData = {
-//   labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-//   datasets: [
-//     { data: [10, 20, 15, 30, 25], label: 'Sales', fill: true, tension: 0.4 }
-//   ]
-// };
-
-// pieChartData = {
-//   labels: ['Product A', 'Product B', 'Product C'],
-//   datasets: [
-//     { data: [30, 50, 20], backgroundColor: ['#f59e0b', '#6366f1', '#ec4899'] }
-//   ]
-// };
-
-// chartOptions = {
-//   responsive: true,
-//   plugins: {
-//     legend: { display: true, position: 'top' }
-//   }
-// };
- // Line Chart Data
+import { Component, OnInit } from '@angular/core';
+import { ChartConfiguration } from 'chart.js';
+import { Observable, forkJoin, timer } from 'rxjs';
+import { switchMap, map } from 'rxjs/operators';
+import { Contact } from '../../../core/interfaces/contact.interface';
+import { Campaign } from '../../../core/interfaces/campaign.interface';
+import { Template } from '../../../core/interfaces/template.interface';
+import { ContactsService } from '../../../core/services/contacts.service';
+import { CampaignsService } from '../../../core/services/campaign.service';
+import { TemplatesService } from '../../../core/services/template.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
-export class HomeComponent {
-  // Date range models for each chart
-  campaignsDateRange: string = '';
-  messagesDateRange: string = '';
-  contactsDateRange: string = '';
+export class HomeComponent implements OnInit {
+  public userName: string = '';
 
-  // Chart data and options
+  contacts$!: Observable<Contact[]>;
+  campaigns$!: Observable<Campaign[]>;
+  templates$!: Observable<Template[]>;
+
+  // Date range models for charts 
+   campaignsDateRange: string = ''; 
+   messagesDateRange: string = ''; 
+   contactsDateRange: string = '';
+
+   // Summary cards
+  totalCampaigns = 0;
+  totalAudience = 0;
+  totalMessages = 0;
+
+  constructor(
+    private contactsService: ContactsService,
+    private campaignsService: CampaignsService,
+    private templatesService: TemplatesService,
+    private authService: AuthService
+  ) {}
+
+  ngOnInit() {
+    // Fetch logged-in user
+    const userStr = localStorage.getItem('user');
+    this.userName = userStr ? JSON.parse(userStr)?.username || 'User' : 'User';
+
+    const wsId = this.getWorkspaceId();
+
+    // Polling campaigns with audience & contacts every 10s
+    this.campaigns$ = timer(0, 10000).pipe(
+      switchMap(() => this.campaignsService.getCampaigns()),
+      switchMap(campaigns => {
+        const campaignsWithAudience$ = campaigns.map(campaign => {
+          const tags = campaign.selectedTags || [];
+          if (tags.length > 0) {
+            return this.campaignsService.getTargetContacts(wsId, tags).pipe(
+              map((contacts: Contact[]) => ({
+                ...campaign,
+                targetedContacts: contacts,
+                audience: contacts.length,
+                status: this.evaluateStatus(campaign)
+              }))
+            );
+          } else {
+            return new Observable<Campaign>(observer => {
+              observer.next({
+                ...campaign,
+                targetedContacts: [],
+                audience: 0,
+                status: this.evaluateStatus(campaign)
+              });
+              observer.complete();
+            });
+          }
+        });
+
+        return forkJoin(campaignsWithAudience$);
+      })
+    );
+
+    // Poll contacts (all) every 10s
+    this.contacts$ = timer(0, 10000).pipe(
+      switchMap(() => this.contactsService.getContacts())
+    );
+
+    // Fetch templates for mapping template names
+    this.templates$ = timer(0, 10000).pipe(
+      switchMap(() => this.templatesService.getTemplates())
+    );
+  }
+
+  private getWorkspaceId(): string {
+    return this.authService.getActiveWorkspace() || this.authService.getWorkspaceId() || '';
+  }
+
+  /** Evaluate campaign status based on start/end date/time */
+  private evaluateStatus(campaign: Campaign): string {
+    const now = new Date();
+    const start = new Date(`${campaign.startDate}T${campaign.startTime}`);
+    const end = new Date(`${campaign.endDate}T${campaign.endTime}`);
+
+    if (now < start) return 'Draft';
+    if (now >= start && now <= end) return 'Running';
+    return 'Completed';
+  }
+
+  /** Get template name by ID */
+  public getTemplateName(templateId: string, templates: Template[]): string {
+    const template = templates.find(t => t._id === templateId);
+    return template ? template.name : 'Unknown Template';
+  }
+
+  /** Total unique audience across all campaigns */
+  public totalTargetedAudience(campaigns: Campaign[]): number {
+    const unique = new Set<string>();
+    campaigns.forEach(c => (c.targetedContacts || []).forEach(ct => unique.add(ct._id!)));
+    return unique.size;
+  }
+
+  // ------------------- Chart Data -------------------
   campaignsChartData: ChartConfiguration<'bar'>['data'] = {
     labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    datasets: [
-      { data: [12, 19, 3, 5, 2, 3, 7], label: 'Campaigns', backgroundColor: '#6366f1' }
-    ]
+    datasets: [{ data: [12, 19, 3, 5, 2, 3, 7], label: 'Campaigns', backgroundColor: '#6366f1' }]
   };
 
   messagesChartData: ChartConfiguration<'line'>['data'] = {
@@ -59,31 +139,12 @@ export class HomeComponent {
 
   chartOptions: ChartConfiguration['options'] = {
     responsive: true,
-    plugins: {
-      legend: { display: true },
-      tooltip: { enabled: true }
-    },
-    scales: {
-      x: {},
-      y: { beginAtZero: true }
-    }
+    plugins: { legend: { display: true }, tooltip: { enabled: true } },
+    scales: { x: {}, y: { beginAtZero: true } }
   };
 
   pieChartOptions: ChartConfiguration['options'] = {
-  responsive: true,
-  plugins: {
-    legend: { display: true, position: 'top' },
-    tooltip: { enabled: true }
-  }
-  // No scales for pie chart
-};
-contacts = [
-  { name: 'John Doe', email: 'john@example.com', company: 'ABC Corp' },
-  { name: 'Jane Smith', email: 'jane@example.com', company: 'XYZ Inc' }
-];
-
-campaigns = [
-  { name: 'Campaign 1', status: 'Active', leads: 120 },
-  { name: 'Campaign 2', status: 'Paused', leads: 80 }
-];
+    responsive: true,
+    plugins: { legend: { display: true, position: 'top' }, tooltip: { enabled: true } }
+  };
 }

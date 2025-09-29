@@ -95,7 +95,8 @@
               "buildTarget": "OutreachHub-admin:build:production"
             },
             "development": {
-              "buildTarget": "OutreachHub-admin:build:development"
+              "buildTarget": "OutreachHub-admin:build:development",
+              "port": 4201
             }
           },
           "defaultConfiguration": "development"

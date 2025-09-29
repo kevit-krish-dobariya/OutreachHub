@@ -1,0 +1,129 @@
+<!-- Main Page Container -->
+<div class="flex h-full w-full flex-col bg-gray-100 dark:bg-gradient-to-br dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 text-gray-800 dark:text-slate-300">
+
+
+  <!-- Header Section-->
+  <header class="flex flex-wrap items-center justify-between gap-4 border-b border-gray-200 dark:border-slate-700/50 bg-white dark:bg-slate-900/50 px-8 py-4 shadow-lg backdrop-blur-md">
+    <div>
+      <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-wide">Manage Workspace Users 👥</h1>
+      <p class="mt-1 text-sm text-gray-500 dark:text-slate-400">Select a workspace to view and manage its members.</p>
+    </div>
+    <!-- Add User button is now conditional -->
+    <button *ngIf="selectedWorkspaceId" (click)="openAddUserModal()" class="rounded-lg bg-blue-600 dark:bg-yellow-400 text-white dark:text-indigo-900 px-5 py-2.5 text-sm font-semibold shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95">
+      + Add User to "{{ workspaceName }}"
+    </button>
+  </header>
+
+ 
+  <!-- Main Content Area -->
+  
+  <main class="flex-1 overflow-y-auto p-8">
+    <!-- Workspace Selector -->
+    <div class="mb-8 max-w-lg">
+      <label for="workspace-select" class="block text-sm font-medium text-gray-600 dark:text-slate-400">Choose a Workspace</label>
+      <select id="workspace-select" (change)="onWorkspaceChange($event)" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 py-3 pl-3 pr-10 text-base text-gray-900 dark:text-white ring-1 ring-transparent dark:ring-slate-700/50 focus:border-indigo-500 dark:focus:border-yellow-400 focus:outline-none focus:ring-indigo-500 dark:focus:ring-yellow-400 sm:text-sm">
+        <option [ngValue]="null" disabled selected>-- Select a Workspace --</option>
+        <option *ngFor="let ws of allWorkspaces" [value]="ws._id">{{ ws.name }}</option>
+      </select>
+    </div>
+
+    <!-- Conditional Content: Shown only after a workspace is selected -->
+    <div *ngIf="selectedWorkspaceId">
+      <!-- Users Table (shown if users exist) -->
+      <div *ngIf="workspaceMembers.length > 0" class="overflow-hidden rounded-xl bg-white dark:bg-slate-800/50 shadow-2xl ring-1 ring-gray-200/50 dark:ring-slate-700/50">
+        <table class="min-w-full text-left text-sm">
+          <thead class="bg-gray-50 dark:bg-slate-900/70 text-xs uppercase tracking-wider text-gray-600 dark:text-yellow-300">
+            <tr>
+              <th class="px-6 py-4">Username</th>
+              <th class="px-6 py-4">Email</th>
+              <th class="px-6 py-4">Role</th>
+              <th class="px-6 py-4 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200 dark:divide-slate-700/50">
+            <tr *ngFor="let member of workspaceMembers" class="hover:bg-gray-50 dark:hover:bg-slate-800/70 transition-colors duration-200">
+              <td class="px-6 py-4 font-semibold text-gray-900 dark:text-white">{{ member.user.username }}</td>
+              <td class="px-6 py-4 text-gray-500 dark:text-slate-400">{{ member.user.email }}</td>
+              <td class="px-6 py-4">
+                <select (change)="onRoleChange($event, member)" [value]="member.role" class="rounded-md border-0 bg-gray-100 dark:bg-slate-700/80 px-3 py-1.5 text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-slate-600 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-yellow-400">
+                  <option value="editor">Editor</option>
+                  <option value="viewer">Viewer</option>
+                </select>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <button (click)="openRemoveUserModal(member)" class="font-semibold text-red-600 dark:text-red-500 hover:text-red-500 dark:hover:text-red-400 transition-colors">
+                  Remove
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- No Users Message (shown if no users exist in selected workspace) -->
+      <div *ngIf="workspaceMembers.length === 0" class="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800/30 p-12 text-center">
+        <h3 class="text-xl font-semibold text-gray-800 dark:text-white">No Users Found</h3>
+        <p class="mt-2 text-gray-500 dark:text-slate-400">There are currently no users in the "{{ workspaceName }}" workspace.</p>
+        <button (click)="openAddUserModal()" class="mt-6 rounded-lg bg-blue-600 dark:bg-yellow-400 px-5 py-2.5 text-sm font-semibold text-white dark:text-indigo-900 shadow-lg transition-transform duration-200 hover:bg-blue-500 dark:hover:bg-yellow-500 hover:scale-105">
+          Add the First User
+        </button>
+      </div>
+    </div>
+  </main>
+</div>
+
+
+<!-- Modals -->
+
+
+<!-- Add User Modal -->
+<div *ngIf="showAddUserModal" class="fixed inset-0 z-30 flex items-center justify-center bg-black/60 backdrop-blur-sm" (click)="closeModals()">
+  <div class="w-full max-w-md rounded-2xl bg-white dark:bg-slate-800 p-8 text-slate-800 dark:text-slate-300 shadow-2xl" (click)="$event.stopPropagation()">
+    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Add User to "{{ workspaceName }}"</h2>
+    <form [formGroup]="addUserForm" (ngSubmit)="onAddUserSubmit()" class="mt-6 space-y-4">
+      <div>
+        <label for="email" class="block text-sm font-semibold text-gray-700 dark:text-slate-300">User Email</label>
+        <input id="email" type="email" formControlName="email" placeholder="Enter user's email address" class="mt-1 w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-700 px-4 py-3 text-gray-900 dark:text-white shadow-sm focus:border-blue-500 dark:focus:border-yellow-400 focus:ring focus:ring-blue-200 dark:focus:ring-yellow-400/50">
+      </div>
+      <div>
+        <label for="role" class="block text-sm font-semibold text-gray-700 dark:text-slate-300">Role</label>
+        <select id="role" formControlName="role" class="mt-1 w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-3 text-gray-900 dark:text-white shadow-sm focus:border-blue-500 dark:focus:border-yellow-400 focus:ring focus:ring-blue-200 dark:focus:ring-yellow-400/50">
+          <option value="viewer">Viewer</option>
+          <option value="editor">Editor</option>
+        </select>
+      </div>
+      <div class="flex justify-end gap-x-4 pt-4">
+        <button type="button" (click)="closeModals()" class="rounded-lg bg-gray-200 dark:bg-slate-600 px-5 py-2.5 font-semibold text-gray-800 dark:text-slate-300 hover:bg-gray-300 dark:hover:bg-slate-500">Cancel</button>
+        <button type="submit" [disabled]="addUserForm.invalid" class="rounded-lg bg-blue-600 dark:bg-yellow-400 px-5 py-2.5 font-semibold text-white dark:text-indigo-900 hover:bg-blue-700 dark:hover:bg-yellow-500 disabled:opacity-50">Add User</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add User Confirmation Modal -->
+<div *ngIf="showConfirmAddModal" class="fixed inset-0 z-30 flex items-center justify-center bg-black/60 backdrop-blur-sm" (click)="closeModals()">
+  <div class="w-full max-w-md rounded-2xl bg-white dark:bg-slate-800 p-8 text-slate-800 dark:text-slate-300 shadow-2xl" (click)="$event.stopPropagation()">
+    <h2 class="text-2xl font-bold text-indigo-600 dark:text-yellow-300">Confirm New User Creation</h2>
+    <p class="mt-2 text-gray-600 dark:text-slate-400">
+      Are you sure you want to create a new user with the email <strong class="font-bold text-gray-800 dark:text-white">{{ newUserPayload?.email }}</strong> and assign them to this workspace as a <strong class="font-bold text-gray-800 dark:text-white">{{ newUserPayload?.role }}</strong>?
+    </p>
+    <div class="mt-8 flex justify-end gap-x-4">
+      <button (click)="closeModals()" class="rounded-lg bg-gray-200 dark:bg-slate-600 px-5 py-2.5 font-semibold text-gray-800 dark:text-slate-300 hover:bg-gray-300 dark:hover:bg-slate-500">Cancel</button>
+      <button (click)="onConfirmAddUser()" class="rounded-lg bg-indigo-600 dark:bg-yellow-400 px-5 py-2.5 font-semibold text-white dark:text-indigo-900 hover:bg-indigo-500 dark:hover:bg-yellow-500">Confirm & Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- Remove User Confirmation Modal -->
+<div *ngIf="showRemoveUserModal" class="fixed inset-0 z-30 flex items-center justify-center bg-black/60 backdrop-blur-sm" (click)="closeModals()">
+  <div class="w-full max-w-md rounded-2xl bg-white dark:bg-slate-800 p-8 text-slate-800 dark:text-slate-300 shadow-2xl" (click)="$event.stopPropagation()">
+    <h2 class="text-2xl font-bold text-red-600">Confirm Removal</h2>
+    <p class="mt-2 text-gray-600 dark:text-slate-400">
+      Are you sure you want to remove <strong class="font-bold text-gray-800 dark:text-white">{{ userToRemove?.user?.username }}</strong> from this workspace?
+    </p>
+    <div class="mt-8 flex justify-end gap-x-4">
+      <button (click)="closeModals()" class="rounded-lg bg-gray-200 dark:bg-slate-600 px-5 py-2.5 font-semibold text-gray-800 dark:text-slate-300 hover:bg-gray-300 dark:hover:bg-slate-500">Cancel</button>
+      <button (click)="onConfirmRemove()" class="rounded-lg bg-red-600 px-5 py-2.5 font-semibold text-white hover:bg-red-500">Confirm</button>
+    </div>
+  </div>
+</div>

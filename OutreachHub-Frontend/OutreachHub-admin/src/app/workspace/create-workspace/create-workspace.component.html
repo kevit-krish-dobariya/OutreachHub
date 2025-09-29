@@ -1,0 +1,56 @@
+<!-- 
+  ADD WORKSPACE COMPONENT
+  - Provides a form for creating a new workspace.
+  - Features a consistent header with a back button.
+  - Fully supports both light and dark modes.
+-->
+
+<!-- Main Page Container -->
+<div class="flex h-screen w-full flex-col bg-gray-100 dark:bg-gradient-to-br dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 text-gray-800 dark:text-slate-300">
+
+  <!-- Header Section -->
+  <header class="flex items-center justify-between border-b border-gray-200 dark:border-slate-700/50 bg-white dark:bg-slate-900/50 px-8 py-4 shadow-sm dark:shadow-lg dark:backdrop-blur-md">
+    <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-wide">Create Workspace</h1>
+    <button (click)="goToWorkspaceList()"
+      class="rounded-lg bg-gray-200 dark:bg-slate-700 px-4 py-2 text-sm font-semibold text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-slate-600 transition-colors">
+      ← Back to List
+    </button>
+  </header>
+
+  <!-- Main Content: Create Form -->
+  <main class="flex-1 flex justify-center items-start p-8">
+    <form (ngSubmit)="onSubmit()" class="w-full max-w-lg bg-white dark:bg-slate-800/60 rounded-xl shadow-xl p-8 space-y-6 ring-1 ring-gray-200/50 dark:ring-slate-700/50">
+      
+      <!-- Workspace Name Input -->
+      <div>
+        <label class="block text-sm font-semibold mb-2 text-gray-700 dark:text-white">Workspace Name</label>
+        <input [(ngModel)]="workspace.name" name="name" required
+          class="w-full rounded-lg bg-gray-50 dark:bg-slate-900/80 border border-gray-300 dark:border-slate-700 px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-yellow-500" />
+      </div>
+
+      <!-- Description Input -->
+      <div>
+        <label class="block text-sm font-semibold mb-2 text-gray-700 dark:text-white">Description</label>
+        <textarea [(ngModel)]="workspace.description" name="description" rows="3"
+          class="w-full rounded-lg bg-gray-50 dark:bg-slate-900/80 border border-gray-300 dark:border-slate-700 px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-yellow-500"></textarea>
+      </div>
+
+      <!-- Created By Input -->
+      <div>
+        <label class="block text-sm font-semibold mb-2 text-gray-700 dark:text-white">Created By</label>
+        <input [(ngModel)]="workspace.createdBy" name="createdBy" required
+          class="w-full rounded-lg bg-gray-50 dark:bg-slate-900/80 border border-gray-300 dark:border-slate-700 px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-yellow-500" />
+      </div>
+
+      <!-- Error Message Display -->
+      <div *ngIf="errorMsg" class="text-red-500 dark:text-red-400 text-sm">{{ errorMsg }}</div>
+
+      <!-- Submit Button -->
+      <button type="submit" [disabled]="isLoading"
+        class="w-full rounded-lg bg-blue-600 dark:bg-yellow-400 text-white dark:text-indigo-900 px-5 py-2.5 text-sm font-semibold shadow-md hover:bg-blue-700 dark:hover:bg-yellow-500 disabled:opacity-50 transition-all duration-200">
+        {{ isLoading ? 'Creating...' : 'Create Workspace' }}
+      </button>
+
+    </form>
+  </main>
+</div>

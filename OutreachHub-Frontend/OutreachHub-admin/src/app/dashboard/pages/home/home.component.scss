@@ -1,0 +1,23 @@
+
+.ngx-charts {
+  /* MODIFIED: Use a more specific selector for all text inside the SVG */
+  .ngx-charts-outer-text, .ngx-charts-title, .ngx-charts-axis-label, .tick text, .legend-label-text, text {
+    fill: #ffffff !important;
+  }
+
+  /* Target the legend text which is outside the SVG */
+  .chart-legend .legend-label-text {
+    color: #ffffff !important;
+  }
+
+  /* Specific styling for axis labels to make them slightly dimmer */
+  .axis-label {
+    fill: #cbd5e1 !important; /* e.g., slate-300 */
+    font-weight: 600;
+  }
+  
+  /* Style the grid lines for better contrast */
+  .grid-panel line {
+    stroke: rgba(255, 255, 255, 0.2) !important;
+  }
+}

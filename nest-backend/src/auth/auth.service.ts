@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
@@ -119,6 +119,19 @@ export class AuthService {
   };
 }
 
+async findUnassignedUsers() {
+  // Step 1: Get all user IDs that are assigned in WorkspaceUser
+  const assignedUsers = await this.workspaceUserModel.distinct('user');
+
+  // Step 2: Find users whose _id is NOT in the assignedUsers list
+  const unassignedUsers = await this.userModel
+    .find({ _id: { $nin: assignedUsers } })
+    .select('-password') // never return password
+    .exec();
+
+  return unassignedUsers;
+}
+
 
  async validatePayload(payload: any) {
     if (!payload) return null;
@@ -128,6 +141,23 @@ export class AuthService {
       return user || null;
     }
     return null;
+  }
+
+  async deleteUser(userId: string) {
+    // 1. First, verify the user exists.
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException(`User with ID "${userId}" not found`);
+    }
+
+    // 2. Delete all memberships this user has in any workspace.
+    // This is crucial for preventing orphaned data.
+    await this.workspaceUserModel.deleteMany({ user: userId });
+
+    // 3. Finally, delete the user document itself.
+    await this.userModel.findByIdAndDelete(userId);
+
+    return { message: 'User and all associated data have been permanently deleted.' };
   }
 
 async isTokenBlacklisted(token: string): Promise<boolean> {

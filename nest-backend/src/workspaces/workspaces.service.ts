@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { isValidObjectId, Model, Types } from 'mongoose';
 import { Workspace, WorkspaceDocument } from './schemas/workspaces.schema';
 import { WorkspaceUser, WorkspaceUserDocument, WorkspaceRole } from '../workspace-users/schemas/workspace-user.schema';
 import { User, UserDocument } from '../auth/schemas/user.schema';
@@ -59,6 +59,19 @@ export class WorkspacesService {
   return workspace;
 }
 
+async findOne(id: string): Promise<Workspace> {
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException('Invalid workspace ID');
+    }
+
+    const workspace = await this.workspaceModel.findById(new Types.ObjectId(id));
+    if (!workspace) {
+      throw new NotFoundException('Workspace not found');
+    }
+
+    return workspace;
+  }
+
 
   async updateWorkspace(id: string, updateData: Partial<Workspace>) {
     const workspace = await this.workspaceModel.findById(id);
@@ -78,14 +91,14 @@ export class WorkspacesService {
     return { message: 'Workspace deleted successfully' };
   }
 
-  async getWorkspaceForUser(userId: string) {
-    const link = await this.workspaceUserModel
-      .findOne({ user: userId })
-      .populate('workspace');
+//   async getWorkspaceForUser(userId: string) {
+//     const link = await this.workspaceUserModel
+//       .findOne({ user: userId })
+//       .populate('workspace');
 
-    if (!link) throw new ForbiddenException('You are not assigned to any workspace');
-    return link.workspace;
-  }
-}
+//     if (!link) throw new ForbiddenException('You are not assigned to any workspace');
+//     return link.workspace;
+//   }
+ }
 
 

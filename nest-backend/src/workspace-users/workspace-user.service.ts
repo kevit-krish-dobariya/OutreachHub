@@ -1,106 +1,158 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { isValidObjectId, Model, Types } from 'mongoose';
 import { WorkspaceUser, WorkspaceUserDocument, WorkspaceRole } from './schemas/workspace-user.schema';
-import { Workspace, WorkspaceDocument } from '../workspaces/schemas/workspaces.schema';
 import { User, UserDocument } from '../auth/schemas/user.schema';
-import mongoose from 'mongoose';
-
-
 
 @Injectable()
 export class WorkspaceUsersService {
   constructor(
     @InjectModel(WorkspaceUser.name) private workspaceUserModel: Model<WorkspaceUserDocument>,
-    @InjectModel(Workspace.name) private workspaceModel: Model<WorkspaceDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
-
-async addUserToWorkspace(workspaceId: string, userId: string, role: string) {
-  console.log('Looking for userId:', userId);
-
-  // 1. Fetch user safely
-  let user;
-  try {
-    user = await this.userModel.findById(new mongoose.Types.ObjectId(userId));
-  } catch (err) {
-    throw new BadRequestException('Invalid userId format');
+  /**
+   * Finds all WorkspaceUser entries for a given workspace and populates user details.
+   */
+  async findByWorkspace(workspaceId: string): Promise<WorkspaceUser[]> {
+    if (!Types.ObjectId.isValid(workspaceId)) {
+      throw new BadRequestException('Invalid workspaceId format');
+    }
+    return this.workspaceUserModel
+      .find({ workspace: new Types.ObjectId(workspaceId) })
+      .populate({
+        path: 'user',
+        select: 'username email', // Only return necessary user fields
+      })
+      .exec();
   }
 
-  if (!user) throw new NotFoundException('User not found in DB');
+  /**
+   * Adds a user to a workspace using their email address.
+   * Throws an error if the user does not exist or is already in the workspace.
+   */
+  async addUserToWorkspace(workspaceId: string, email: string, role: WorkspaceRole): Promise<WorkspaceUser> {
+    // 1. Find the user by their email address.
+    const user = await this.userModel.findOne({ email }).exec();
+    if (!user) {
+      throw new NotFoundException(`User with email "${email}" not found.`);
+    }
 
-  // 2. Update user's role if different
-  if (user.role !== role) {
-    await this.userModel.updateOne(
-      { _id: user._id },
-      { $set: { role: role } }
-    );
+    // 2. Check if the user is already a member of this workspace.
+    const existingMember = await this.workspaceUserModel.findOne({
+      workspace: new Types.ObjectId(workspaceId),
+      user: user._id,
+    });
+
+    if (existingMember) {
+      throw new ConflictException(`User "${email}" is already a member of this workspace.`);
+    }
+
+    // 3. Create the new workspace-user association.
+    const newWorkspaceUser = new this.workspaceUserModel({
+      workspace: new Types.ObjectId(workspaceId),
+      user: user._id,
+      role,
+    });
+    
+    await newWorkspaceUser.save();
+    
+    // 4. Populate user details before returning for a complete response
+    return newWorkspaceUser.populate({
+        path: 'user',
+        select: 'username email'
+    });
   }
 
-  // 3. Add to workspaceUsers table
-  const workspaceUser = await this.workspaceUserModel.create({
-    workspace: new mongoose.Types.ObjectId(workspaceId),
-    user: user._id,
+  async assignUserToWorkspace(
+  workspaceId: string,
+   userId: string,
+  role: WorkspaceRole = WorkspaceRole.VIEWER,
+) {
+  // 1. Validate IDs
+  if (!isValidObjectId(userId) || !isValidObjectId(workspaceId)) {
+    throw new BadRequestException('Invalid userId or workspaceId');
+  }
+
+  // 2. Verify user exists
+  const user = await this.userModel.findById(userId).select('username email').exec();
+  if (!user) {
+    throw new NotFoundException(`User with ID "${userId}" not found`);
+  }
+
+  // 3. Check if already assigned
+  const existing = await this.workspaceUserModel.findOne({
+    user: new Types.ObjectId(userId),
+    workspace: new Types.ObjectId(workspaceId),
+  });
+  if (existing) {
+    throw new ConflictException(`User "${user.email}" is already assigned to this workspace`);
+  }
+
+  // 4. Create workspace-user association
+  const workspaceUser = new this.workspaceUserModel({
+    user: new Types.ObjectId(userId),
+    workspace: new Types.ObjectId(workspaceId),
     role,
   });
 
-  return workspaceUser;
+  await workspaceUser.save();
+
+  // 5. Return populated record for consistency
+  return workspaceUser.populate({
+    path: 'user',
+    select: 'username email',
+  });
 }
 
+  /**
+   * Updates the role of a user within a workspace.
+   */
+    async updateWorkspaceUserRole(workspaceUserId: string, role: WorkspaceRole): Promise<WorkspaceUser> {
+    // 1. Validate the incoming role
+    if (!Object.values(WorkspaceRole).includes(role)) {
+      throw new BadRequestException(`Invalid role specified.`);
+    }
 
-async updateWorkspaceUserRole(workspaceUserId: string, role: string) {
-  // 1. Get the workspace user entry (no populate needed)
-  const workspaceUser = await this.workspaceUserModel.findById(workspaceUserId);
-  if (!workspaceUser) {
-    throw new NotFoundException('Workspace user not found');
+    // 2. Find the workspace-user document to get the user's ID
+    const workspaceUser = await this.workspaceUserModel.findById(workspaceUserId);
+    if (!workspaceUser) {
+      throw new NotFoundException(`Workspace-user association with ID "${workspaceUserId}" not found.`);
+    }
+
+    // 3. Perform both database updates concurrently
+    await Promise.all([
+      // Update 1: Change the role in the main 'users' collection
+      this.userModel.findByIdAndUpdate(workspaceUser.user, { $set: { role } }),
+      // Update 2: Change the role in the 'workspace_users' collection
+      this.workspaceUserModel.findByIdAndUpdate(workspaceUserId, { $set: { role } })
+    ]);
+
+    // 4. Fetch and return the updated document, populated with the user's details
+    // to confirm the change to the frontend.
+    const updatedDocument = await this.workspaceUserModel.findById(workspaceUserId)
+      .populate({
+        path: 'user',
+        select: 'username email role' // Include role to show it's updated
+      });
+
+    if (!updatedDocument) {
+      // This should ideally not happen if the above succeeded, but it's a good safeguard.
+      throw new NotFoundException('Could not retrieve the updated workspace user.');
+    }
+    
+    return updatedDocument;
   }
 
-  // 2. Handle populated and non-populated user field
-  let userId: string;
-  if (workspaceUser.user && typeof workspaceUser.user === 'object' && '_id' in workspaceUser.user) {
-    // Populated user object
-    userId = (workspaceUser.user as any)._id.toString();
-  } else {
-    // Plain ObjectId
-    userId = workspaceUser.user.toString();
-  }
-
-  // 3. Fetch the user document
-  const user = await this.userModel.findById(userId);
-  if (!user) {
-    throw new NotFoundException('User not found');
-  }
-
-  // 4. Update user's role if different
-  if (user.role !== role) {
-    await this.userModel.updateOne({ _id: userId }, { $set: { role } });
-  }
-
-  // 5. Update workspace user role if different
- if (!Object.values(WorkspaceRole).includes(role as WorkspaceRole)) {
-  throw new BadRequestException('Invalid role');
-}
-
-workspaceUser.role = role as WorkspaceRole;
-    await workspaceUser.save();
-  
-  return workspaceUser;
-}
-
-
-
-  async removeUser(id: string) {
-    const workspaceUser = await this.workspaceUserModel.findById(id);
-    if (!workspaceUser) throw new NotFoundException('Workspace user not found');
-
-    await this.workspaceUserModel.findByIdAndDelete(id);
-    return { message: 'Workspace user removed' };
-  }
-
-  async getUsersForWorkspace(workspaceId: string) {
-    return this.workspaceUserModel
-      .find({ workspace: workspaceId })
-      .populate('user');
+  /**
+   * Removes a user's association from a workspace.
+   */
+  async removeUser(id: string): Promise<{ message: string }> {
+    const result = await this.workspaceUserModel.findByIdAndDelete(id);
+    if (!result) {
+      throw new NotFoundException(`Workspace-user association with ID "${id}" not found.`);
+    }
+    return { message: 'User removed from workspace successfully.' };
   }
 }
+

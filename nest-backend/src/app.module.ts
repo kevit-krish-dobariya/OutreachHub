@@ -8,6 +8,8 @@ import { ContactsModule } from './contacts/contacts.module';
 import { CampaignsModule } from './campaigns/campaigns.module';
 import { MessageTemplateModule } from './message-template/message-template.module';
 import { CampaignMessageModule } from './campaign-message/campaign-message.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { AdminDashboardModule } from './admin-dashboard/admin-dashboard.module';
 
 @Module({
   controllers: [],
@@ -21,6 +23,8 @@ import { CampaignMessageModule } from './campaign-message/campaign-message.modul
     ContactsModule,
     CampaignsModule,
     MessageTemplateModule,
-    CampaignMessageModule],
+    CampaignMessageModule,
+    DashboardModule,
+    AdminDashboardModule],
 })
 export class AppModule {}

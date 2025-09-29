@@ -7,7 +7,7 @@ export type WorkspaceDocument = Workspace & Document;
 @Schema({ timestamps: true })
 export class Workspace {
   @Prop({ required: true })
-  name: string;
+  name?: string;
 
   @Prop()
   description?: string;

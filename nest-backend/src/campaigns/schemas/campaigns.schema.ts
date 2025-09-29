@@ -1,16 +1,17 @@
 // src/campaigns/schemas/campaign.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
+
+export type CampaignDocument = Campaign & Document;
 
 @Schema({ timestamps: true })
-export class Campaign extends Document {
+export class Campaign {
   @Prop({ required: true })
   name: string;
 
   @Prop()
   description?: string;
 
-  // Added new status field with an enum
   @Prop({
     type: String,
     enum: ['Draft', 'Running', 'Completed'],
@@ -18,10 +19,9 @@ export class Campaign extends Document {
   })
   status: string;
 
-  @Prop({ type: [String] })
+  @Prop({ type: [String], default: [] })
   selectedTags: string[];
 
-  // Added new fields for campaign scheduling
   @Prop()
   startDate?: string;
 
@@ -34,18 +34,17 @@ export class Campaign extends Document {
   @Prop()
   endTime?: string;
 
-  // Added new reference to a MessageTemplate
-  @Prop({ type: Types.ObjectId, ref: 'MessageTemplate' })
-  templateId: Types.ObjectId;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'MessageTemplate' })
+  templateId: mongoose.Schema.Types.ObjectId;
 
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Workspace', required: true })
+  workspaceId: mongoose.Schema.Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'Workspace', required: true })
-  workspaceId: Types.ObjectId;
-
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  createdBy: Types.ObjectId;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
+  createdBy: mongoose.Schema.Types.ObjectId;
 }
 
-
 export const CampaignSchema = SchemaFactory.createForClass(Campaign);
+
+// compound index for workspace + status queries
 CampaignSchema.index({ workspaceId: 1, status: 1 });

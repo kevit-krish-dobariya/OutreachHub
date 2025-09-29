@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { TemplatesService } from '../../../core/services/template.service';
+import { TemplatesService } from '../../../core/services/template.service'; // Corrected service import
 import { Template } from '../../../core/interfaces/template.interface';
 import { AuthService } from '../../../core/services/auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -10,21 +10,28 @@ import { HttpErrorResponse } from '@angular/common/http';
   styleUrls: ['./templates.component.scss']
 })
 export class TemplatesComponent implements OnInit {
-  templates: Template[] = [];
-  showModal = false;
-  editingTemplate: Template | null = null;
-  templateForm: Partial<Template> = {
-    name: '',
-    type: 'Text',
-    message: { text: '', imageUrl: '' }
-  };
-  loading = false;
+  // --- STATE --- //
+  templates: Template[] = []; // This holds the master list of templates
+  loading = true;
   errorMessage = '';
 
+  // Modals and Form State
+  showModal = false;
+  editingTemplate: Template | null = null;
+  templateForm: Partial<Template> = this.createEmptyTemplate();
   showConfirmModal = false;
   templateToDelete: Template | null = null;
   showInfoModal = false;
   infoTemplate: Template | null = null;
+
+  // Role check
+  isEditor = false;
+
+  // --- PAGINATION STATE --- //
+  paginatedTemplates: Template[] = []; // Holds the templates for the current page's view
+  currentPage = 1;
+  readonly pageSize = 9; // Display 9 templates per page (for a 3x3 grid)
+  totalPages = 0;
 
   constructor(
     private templatesService: TemplatesService,
@@ -32,15 +39,23 @@ export class TemplatesComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.isEditor = this.auth.getUserRole() === 'editor';
     this.loadTemplates();
   }
 
-  // Fetch all templates for the active workspace
-  loadTemplates() {
+  // --- DATA LOADING --- //
+  loadTemplates(): void {
     this.loading = true;
     this.templatesService.getTemplates().subscribe({
-      next: (data: any) => {
+      next: (data: Template[]) => {
         this.templates = data;
+        
+        // --- FIXED: Initialize pagination after data is fetched ---
+        this.currentPage = 1;
+        this.totalPages = Math.ceil(this.templates.length / this.pageSize);
+        this.updatePagination(); 
+        // ---------------------------------------------------------
+
         this.loading = false;
       },
       error: (err: HttpErrorResponse) => {
@@ -51,116 +66,118 @@ export class TemplatesComponent implements OnInit {
     });
   }
 
-  // Open modal for creating a new template
-  openAddTemplate() {
-    this.templateForm = {
-      name: '',
-      type: 'Text',
-      message: { text: '', imageUrl: '' }
-    };
+  // --- PAGINATION LOGIC --- //
+  get startIndex(): number {
+    return (this.currentPage - 1) * this.pageSize;
+  }
+
+  get endIndex(): number {
+    return Math.min(this.startIndex + this.pageSize, this.templates.length);
+  }
+
+  updatePagination(): void {
+    this.paginatedTemplates = this.templates.slice(this.startIndex, this.endIndex);
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagination();
+    }
+  }
+
+  prevPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagination();
+    }
+  }
+
+  // --- CRUD & MODAL ACTIONS --- //
+
+  openAddTemplate(): void {
     this.editingTemplate = null;
+    this.templateForm = this.createEmptyTemplate();
     this.showModal = true;
   }
 
-  // Open modal to edit an existing template
-  editTemplate(template: Template) {
-    this.templateForm = { ...template, message: { ...template.message } };
+  editTemplate(template: Template): void {
     this.editingTemplate = template;
+    this.templateForm = JSON.parse(JSON.stringify(template)); // Deep copy
     this.showModal = true;
   }
 
-  // Save a template (create or update)
-  saveTemplate() {
+  viewTemplate(template: Template): void {
+    this.infoTemplate = template;
+    this.showInfoModal = true;
+  }
+
+  saveTemplate(): void {
     if (!this.templateForm.name || !this.templateForm.message?.text) {
       this.errorMessage = 'Template name and message are required.';
       return;
     }
 
-    // Create a clean payload to send to the service
-    const payload: Partial<Template> = {
-      name: this.templateForm.name,
-      type: this.templateForm.type,
-      message: {
-        text: this.templateForm.message.text,
-        imageUrl: this.templateForm.type === 'Text-Image' ? this.templateForm.message.imageUrl : ''
-      }
-    };
+    const payload = { ...this.templateForm };
+    const action = this.editingTemplate
+      ? this.templatesService.updateTemplate(this.editingTemplate._id!, payload)
+      : this.templatesService.addTemplate(payload as Template);
 
-    if (this.editingTemplate) {
-      this.templatesService.updateTemplate(this.editingTemplate._id!, payload).subscribe({
-        next: updated => {
-          const idx = this.templates.findIndex(t => t._id === updated._id);
-          if (idx !== -1) {
-            this.templates[idx] = updated;
-          }
-          this.closeModal();
-        },
-        error: (err: HttpErrorResponse) => {
-          console.error('Failed to update template', err);
-          this.errorMessage = `Failed to update template: ${err.error.message || err.message}`;
-        }
-      });
-    } else {
-      this.templatesService.addTemplate(payload as Template).subscribe({
-        next: newTemplate => {
-          this.templates.push(newTemplate);
-          this.closeModal();
-        },
-        error: (err: HttpErrorResponse) => {
-          console.error('Failed to add template', err);
-          this.errorMessage = `Failed to add template: ${err.error.message || err.message}`;
-        }
-      });
-    }
+    action.subscribe({
+      next: () => {
+        this.loadTemplates(); // Reload the list to show changes and reset pagination
+        this.closeModal();
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('Failed to save template', err);
+        this.errorMessage = `Failed to save template: ${err.error?.message || err.message}`;
+      }
+    });
   }
 
-  // Confirm deletion with a modal
-  confirmDelete(template: Template) {
+  confirmDelete(template: Template): void {
     this.templateToDelete = template;
     this.showConfirmModal = true;
   }
 
-  // Perform deletion after confirmation
-  performDelete() {
-    if (!this.templateToDelete || !this.templateToDelete._id) {
-      this.cancelDelete();
-      return;
-    }
+  performDelete(): void {
+    if (!this.templateToDelete?._id) return;
+
     this.templatesService.deleteTemplate(this.templateToDelete._id).subscribe({
       next: () => {
-        this.templates = this.templates.filter(t => t._id !== this.templateToDelete!._id);
+        this.loadTemplates(); // Reload the list
         this.cancelDelete();
       },
       error: (err: HttpErrorResponse) => {
         console.error('Failed to delete template', err);
-        this.errorMessage = `Failed to delete template: ${err.error.message || err.message}`;
+        this.errorMessage = `Failed to delete template: ${err.error?.message || err.message}`;
         this.cancelDelete();
       }
     });
   }
 
-  // View template content
-  viewTemplate(template: Template) {
-    this.infoTemplate = template;
-    this.showInfoModal = true;
-  }
-
-  // Close the add/edit modal
-  closeModal() {
+  closeModal(): void {
     this.showModal = false;
     this.editingTemplate = null;
     this.errorMessage = '';
   }
 
-  // Cancel deletion
-  cancelDelete() {
+  cancelDelete(): void {
     this.showConfirmModal = false;
     this.templateToDelete = null;
   }
 
-  // Close the info modal
-  closeInfoModal() {
+  closeInfoModal(): void {
     this.showInfoModal = false;
     this.infoTemplate = null;
   }
+
+  private createEmptyTemplate(): Partial<Template> {
+    return {
+      name: '',
+      type: 'Text',
+      message: { text: '', imageUrl: '' }
+    };
+  }
 }
+

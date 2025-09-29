@@ -15,6 +15,7 @@ export class CampaignsComponent implements OnInit {
   templates: Template[] = [];
   tags: string[] = [];
   targetContacts: Contact[] = [];
+  isEditor = false;
 
   showModal = false;
   showDeleteModal = false;
@@ -26,6 +27,12 @@ export class CampaignsComponent implements OnInit {
   charCount = 0;
   startNow = false;
 
+   // --- ADDED: Pagination State ---
+  paginatedCampaigns: Campaign[] = [];
+  currentPage = 1;
+  readonly pageSize = 10; // You can adjust the number of items per page
+  totalPages = 0;
+
   constructor(
     private campaignService: CampaignsService,
     private templateService: TemplatesService,
@@ -33,6 +40,7 @@ export class CampaignsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.isEditor = this.auth.getUserRole() === 'editor';
     this.loadCampaigns();
     this.loadTemplates();
     setInterval(() => this.loadCampaigns(), 30000);
@@ -62,6 +70,10 @@ loadCampaigns(): void {
           contacts: c.contacts ?? []                  // ensure defined
         })
       );
+
+       // --- ADDED: Initialize Pagination ---
+        this.totalPages = Math.ceil(this.campaigns.length / this.pageSize);
+        this.updatePagination();
 
       // Fetch and store audience per campaign
       this.campaigns.forEach(campaign => {
@@ -105,6 +117,40 @@ loadCampaigns(): void {
 
   return campaign;
 }
+
+ // --- ADDED: All Pagination Methods ---
+
+  /** Calculates the starting index for the current page's slice. */
+  get startIndex(): number {
+    return (this.currentPage - 1) * this.pageSize;
+  }
+
+  /** Calculates the ending index for the current page's slice. */
+  get endIndex(): number {
+    return Math.min(this.startIndex + this.pageSize, this.campaigns.length);
+  }
+
+  /** Slices the main campaigns array to get the items for the current page. */
+  updatePagination(): void {
+    this.paginatedCampaigns = this.campaigns.slice(this.startIndex, this.endIndex);
+  }
+
+  /** Navigates to the next page. */
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagination();
+    }
+  }
+
+  /** Navigates to the previous page. */
+  prevPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagination();
+    }
+  }
+  // ------------------------------------
 
   
   

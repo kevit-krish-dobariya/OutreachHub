@@ -1,7 +1,8 @@
 import { isPlatformBrowser } from "@angular/common";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Inject, Injectable, PLATFORM_ID } from "@angular/core";
-import { BehaviorSubject, Observable } from "rxjs";
+import { Router } from "@angular/router";
+import { BehaviorSubject, finalize, Observable } from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +14,7 @@ export class AuthService {
 
   constructor(
     private http: HttpClient,
+    private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
@@ -152,11 +154,30 @@ export class AuthService {
   activeWorkspace$ = this.activeWorkspaceSubject.asObservable();
 
   /** ===== Logout ===== **/
-
-  logout() {
-    if (this.isBrowser) {
-      localStorage.clear();
-    }
-    this.activeWorkspaceSubject.next(null);
+   logout(): void {
+    // The AuthInterceptor will automatically add the necessary Authorization header.
+    this.http.post(`${this.apiUrl}/logout`, {}, { headers: this.getAuthHeaders()}).pipe(
+      // The finalize operator ensures this code runs on success, error, or completion.
+      finalize(() => {
+        this.clearLocalSessionAndNavigate();
+      })
+    ).subscribe({
+      next: () => console.log('Successfully logged out from backend.'),
+      error: (err) => console.error('Error during backend logout, but session cleared anyway:', err)
+    });
   }
+  clearLocalSessionAndNavigate() {
+     if (this.isBrowser) {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('workspaceId');
+    }
+    // Notify subscribers that the active workspace is now null
+    this.activeWorkspaceSubject.next(null);
+    // Navigate the user back to the login page
+    this.router.navigate(['/auth/login']);
+  }
+
+
 }
+

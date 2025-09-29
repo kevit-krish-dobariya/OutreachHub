@@ -16,17 +16,15 @@ import {
   ɵɵdefineNgModule,
   ɵɵdirectiveInject,
   ɵɵinject
-} from "./chunk-3NY34RAC.js";
-import "./chunk-6O77X5R6.js";
-import "./chunk-ITNSOF2D.js";
+} from "./chunk-IGJZNA3K.js";
+import "./chunk-V4GYEGQC.js";
+import "./chunk-CONQKHOI.js";
 import {
   BehaviorSubject,
-  distinctUntilChanged
-} from "./chunk-7DGIAWOM.js";
-import {
   __spreadProps,
-  __spreadValues
-} from "./chunk-WDMUDEB6.js";
+  __spreadValues,
+  distinctUntilChanged
+} from "./chunk-GC5FLHL6.js";
 
 // node_modules/@kurkle/color/dist/color.esm.js
 function round(v) {
@@ -22575,8 +22573,8 @@ if (symIterator2) {
   wrapperLodash_default.prototype[symIterator2] = seq_default_default.toIterator;
 }
 
-// node_modules/ng2-charts/fesm2022/ng2-charts.mjs
-var ThemeService = class _ThemeService {
+// node_modules/ng2-charts/fesm2020/ng2-charts.mjs
+var ThemeService = class {
   constructor() {
     this.colorschemesOptions = new BehaviorSubject(void 0);
   }
@@ -22587,28 +22585,26 @@ var ThemeService = class _ThemeService {
   getColorschemesOptions() {
     return this.pColorschemesOptions;
   }
-  static {
-    this.ɵfac = function ThemeService_Factory(t) {
-      return new (t || _ThemeService)();
-    };
-  }
-  static {
-    this.ɵprov = ɵɵdefineInjectable({
-      token: _ThemeService,
-      factory: _ThemeService.ɵfac,
-      providedIn: "root"
-    });
-  }
 };
+ThemeService.ɵfac = function ThemeService_Factory(t) {
+  return new (t || ThemeService)();
+};
+ThemeService.ɵprov = ɵɵdefineInjectable({
+  token: ThemeService,
+  factory: ThemeService.ɵfac,
+  providedIn: "root"
+});
 (() => {
   (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ThemeService, [{
     type: Injectable,
     args: [{
       providedIn: "root"
     }]
-  }], null, null);
+  }], function() {
+    return [];
+  }, null);
 })();
-var BaseChartDirective = class _BaseChartDirective {
+var BaseChartDirective = class {
   constructor(element, zone, themeService) {
     this.zone = zone;
     this.themeService = themeService;
@@ -22721,33 +22717,29 @@ var BaseChartDirective = class _BaseChartDirective {
       datasets: this.datasets || []
     };
   }
-  static {
-    this.ɵfac = function BaseChartDirective_Factory(t) {
-      return new (t || _BaseChartDirective)(ɵɵdirectiveInject(ElementRef), ɵɵdirectiveInject(NgZone), ɵɵdirectiveInject(ThemeService));
-    };
-  }
-  static {
-    this.ɵdir = ɵɵdefineDirective({
-      type: _BaseChartDirective,
-      selectors: [["canvas", "baseChart", ""]],
-      inputs: {
-        type: "type",
-        legend: "legend",
-        data: "data",
-        options: "options",
-        plugins: "plugins",
-        labels: "labels",
-        datasets: "datasets"
-      },
-      outputs: {
-        chartClick: "chartClick",
-        chartHover: "chartHover"
-      },
-      exportAs: ["base-chart"],
-      features: [ɵɵNgOnChangesFeature]
-    });
-  }
 };
+BaseChartDirective.ɵfac = function BaseChartDirective_Factory(t) {
+  return new (t || BaseChartDirective)(ɵɵdirectiveInject(ElementRef), ɵɵdirectiveInject(NgZone), ɵɵdirectiveInject(ThemeService));
+};
+BaseChartDirective.ɵdir = ɵɵdefineDirective({
+  type: BaseChartDirective,
+  selectors: [["canvas", "baseChart", ""]],
+  inputs: {
+    type: "type",
+    legend: "legend",
+    data: "data",
+    options: "options",
+    plugins: "plugins",
+    labels: "labels",
+    datasets: "datasets"
+  },
+  outputs: {
+    chartClick: "chartClick",
+    chartHover: "chartHover"
+  },
+  exportAs: ["base-chart"],
+  features: [ɵɵNgOnChangesFeature]
+});
 (() => {
   (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(BaseChartDirective, [{
     type: Directive,
@@ -22849,23 +22841,19 @@ function getRandomColor() {
 function generateColor(index2 = 0) {
   return baseColors[index2] || getRandomColor();
 }
-var NgChartsConfiguration = class _NgChartsConfiguration {
+var NgChartsConfiguration = class {
   constructor() {
     this.generateColors = true;
   }
-  static {
-    this.ɵfac = function NgChartsConfiguration_Factory(t) {
-      return new (t || _NgChartsConfiguration)();
-    };
-  }
-  static {
-    this.ɵprov = ɵɵdefineInjectable({
-      token: _NgChartsConfiguration,
-      factory: _NgChartsConfiguration.ɵfac,
-      providedIn: "root"
-    });
-  }
 };
+NgChartsConfiguration.ɵfac = function NgChartsConfiguration_Factory(t) {
+  return new (t || NgChartsConfiguration)();
+};
+NgChartsConfiguration.ɵprov = ɵɵdefineInjectable({
+  token: NgChartsConfiguration,
+  factory: NgChartsConfiguration.ɵfac,
+  providedIn: "root"
+});
 (() => {
   (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(NgChartsConfiguration, [{
     type: Injectable,
@@ -22877,7 +22865,7 @@ var NgChartsConfiguration = class _NgChartsConfiguration {
 Chart.register(...registerables);
 var NgChartsModule = class _NgChartsModule {
   constructor(config) {
-    if (config?.plugins) Chart.register(...config.plugins);
+    if (config?.plugins) Chart.register(...config?.plugins);
     const ngChartsDefaults = merge_default(config?.generateColors ? builtInDefaults : {}, config?.defaults || {});
     defaults.set(ngChartsDefaults);
   }
@@ -22890,22 +22878,16 @@ var NgChartsModule = class _NgChartsModule {
       }]
     };
   }
-  static {
-    this.ɵfac = function NgChartsModule_Factory(t) {
-      return new (t || _NgChartsModule)(ɵɵinject(NgChartsConfiguration, 8));
-    };
-  }
-  static {
-    this.ɵmod = ɵɵdefineNgModule({
-      type: _NgChartsModule,
-      declarations: [BaseChartDirective],
-      exports: [BaseChartDirective]
-    });
-  }
-  static {
-    this.ɵinj = ɵɵdefineInjector({});
-  }
 };
+NgChartsModule.ɵfac = function NgChartsModule_Factory(t) {
+  return new (t || NgChartsModule)(ɵɵinject(NgChartsConfiguration, 8));
+};
+NgChartsModule.ɵmod = ɵɵdefineNgModule({
+  type: NgChartsModule,
+  declarations: [BaseChartDirective],
+  exports: [BaseChartDirective]
+});
+NgChartsModule.ɵinj = ɵɵdefineInjector({});
 (() => {
   (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(NgChartsModule, [{
     type: NgModule,

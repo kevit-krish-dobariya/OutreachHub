@@ -1,27 +1,54 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service'
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   showPassword = false;
   errorMessage = '';
+  isDarkMode = false;
+  private themeSubscription!: Subscription;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private themeService: ThemeService,
     private router: Router
   ) {
     this.loginForm = this.fb.group({
       username: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
+  }
+
+  ngOnInit(){
+    
+     // Subscribe to theme changes to update the icon
+    this.themeSubscription = this.themeService.currentTheme$.subscribe(theme => {
+      this.isDarkMode = (theme === 'dark');
+      });
+  }
+
+   ngOnDestroy(): void {
+    // Unsubscribe to prevent memory leaks
+    if (this.themeSubscription) {
+      this.themeSubscription.unsubscribe();
+    }
+  }
+
+  /**
+   * Toggles the application's theme between light and dark mode.
+   */
+  toggleTheme(): void {
+    this.themeService.toggleTheme();
   }
 
   togglePassword() {
@@ -98,6 +125,8 @@ export class LoginComponent {
     });
   }
 }
+
+
 
 
 }

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -19,7 +20,9 @@ export class NavbarComponent implements OnInit{
   // Temporary hardcoded values
   username = 'Krish Patel';
 
-  constructor(private router: Router) {}
+  constructor(private router: Router,
+    private authService: AuthService
+  ) {}
 
   toggleDropdown() {
     this.dropdownOpen = !this.dropdownOpen;
@@ -29,8 +32,7 @@ export class NavbarComponent implements OnInit{
     this.mobileMenuOpen = !this.mobileMenuOpen;
   }
 
-  logout() {
-    localStorage.removeItem('token');
-    this.router.navigate(['/login']);
+  logout(): void {
+    this.authService.logout();
   }
 }

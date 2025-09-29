@@ -1,10 +1,14 @@
 import {
+  DomSanitizer
+} from "./chunk-FGIJWRIL.js";
+import "./chunk-2DJJH5CC.js";
+import {
   FormsModule,
   NG_VALUE_ACCESSOR,
   NgControl,
   NgControlStatus,
   NgModel
-} from "./chunk-NIASIYWP.js";
+} from "./chunk-HTZ36MZ2.js";
 import {
   CommonModule,
   DOCUMENT,
@@ -16,7 +20,7 @@ import {
   NgSwitchCase,
   NgTemplateOutlet,
   isPlatformBrowser
-} from "./chunk-S5MQ5EBI.js";
+} from "./chunk-APQJ6POP.js";
 import {
   ANIMATION_MODULE_TYPE,
   ChangeDetectionStrategy,
@@ -45,13 +49,16 @@ import {
   ViewChild,
   ViewContainerRef,
   ViewEncapsulation$1,
+  booleanAttribute,
   computed,
   effect,
   forwardRef,
   inject,
+  numberAttribute,
   setClassMetadata,
   signal,
   ɵɵInheritDefinitionFeature,
+  ɵɵInputTransformsFeature,
   ɵɵNgOnChangesFeature,
   ɵɵProvidersFeature,
   ɵɵStandaloneFeature,
@@ -94,7 +101,7 @@ import {
   ɵɵqueryRefresh,
   ɵɵreference,
   ɵɵresetView,
-  ɵɵresolveDocument,
+  ɵɵresolveWindow,
   ɵɵrestoreView,
   ɵɵstyleMap,
   ɵɵstyleProp,
@@ -108,16 +115,14 @@ import {
   ɵɵtwoWayListener,
   ɵɵtwoWayProperty,
   ɵɵviewQuery
-} from "./chunk-3NY34RAC.js";
-import "./chunk-6O77X5R6.js";
-import "./chunk-ITNSOF2D.js";
+} from "./chunk-IGJZNA3K.js";
+import "./chunk-V4GYEGQC.js";
+import "./chunk-CONQKHOI.js";
 import {
-  Subject
-} from "./chunk-7DGIAWOM.js";
-import {
+  Subject,
   __spreadProps,
   __spreadValues
-} from "./chunk-WDMUDEB6.js";
+} from "./chunk-GC5FLHL6.js";
 
 // node_modules/@angular/animations/fesm2022/animations.mjs
 var AnimationMetadataType;
@@ -363,6 +368,12 @@ function isAnimationRenderer(renderer) {
 
 // node_modules/primeng/fesm2022/primeng-utils.mjs
 var ObjectUtils = class _ObjectUtils {
+  static isArray(value, empty = true) {
+    return Array.isArray(value) && (empty || value.length !== 0);
+  }
+  static isObject(value, empty = true) {
+    return typeof value === "object" && !Array.isArray(value) && value != null && (empty || Object.keys(value).length !== 0);
+  }
   static equals(obj1, obj2, field) {
     if (field)
       return this.resolveFieldData(obj1, field) === this.resolveFieldData(obj2, field);
@@ -485,8 +496,8 @@ var ObjectUtils = class _ObjectUtils {
     return false;
   }
   static removeAccents(str) {
-    if (str && str.search(/[\xC0-\xFF]/g) > -1) {
-      str = str.replace(/[\xC0-\xC5]/g, "A").replace(/[\xC6]/g, "AE").replace(/[\xC7]/g, "C").replace(/[\xC8-\xCB]/g, "E").replace(/[\xCC-\xCF]/g, "I").replace(/[\xD0]/g, "D").replace(/[\xD1]/g, "N").replace(/[\xD2-\xD6\xD8]/g, "O").replace(/[\xD9-\xDC]/g, "U").replace(/[\xDD]/g, "Y").replace(/[\xDE]/g, "P").replace(/[\xE0-\xE5]/g, "a").replace(/[\xE6]/g, "ae").replace(/[\xE7]/g, "c").replace(/[\xE8-\xEB]/g, "e").replace(/[\xEC-\xEF]/g, "i").replace(/[\xF1]/g, "n").replace(/[\xF2-\xF6\xF8]/g, "o").replace(/[\xF9-\xFC]/g, "u").replace(/[\xFE]/g, "p").replace(/[\xFD\xFF]/g, "y");
+    if (str) {
+      str = str.normalize("NFKD").replace(new RegExp("\\p{Diacritic}", "gu"), "");
     }
     return str;
   }
@@ -560,6 +571,48 @@ var ObjectUtils = class _ObjectUtils {
       }
     }
     return item;
+  }
+  static deepEquals(a, b) {
+    if (a === b)
+      return true;
+    if (a && b && typeof a == "object" && typeof b == "object") {
+      var arrA = Array.isArray(a), arrB = Array.isArray(b), i, length, key;
+      if (arrA && arrB) {
+        length = a.length;
+        if (length != b.length)
+          return false;
+        for (i = length; i-- !== 0; )
+          if (!this.deepEquals(a[i], b[i]))
+            return false;
+        return true;
+      }
+      if (arrA != arrB)
+        return false;
+      var dateA = a instanceof Date, dateB = b instanceof Date;
+      if (dateA != dateB)
+        return false;
+      if (dateA && dateB)
+        return a.getTime() == b.getTime();
+      var regexpA = a instanceof RegExp, regexpB = b instanceof RegExp;
+      if (regexpA != regexpB)
+        return false;
+      if (regexpA && regexpB)
+        return a.toString() == b.toString();
+      var keys = Object.keys(a);
+      length = keys.length;
+      if (length !== Object.keys(b).length)
+        return false;
+      for (i = length; i-- !== 0; )
+        if (!Object.prototype.hasOwnProperty.call(b, keys[i]))
+          return false;
+      for (i = length; i-- !== 0; ) {
+        key = keys[i];
+        if (!this.deepEquals(a[key], b[key]))
+          return false;
+      }
+      return true;
+    }
+    return a !== a && b !== b;
   }
 };
 var lastId = 0;
@@ -772,6 +825,7 @@ var FilterService = class _FilterService {
         return false;
       }
       if (value.getTime && filter.getTime) return value.getTime() === filter.getTime();
+      else if (value == filter) return true;
       else return ObjectUtils.removeAccents(value.toString()).toLocaleLowerCase(filterLocale) == ObjectUtils.removeAccents(filter.toString()).toLocaleLowerCase(filterLocale);
     },
     notEquals: (value, filter, filterLocale) => {
@@ -782,6 +836,7 @@ var FilterService = class _FilterService {
         return true;
       }
       if (value.getTime && filter.getTime) return value.getTime() !== filter.getTime();
+      else if (value == filter) return false;
       else return ObjectUtils.removeAccents(value.toString()).toLocaleLowerCase(filterLocale) != ObjectUtils.removeAccents(filter.toString()).toLocaleLowerCase(filterLocale);
     },
     in: (value, filter) => {
@@ -891,7 +946,9 @@ var FilterService = class _FilterService {
       if (value === void 0 || value === null) {
         return false;
       }
-      return value.getTime() > filter.getTime();
+      const valueCopy = new Date(value);
+      valueCopy.setHours(0, 0, 0, 0);
+      return valueCopy.getTime() > filter.getTime();
     }
   };
   register(rule, fn) {
@@ -930,7 +987,7 @@ var MessageService = class _MessageService {
     }
   }
   /**
-   * Insterts new messages.
+   * Inserts new messages.
    * @param {Message[]} messages - Messages to be added.
    * @group Method
    */
@@ -987,8 +1044,11 @@ var OverlayService = class _OverlayService {
 })();
 var PrimeNGConfig = class _PrimeNGConfig {
   ripple = false;
-  inputStyle = "outlined";
+  inputStyle = signal("outlined");
   overlayOptions = {};
+  csp = signal({
+    nonce: void 0
+  });
   filterMatchModeOptions = {
     text: [FilterMatchMode.STARTS_WITH, FilterMatchMode.CONTAINS, FilterMatchMode.NOT_CONTAINS, FilterMatchMode.ENDS_WITH, FilterMatchMode.EQUALS, FilterMatchMode.NOT_EQUALS],
     numeric: [FilterMatchMode.EQUALS, FilterMatchMode.NOT_EQUALS, FilterMatchMode.LESS_THAN, FilterMatchMode.LESS_THAN_OR_EQUAL_TO, FilterMatchMode.GREATER_THAN, FilterMatchMode.GREATER_THAN_OR_EQUAL_TO],
@@ -1112,7 +1172,12 @@ var PrimeNGConfig = class _PrimeNGConfig {
       zoomIn: "Zoom In",
       zoomOut: "Zoom Out",
       rotateRight: "Rotate Right",
-      rotateLeft: "Rotate Left"
+      rotateLeft: "Rotate Left",
+      listLabel: "Option List",
+      selectColor: "Select a color",
+      removeLabel: "Remove",
+      browseFiles: "Browse Files",
+      maximizeLabel: "Maximize"
     }
   };
   zIndex = {
@@ -1154,6 +1219,8 @@ var Header = class _Header {
   static ɵcmp = ɵɵdefineComponent({
     type: _Header,
     selectors: [["p-header"]],
+    standalone: true,
+    features: [ɵɵStandaloneFeature],
     ngContentSelectors: _c0,
     decls: 1,
     vars: 0,
@@ -1171,6 +1238,7 @@ var Header = class _Header {
     type: Component,
     args: [{
       selector: "p-header",
+      standalone: true,
       template: "<ng-content></ng-content>"
     }]
   }], null, null);
@@ -1182,6 +1250,8 @@ var Footer = class _Footer {
   static ɵcmp = ɵɵdefineComponent({
     type: _Footer,
     selectors: [["p-footer"]],
+    standalone: true,
+    features: [ɵɵStandaloneFeature],
     ngContentSelectors: _c0,
     decls: 1,
     vars: 0,
@@ -1199,6 +1269,7 @@ var Footer = class _Footer {
     type: Component,
     args: [{
       selector: "p-footer",
+      standalone: true,
       template: "<ng-content></ng-content>"
     }]
   }], null, null);
@@ -1222,7 +1293,8 @@ var PrimeTemplate = class _PrimeTemplate {
     inputs: {
       type: "type",
       name: [InputFlags.None, "pTemplate", "name"]
-    }
+    },
+    standalone: true
   });
 };
 (() => {
@@ -1230,6 +1302,7 @@ var PrimeTemplate = class _PrimeTemplate {
     type: Directive,
     args: [{
       selector: "[pTemplate]",
+      standalone: true,
       host: {}
     }]
   }], () => [{
@@ -1250,21 +1323,17 @@ var SharedModule = class _SharedModule {
   };
   static ɵmod = ɵɵdefineNgModule({
     type: _SharedModule,
-    declarations: [Header, Footer, PrimeTemplate],
-    imports: [CommonModule],
+    imports: [Header, Footer, PrimeTemplate],
     exports: [Header, Footer, PrimeTemplate]
   });
-  static ɵinj = ɵɵdefineInjector({
-    imports: [CommonModule]
-  });
+  static ɵinj = ɵɵdefineInjector({});
 };
 (() => {
   (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(SharedModule, [{
     type: NgModule,
     args: [{
-      imports: [CommonModule],
-      exports: [Header, Footer, PrimeTemplate],
-      declarations: [Header, Footer, PrimeTemplate]
+      imports: [Header, Footer, PrimeTemplate],
+      exports: [Header, Footer, PrimeTemplate]
     }]
   }], null, null);
 })();
@@ -1311,6 +1380,12 @@ var TranslationKeys = class {
   static PASSWORD_PROMPT = "passwordPrompt";
   static EMPTY_MESSAGE = "emptyMessage";
   static EMPTY_FILTER_MESSAGE = "emptyFilterMessage";
+  static SHOW_FILTER_MENU = "showFilterMenu";
+  static HIDE_FILTER_MENU = "hideFilterMenu";
+  static SELECTION_MESSAGE = "selectionMessage";
+  static ARIA = "aria";
+  static SELECT_COLOR = "selectColor";
+  static BROWSE_FILES = "browseFiles";
 };
 var TreeDragDropService = class _TreeDragDropService {
   dragStartSource = new Subject();
@@ -1438,14 +1513,14 @@ var DomHandler = class _DomHandler {
       }
     }
   }
-  static relativePosition(element, target) {
+  static relativePosition(element, target, gutter = true) {
     const getClosestRelativeElement = (el) => {
       if (!el)
         return;
       return getComputedStyle(el).getPropertyValue("position") === "relative" ? el : getClosestRelativeElement(el.parentElement);
     };
     const elementDimensions = element.offsetParent ? { width: element.offsetWidth, height: element.offsetHeight } : this.getHiddenElementDimensions(element);
-    const targetHeight = target.offsetHeight;
+    const targetHeight = target.offsetHeight ?? target.getBoundingClientRect().height;
     const targetOffset = target.getBoundingClientRect();
     const windowScrollTop = this.getWindowScrollTop();
     const windowScrollLeft = this.getWindowScrollLeft();
@@ -1474,13 +1549,14 @@ var DomHandler = class _DomHandler {
     }
     element.style.top = top + "px";
     element.style.left = left + "px";
+    gutter && (element.style.marginTop = origin === "bottom" ? "calc(var(--p-anchor-gutter) * -1)" : "calc(var(--p-anchor-gutter))");
   }
-  static absolutePosition(element, target) {
+  static absolutePosition(element, target, gutter = true) {
     const elementDimensions = element.offsetParent ? { width: element.offsetWidth, height: element.offsetHeight } : this.getHiddenElementDimensions(element);
     const elementOuterHeight = elementDimensions.height;
     const elementOuterWidth = elementDimensions.width;
-    const targetOuterHeight = target.offsetHeight;
-    const targetOuterWidth = target.offsetWidth;
+    const targetOuterHeight = target.offsetHeight ?? target.getBoundingClientRect().height;
+    const targetOuterWidth = target.offsetWidth ?? target.getBoundingClientRect().width;
     const targetOffset = target.getBoundingClientRect();
     const windowScrollTop = this.getWindowScrollTop();
     const windowScrollLeft = this.getWindowScrollLeft();
@@ -1502,6 +1578,7 @@ var DomHandler = class _DomHandler {
       left = targetOffset.left + windowScrollLeft;
     element.style.top = top + "px";
     element.style.left = left + "px";
+    gutter && (element.style.marginTop = origin === "bottom" ? "calc(var(--p-anchor-gutter) * -1)" : "calc(var(--p-anchor-gutter))");
   }
   static getParents(element, parents = []) {
     return element["parentNode"] === null ? parents : this.getParents(element.parentNode, parents.concat([element.parentNode]));
@@ -1830,22 +1907,37 @@ var DomHandler = class _DomHandler {
   static focus(element, options) {
     element && document.activeElement !== element && element.focus(options);
   }
+  static getFocusableSelectorString(selector = "") {
+    return `button:not([tabindex = "-1"]):not([disabled]):not([style*="display:none"]):not([hidden])${selector},
+        [href][clientHeight][clientWidth]:not([tabindex = "-1"]):not([disabled]):not([style*="display:none"]):not([hidden])${selector},
+        input:not([tabindex = "-1"]):not([disabled]):not([style*="display:none"]):not([hidden])${selector},
+        select:not([tabindex = "-1"]):not([disabled]):not([style*="display:none"]):not([hidden])${selector},
+        textarea:not([tabindex = "-1"]):not([disabled]):not([style*="display:none"]):not([hidden])${selector},
+        [tabIndex]:not([tabIndex = "-1"]):not([disabled]):not([style*="display:none"]):not([hidden])${selector},
+        [contenteditable]:not([tabIndex = "-1"]):not([disabled]):not([style*="display:none"]):not([hidden])${selector},
+        .p-inputtext:not([tabindex = "-1"]):not([disabled]):not([style*="display:none"]):not([hidden])${selector},
+        .p-button:not([tabindex = "-1"]):not([disabled]):not([style*="display:none"]):not([hidden])${selector}`;
+  }
   static getFocusableElements(element, selector = "") {
-    let focusableElements = this.find(element, `button:not([tabindex = "-1"]):not([disabled]):not([style*="display:none"]):not([hidden])${selector},
-                [href][clientHeight][clientWidth]:not([tabindex = "-1"]):not([disabled]):not([style*="display:none"]):not([hidden])${selector},
-                input:not([tabindex = "-1"]):not([disabled]):not([style*="display:none"]):not([hidden])${selector},
-                select:not([tabindex = "-1"]):not([disabled]):not([style*="display:none"]):not([hidden])${selector},
-                textarea:not([tabindex = "-1"]):not([disabled]):not([style*="display:none"]):not([hidden])${selector},
-                [tabIndex]:not([tabIndex = "-1"]):not([disabled]):not([style*="display:none"]):not([hidden])${selector},
-                [contenteditable]:not([tabIndex = "-1"]):not([disabled]):not([style*="display:none"]):not([hidden])${selector}`);
+    let focusableElements = this.find(element, this.getFocusableSelectorString(selector));
     let visibleFocusableElements = [];
     for (let focusableElement of focusableElements) {
-      if (getComputedStyle(focusableElement).display != "none" && getComputedStyle(focusableElement).visibility != "hidden")
+      const computedStyle = getComputedStyle(focusableElement);
+      if (this.isVisible(focusableElement) && computedStyle.display != "none" && computedStyle.visibility != "hidden")
         visibleFocusableElements.push(focusableElement);
     }
     return visibleFocusableElements;
   }
-  static getFirstFocusableElement(element, selector) {
+  static getFocusableElement(element, selector = "") {
+    let focusableElement = this.findSingle(element, this.getFocusableSelectorString(selector));
+    if (focusableElement) {
+      const computedStyle = getComputedStyle(focusableElement);
+      if (this.isVisible(focusableElement) && computedStyle.display != "none" && computedStyle.visibility != "hidden")
+        return focusableElement;
+    }
+    return null;
+  }
+  static getFirstFocusableElement(element, selector = "") {
     const focusableElements = this.getFocusableElements(element, selector);
     return focusableElements.length > 0 ? focusableElements[0] : null;
   }
@@ -1938,6 +2030,62 @@ var DomHandler = class _DomHandler {
     document.body.style.removeProperty("--scrollbar-width");
     this.removeClass(document.body, className);
   }
+  static createElement(type, attributes = {}, ...children) {
+    if (type) {
+      const element = document.createElement(type);
+      this.setAttributes(element, attributes);
+      element.append(...children);
+      return element;
+    }
+    return void 0;
+  }
+  static setAttribute(element, attribute = "", value) {
+    if (this.isElement(element) && value !== null && value !== void 0) {
+      element.setAttribute(attribute, value);
+    }
+  }
+  static setAttributes(element, attributes = {}) {
+    if (this.isElement(element)) {
+      const computedStyles = (rule, value) => {
+        const styles = element?.$attrs?.[rule] ? [element?.$attrs?.[rule]] : [];
+        return [value].flat().reduce((cv, v) => {
+          if (v !== null && v !== void 0) {
+            const type = typeof v;
+            if (type === "string" || type === "number") {
+              cv.push(v);
+            } else if (type === "object") {
+              const _cv = Array.isArray(v) ? computedStyles(rule, v) : Object.entries(v).map(([_k, _v]) => rule === "style" && (!!_v || _v === 0) ? `${_k.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase()}:${_v}` : !!_v ? _k : void 0);
+              cv = _cv.length ? cv.concat(_cv.filter((c) => !!c)) : cv;
+            }
+          }
+          return cv;
+        }, styles);
+      };
+      Object.entries(attributes).forEach(([key, value]) => {
+        if (value !== void 0 && value !== null) {
+          const matchedEvent = key.match(/^on(.+)/);
+          if (matchedEvent) {
+            element.addEventListener(matchedEvent[1].toLowerCase(), value);
+          } else if (key === "pBind") {
+            this.setAttributes(element, value);
+          } else {
+            value = key === "class" ? [...new Set(computedStyles("class", value))].join(" ").trim() : key === "style" ? computedStyles("style", value).join(";").trim() : value;
+            (element.$attrs = element.$attrs || {}) && (element.$attrs[key] = value);
+            element.setAttribute(key, value);
+          }
+        }
+      });
+    }
+  }
+  static isFocusableElement(element, selector = "") {
+    return this.isElement(element) ? element.matches(`button:not([tabindex = "-1"]):not([disabled]):not([style*="display:none"]):not([hidden])${selector},
+                [href][clientHeight][clientWidth]:not([tabindex = "-1"]):not([disabled]):not([style*="display:none"]):not([hidden])${selector},
+                input:not([tabindex = "-1"]):not([disabled]):not([style*="display:none"]):not([hidden])${selector},
+                select:not([tabindex = "-1"]):not([disabled]):not([style*="display:none"]):not([hidden])${selector},
+                textarea:not([tabindex = "-1"]):not([disabled]):not([style*="display:none"]):not([hidden])${selector},
+                [tabIndex]:not([tabIndex = "-1"]):not([disabled]):not([style*="display:none"]):not([hidden])${selector},
+                [contenteditable]:not([tabIndex = "-1"]):not([disabled]):not([style*="display:none"]):not([hidden])${selector}`) : false;
+  }
 };
 var ConnectedOverlayScrollHandler = class {
   element;
@@ -1969,6 +2117,100 @@ var ConnectedOverlayScrollHandler = class {
   }
 };
 
+// node_modules/primeng/fesm2022/primeng-autofocus.mjs
+var AutoFocus = class _AutoFocus {
+  /**
+   * When present, it specifies that the component should automatically get focus on load.
+   * @group Props
+   */
+  autofocus = false;
+  focused = false;
+  platformId = inject(PLATFORM_ID);
+  document = inject(DOCUMENT);
+  host = inject(ElementRef);
+  ngAfterContentChecked() {
+    if (this.autofocus === false) {
+      this.host.nativeElement.removeAttribute("autofocus");
+    } else {
+      this.host.nativeElement.setAttribute("autofocus", true);
+    }
+    if (!this.focused) {
+      this.autoFocus();
+    }
+  }
+  ngAfterViewChecked() {
+    if (!this.focused) {
+      this.autoFocus();
+    }
+  }
+  autoFocus() {
+    if (isPlatformBrowser(this.platformId) && this.autofocus) {
+      setTimeout(() => {
+        const focusableElements = DomHandler.getFocusableElements(this.host?.nativeElement);
+        if (focusableElements.length === 0) {
+          this.host.nativeElement.focus();
+        }
+        if (focusableElements.length > 0) {
+          focusableElements[0].focus();
+        }
+        this.focused = true;
+      });
+    }
+  }
+  static ɵfac = function AutoFocus_Factory(t) {
+    return new (t || _AutoFocus)();
+  };
+  static ɵdir = ɵɵdefineDirective({
+    type: _AutoFocus,
+    selectors: [["", "pAutoFocus", ""]],
+    hostAttrs: [1, "p-element"],
+    inputs: {
+      autofocus: [InputFlags.HasDecoratorInputTransform, "autofocus", "autofocus", booleanAttribute]
+    },
+    standalone: true,
+    features: [ɵɵInputTransformsFeature]
+  });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(AutoFocus, [{
+    type: Directive,
+    args: [{
+      selector: "[pAutoFocus]",
+      standalone: true,
+      host: {
+        class: "p-element"
+      }
+    }]
+  }], null, {
+    autofocus: [{
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
+    }]
+  });
+})();
+var AutoFocusModule = class _AutoFocusModule {
+  static ɵfac = function AutoFocusModule_Factory(t) {
+    return new (t || _AutoFocusModule)();
+  };
+  static ɵmod = ɵɵdefineNgModule({
+    type: _AutoFocusModule,
+    imports: [AutoFocus],
+    exports: [AutoFocus]
+  });
+  static ɵinj = ɵɵdefineInjector({});
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(AutoFocusModule, [{
+    type: NgModule,
+    args: [{
+      imports: [AutoFocus],
+      exports: [AutoFocus]
+    }]
+  }], null, null);
+})();
+
 // node_modules/primeng/fesm2022/primeng-baseicon.mjs
 var _c02 = ["*"];
 var BaseIcon = class _BaseIcon {
@@ -1999,11 +2241,11 @@ var BaseIcon = class _BaseIcon {
     hostAttrs: [1, "p-element", "p-icon-wrapper"],
     inputs: {
       label: "label",
-      spin: "spin",
+      spin: [InputFlags.HasDecoratorInputTransform, "spin", "spin", booleanAttribute],
       styleClass: "styleClass"
     },
     standalone: true,
-    features: [ɵɵStandaloneFeature],
+    features: [ɵɵInputTransformsFeature, ɵɵStandaloneFeature],
     ngContentSelectors: _c02,
     decls: 1,
     vars: 0,
@@ -2034,7 +2276,10 @@ var BaseIcon = class _BaseIcon {
       type: Input
     }],
     spin: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     styleClass: [{
       type: Input
@@ -2215,7 +2460,8 @@ var Ripple = class _Ripple {
   static ɵdir = ɵɵdefineDirective({
     type: _Ripple,
     selectors: [["", "pRipple", ""]],
-    hostAttrs: [1, "p-ripple", "p-element"]
+    hostAttrs: [1, "p-ripple", "p-element"],
+    standalone: true
   });
 };
 (() => {
@@ -2223,6 +2469,7 @@ var Ripple = class _Ripple {
     type: Directive,
     args: [{
       selector: "[pRipple]",
+      standalone: true,
       host: {
         class: "p-ripple p-element"
       }
@@ -2258,27 +2505,26 @@ var RippleModule = class _RippleModule {
   };
   static ɵmod = ɵɵdefineNgModule({
     type: _RippleModule,
-    declarations: [Ripple],
-    imports: [CommonModule],
+    imports: [Ripple],
     exports: [Ripple]
   });
-  static ɵinj = ɵɵdefineInjector({
-    imports: [CommonModule]
-  });
+  static ɵinj = ɵɵdefineInjector({});
 };
 (() => {
   (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(RippleModule, [{
     type: NgModule,
     args: [{
-      imports: [CommonModule],
-      exports: [Ripple],
-      declarations: [Ripple]
+      imports: [Ripple],
+      exports: [Ripple]
     }]
   }], null, null);
 })();
 
 // node_modules/primeng/fesm2022/primeng-button.mjs
 var _c03 = ["*"];
+var _c1 = (a0) => ({
+  class: a0
+});
 function Button_ng_container_2_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainer(0);
@@ -2290,7 +2536,6 @@ function Button_ng_container_3_ng_container_1_span_1_Template(rf, ctx) {
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext(3);
-    ɵɵclassMap("p-button-loading-icon pi-spin " + ctx_r0.loadingIcon);
     ɵɵproperty("ngClass", ctx_r0.iconClass());
     ɵɵattribute("aria-hidden", true)("data-pc-section", "loadingicon");
   }
@@ -2308,7 +2553,7 @@ function Button_ng_container_3_ng_container_1_SpinnerIcon_2_Template(rf, ctx) {
 function Button_ng_container_3_ng_container_1_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainerStart(0);
-    ɵɵtemplate(1, Button_ng_container_3_ng_container_1_span_1_Template, 1, 5, "span", 6)(2, Button_ng_container_3_ng_container_1_SpinnerIcon_2_Template, 1, 4, "SpinnerIcon", 7);
+    ɵɵtemplate(1, Button_ng_container_3_ng_container_1_span_1_Template, 1, 3, "span", 6)(2, Button_ng_container_3_ng_container_1_SpinnerIcon_2_Template, 1, 4, "SpinnerIcon", 7);
     ɵɵelementContainerEnd();
   }
   if (rf & 2) {
@@ -2319,31 +2564,21 @@ function Button_ng_container_3_ng_container_1_Template(rf, ctx) {
     ɵɵproperty("ngIf", !ctx_r0.loadingIcon);
   }
 }
-function Button_ng_container_3_span_2_1_ng_template_0_Template(rf, ctx) {
+function Button_ng_container_3_2_ng_template_0_Template(rf, ctx) {
 }
-function Button_ng_container_3_span_2_1_Template(rf, ctx) {
+function Button_ng_container_3_2_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵtemplate(0, Button_ng_container_3_span_2_1_ng_template_0_Template, 0, 0, "ng-template");
-  }
-}
-function Button_ng_container_3_span_2_Template(rf, ctx) {
-  if (rf & 1) {
-    ɵɵelementStart(0, "span", 10);
-    ɵɵtemplate(1, Button_ng_container_3_span_2_1_Template, 1, 0, null, 1);
-    ɵɵelementEnd();
+    ɵɵtemplate(0, Button_ng_container_3_2_ng_template_0_Template, 0, 0, "ng-template", 10);
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext(2);
-    ɵɵproperty("ngClass", ctx_r0.iconClass());
-    ɵɵattribute("aria-hidden", true)("data-pc-section", "loadingicon");
-    ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", ctx_r0.loadingIconTemplate);
+    ɵɵproperty("ngIf", ctx_r0.loadingIconTemplate);
   }
 }
 function Button_ng_container_3_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainerStart(0);
-    ɵɵtemplate(1, Button_ng_container_3_ng_container_1_Template, 3, 2, "ng-container", 2)(2, Button_ng_container_3_span_2_Template, 2, 4, "span", 5);
+    ɵɵtemplate(1, Button_ng_container_3_ng_container_1_Template, 3, 2, "ng-container", 2)(2, Button_ng_container_3_2_Template, 1, 1, null, 5);
     ɵɵelementContainerEnd();
   }
   if (rf & 2) {
@@ -2351,7 +2586,7 @@ function Button_ng_container_3_Template(rf, ctx) {
     ɵɵadvance();
     ɵɵproperty("ngIf", !ctx_r0.loadingIconTemplate);
     ɵɵadvance();
-    ɵɵproperty("ngIf", ctx_r0.loadingIconTemplate);
+    ɵɵproperty("ngTemplateOutlet", ctx_r0.loadingIconTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(3, _c1, ctx_r0.iconClass()));
   }
 }
 function Button_ng_container_4_span_1_Template(rf, ctx) {
@@ -2360,40 +2595,25 @@ function Button_ng_container_4_span_1_Template(rf, ctx) {
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext(2);
-    ɵɵclassMap(ctx_r0.icon);
     ɵɵproperty("ngClass", ctx_r0.iconClass());
     ɵɵattribute("data-pc-section", "icon");
   }
 }
-function Button_ng_container_4_span_2_1_ng_template_0_Template(rf, ctx) {
+function Button_ng_container_4_2_ng_template_0_Template(rf, ctx) {
 }
-function Button_ng_container_4_span_2_1_Template(rf, ctx) {
+function Button_ng_container_4_2_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵtemplate(0, Button_ng_container_4_span_2_1_ng_template_0_Template, 0, 0, "ng-template", 12);
-  }
-  if (rf & 2) {
-    const ctx_r0 = ɵɵnextContext(3);
-    ɵɵproperty("ngIf", !ctx_r0.icon);
-  }
-}
-function Button_ng_container_4_span_2_Template(rf, ctx) {
-  if (rf & 1) {
-    ɵɵelementStart(0, "span", 8);
-    ɵɵtemplate(1, Button_ng_container_4_span_2_1_Template, 1, 1, null, 1);
-    ɵɵelementEnd();
+    ɵɵtemplate(0, Button_ng_container_4_2_ng_template_0_Template, 0, 0, "ng-template", 10);
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext(2);
-    ɵɵproperty("ngClass", ctx_r0.iconClass());
-    ɵɵattribute("data-pc-section", "icon");
-    ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", ctx_r0.iconTemplate);
+    ɵɵproperty("ngIf", !ctx_r0.icon && ctx_r0.iconTemplate);
   }
 }
 function Button_ng_container_4_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainerStart(0);
-    ɵɵtemplate(1, Button_ng_container_4_span_1_Template, 1, 4, "span", 6)(2, Button_ng_container_4_span_2_Template, 2, 3, "span", 11);
+    ɵɵtemplate(1, Button_ng_container_4_span_1_Template, 1, 2, "span", 6)(2, Button_ng_container_4_2_Template, 1, 1, null, 5);
     ɵɵelementContainerEnd();
   }
   if (rf & 2) {
@@ -2401,12 +2621,12 @@ function Button_ng_container_4_Template(rf, ctx) {
     ɵɵadvance();
     ɵɵproperty("ngIf", ctx_r0.icon && !ctx_r0.iconTemplate);
     ɵɵadvance();
-    ɵɵproperty("ngIf", !ctx_r0.icon && ctx_r0.iconTemplate);
+    ɵɵproperty("ngTemplateOutlet", ctx_r0.iconTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(3, _c1, ctx_r0.iconClass()));
   }
 }
 function Button_span_5_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "span", 13);
+    ɵɵelementStart(0, "span", 11);
     ɵɵtext(1);
     ɵɵelementEnd();
   }
@@ -2496,6 +2716,41 @@ var ButtonDirective = class _ButtonDirective {
       this.setStyleClass();
     }
   }
+  /**
+   * Defines the style of the button.
+   * @group Props
+   */
+  severity;
+  /**
+   * Add a shadow to indicate elevation.
+   * @group Props
+   */
+  raised = false;
+  /**
+   * Add a circular border radius to the button.
+   * @group Props
+   */
+  rounded = false;
+  /**
+   * Add a textual class to the button without a background initially.
+   * @group Props
+   */
+  text = false;
+  /**
+   * Add a border class without a background initially.
+   * @group Props
+   */
+  outlined = false;
+  /**
+   * Defines the size of the button.
+   * @group Props
+   */
+  size = null;
+  /**
+   * Add a plain textual class to the button without a background initially.
+   * @group Props
+   */
+  plain = false;
   _label;
   _icon;
   _loading = false;
@@ -2504,19 +2759,6 @@ var ButtonDirective = class _ButtonDirective {
     return this.el.nativeElement;
   }
   _internalClasses = Object.values(INTERNAL_BUTTON_CLASSES);
-  spinnerIcon = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" class="p-icon-spin">
-        <g clip-path="url(#clip0_417_21408)">
-            <path
-                d="M6.99701 14C5.85441 13.999 4.72939 13.7186 3.72012 13.1832C2.71084 12.6478 1.84795 11.8737 1.20673 10.9284C0.565504 9.98305 0.165424 8.89526 0.041387 7.75989C-0.0826496 6.62453 0.073125 5.47607 0.495122 4.4147C0.917119 3.35333 1.59252 2.4113 2.46241 1.67077C3.33229 0.930247 4.37024 0.413729 5.4857 0.166275C6.60117 -0.0811796 7.76026 -0.0520535 8.86188 0.251112C9.9635 0.554278 10.9742 1.12227 11.8057 1.90555C11.915 2.01493 11.9764 2.16319 11.9764 2.31778C11.9764 2.47236 11.915 2.62062 11.8057 2.73C11.7521 2.78503 11.688 2.82877 11.6171 2.85864C11.5463 2.8885 11.4702 2.90389 11.3933 2.90389C11.3165 2.90389 11.2404 2.8885 11.1695 2.85864C11.0987 2.82877 11.0346 2.78503 10.9809 2.73C9.9998 1.81273 8.73246 1.26138 7.39226 1.16876C6.05206 1.07615 4.72086 1.44794 3.62279 2.22152C2.52471 2.99511 1.72683 4.12325 1.36345 5.41602C1.00008 6.70879 1.09342 8.08723 1.62775 9.31926C2.16209 10.5513 3.10478 11.5617 4.29713 12.1803C5.48947 12.7989 6.85865 12.988 8.17414 12.7157C9.48963 12.4435 10.6711 11.7264 11.5196 10.6854C12.3681 9.64432 12.8319 8.34282 12.8328 7C12.8328 6.84529 12.8943 6.69692 13.0038 6.58752C13.1132 6.47812 13.2616 6.41667 13.4164 6.41667C13.5712 6.41667 13.7196 6.47812 13.8291 6.58752C13.9385 6.69692 14 6.84529 14 7C14 8.85651 13.2622 10.637 11.9489 11.9497C10.6356 13.2625 8.85432 14 6.99701 14Z"
-                fill="currentColor"
-            />
-        </g>
-        <defs>
-            <clipPath id="clip0_417_21408">
-                <rect width="14" height="14" fill="white" />
-            </clipPath>
-        </defs>
-    </svg>`;
   constructor(el, document2) {
     this.el = el;
     this.document = document2;
@@ -2541,6 +2783,33 @@ var ButtonDirective = class _ButtonDirective {
         styleClass.push(INTERNAL_BUTTON_CLASSES.iconOnly);
       }
     }
+    if (this.text) {
+      styleClass.push("p-button-text");
+    }
+    if (this.severity) {
+      styleClass.push(`p-button-${this.severity}`);
+    }
+    if (this.plain) {
+      styleClass.push("p-button-plain");
+    }
+    if (this.raised) {
+      styleClass.push("p-button-raised");
+    }
+    if (this.size) {
+      styleClass.push(`p-button-${this.size}`);
+    }
+    if (this.outlined) {
+      styleClass.push("p-button-outlined");
+    }
+    if (this.rounded) {
+      styleClass.push("p-button-rounded");
+    }
+    if (this.size === "small") {
+      styleClass.push("p-button-sm");
+    }
+    if (this.size === "large") {
+      styleClass.push("p-button-lg");
+    }
     return styleClass;
   }
   setStyleClass() {
@@ -2549,7 +2818,8 @@ var ButtonDirective = class _ButtonDirective {
     this.htmlElement.classList.add(...styleClass);
   }
   createLabel() {
-    if (this.label) {
+    const created = DomHandler.findSingle(this.htmlElement, ".p-button-label");
+    if (!created && this.label) {
       let labelElement = this.document.createElement("span");
       if (this.icon && !this.label) {
         labelElement.setAttribute("aria-hidden", "true");
@@ -2560,7 +2830,8 @@ var ButtonDirective = class _ButtonDirective {
     }
   }
   createIcon() {
-    if (this.icon || this.loading) {
+    const created = DomHandler.findSingle(this.htmlElement, ".p-button-icon");
+    if (!created && (this.icon || this.loading)) {
       let iconElement = this.document.createElement("span");
       iconElement.className = "p-button-icon";
       iconElement.setAttribute("aria-hidden", "true");
@@ -2571,9 +2842,6 @@ var ButtonDirective = class _ButtonDirective {
       let iconClass = this.getIconClass();
       if (iconClass) {
         DomHandler.addMultipleClasses(iconElement, iconClass);
-      }
-      if (!this.loadingIcon && this.loading) {
-        iconElement.innerHTML = this.spinnerIcon;
       }
       this.htmlElement.insertBefore(iconElement, this.htmlElement.firstChild);
     }
@@ -2589,11 +2857,6 @@ var ButtonDirective = class _ButtonDirective {
   updateIcon() {
     let iconElement = DomHandler.findSingle(this.htmlElement, ".p-button-icon");
     let labelElement = DomHandler.findSingle(this.htmlElement, ".p-button-label");
-    if (this.loading && !this.loadingIcon && iconElement) {
-      iconElement.innerHTML = this.spinnerIcon;
-    } else if (iconElement?.innerHTML) {
-      iconElement.innerHTML = "";
-    }
     if (iconElement) {
       if (this.iconPos) {
         iconElement.className = "p-button-icon " + (labelElement ? "p-button-icon-" + this.iconPos : "") + " " + this.getIconClass();
@@ -2605,7 +2868,7 @@ var ButtonDirective = class _ButtonDirective {
     }
   }
   getIconClass() {
-    return this.loading ? "p-button-loading-icon " + (this.loadingIcon ? this.loadingIcon : "p-icon") : this.icon || "p-hidden";
+    return this.loading ? "p-button-loading-icon pi-spin " + (this.loadingIcon ?? "pi pi-spinner") : this.icon || "p-hidden";
   }
   ngOnDestroy() {
     this.initialized = false;
@@ -2622,8 +2885,17 @@ var ButtonDirective = class _ButtonDirective {
       loadingIcon: "loadingIcon",
       label: "label",
       icon: "icon",
-      loading: "loading"
-    }
+      loading: "loading",
+      severity: "severity",
+      raised: [InputFlags.HasDecoratorInputTransform, "raised", "raised", booleanAttribute],
+      rounded: [InputFlags.HasDecoratorInputTransform, "rounded", "rounded", booleanAttribute],
+      text: [InputFlags.HasDecoratorInputTransform, "text", "text", booleanAttribute],
+      outlined: [InputFlags.HasDecoratorInputTransform, "outlined", "outlined", booleanAttribute],
+      size: "size",
+      plain: [InputFlags.HasDecoratorInputTransform, "plain", "plain", booleanAttribute]
+    },
+    standalone: true,
+    features: [ɵɵInputTransformsFeature]
   });
 };
 (() => {
@@ -2631,6 +2903,7 @@ var ButtonDirective = class _ButtonDirective {
     type: Directive,
     args: [{
       selector: "[pButton]",
+      standalone: true,
       host: {
         class: "p-element"
       }
@@ -2658,10 +2931,47 @@ var ButtonDirective = class _ButtonDirective {
     }],
     loading: [{
       type: Input
+    }],
+    severity: [{
+      type: Input
+    }],
+    raised: [{
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
+    }],
+    rounded: [{
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
+    }],
+    text: [{
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
+    }],
+    outlined: [{
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
+    }],
+    size: [{
+      type: Input
+    }],
+    plain: [{
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }]
   });
 })();
 var Button = class _Button {
+  el;
   /**
    * Type of the button.
    * @group Props
@@ -2733,10 +3043,15 @@ var Button = class _Button {
    */
   outlined = false;
   /**
-   *  Add a link style to the button.
+   * Add a link style to the button.
    * @group Props
    */
   link = false;
+  /**
+   * Add a tabindex to the button.
+   * @group Props
+   */
+  tabindex;
   /**
    * Defines the size of the button.
    * @group Props
@@ -2763,6 +3078,11 @@ var Button = class _Button {
    */
   ariaLabel;
   /**
+   * When present, it specifies that the component should automatically get focus on load.
+   * @group Props
+   */
+  autofocus;
+  /**
    * Callback to execute when button is clicked.
    * This event is intended to be used with the <p-button> component. Using a regular <button> element, use (click).
    * @param {MouseEvent} event - Mouse event.
@@ -2787,24 +3107,32 @@ var Button = class _Button {
   loadingIconTemplate;
   iconTemplate;
   templates;
+  constructor(el) {
+    this.el = el;
+  }
   spinnerIconClass() {
     return Object.entries(this.iconClass()).filter(([, value]) => !!value).reduce((acc, [key]) => acc + ` ${key}`, "p-button-loading-icon");
   }
   iconClass() {
-    return {
+    const iconClasses = {
       "p-button-icon": true,
       "p-button-icon-left": this.iconPos === "left" && this.label,
       "p-button-icon-right": this.iconPos === "right" && this.label,
       "p-button-icon-top": this.iconPos === "top" && this.label,
       "p-button-icon-bottom": this.iconPos === "bottom" && this.label
     };
+    if (this.loading) {
+      iconClasses[`p-button-loading-icon pi-spin ${this.loadingIcon ?? ""}`] = true;
+    } else if (this.icon) {
+      iconClasses[this.icon] = true;
+    }
+    return iconClasses;
   }
-  buttonClass() {
+  get buttonClass() {
     return {
       "p-button p-component": true,
       "p-button-icon-only": (this.icon || this.iconTemplate || this.loadingIcon || this.loadingIconTemplate) && !this.label,
       "p-button-vertical": (this.iconPos === "top" || this.iconPos === "bottom") && this.label,
-      "p-disabled": this.disabled || this.loading,
       "p-button-loading": this.loading,
       "p-button-loading-label-only": this.loading && !this.icon && this.label && !this.loadingIcon && this.iconPos === "left",
       "p-button-link": this.link,
@@ -2843,8 +3171,15 @@ var Button = class _Button {
       "p-badge-no-gutter": this.badge && String(this.badge).length === 1
     };
   }
+  /**
+   * Applies focus.
+   * @group Method
+   */
+  focus() {
+    this.el.nativeElement.firstChild.focus();
+  }
   static ɵfac = function Button_Factory(t) {
-    return new (t || _Button)();
+    return new (t || _Button)(ɵɵdirectiveInject(ElementRef));
   };
   static ɵcmp = ɵɵdefineComponent({
     type: _Button,
@@ -2871,31 +3206,35 @@ var Button = class _Button {
       icon: "icon",
       badge: "badge",
       label: "label",
-      disabled: "disabled",
-      loading: "loading",
+      disabled: [InputFlags.HasDecoratorInputTransform, "disabled", "disabled", booleanAttribute],
+      loading: [InputFlags.HasDecoratorInputTransform, "loading", "loading", booleanAttribute],
       loadingIcon: "loadingIcon",
-      raised: "raised",
-      rounded: "rounded",
-      text: "text",
-      plain: "plain",
+      raised: [InputFlags.HasDecoratorInputTransform, "raised", "raised", booleanAttribute],
+      rounded: [InputFlags.HasDecoratorInputTransform, "rounded", "rounded", booleanAttribute],
+      text: [InputFlags.HasDecoratorInputTransform, "text", "text", booleanAttribute],
+      plain: [InputFlags.HasDecoratorInputTransform, "plain", "plain", booleanAttribute],
       severity: "severity",
-      outlined: "outlined",
-      link: "link",
+      outlined: [InputFlags.HasDecoratorInputTransform, "outlined", "outlined", booleanAttribute],
+      link: [InputFlags.HasDecoratorInputTransform, "link", "link", booleanAttribute],
+      tabindex: [InputFlags.HasDecoratorInputTransform, "tabindex", "tabindex", numberAttribute],
       size: "size",
       style: "style",
       styleClass: "styleClass",
       badgeClass: "badgeClass",
-      ariaLabel: "ariaLabel"
+      ariaLabel: "ariaLabel",
+      autofocus: [InputFlags.HasDecoratorInputTransform, "autofocus", "autofocus", booleanAttribute]
     },
     outputs: {
       onClick: "onClick",
       onFocus: "onFocus",
       onBlur: "onBlur"
     },
+    standalone: true,
+    features: [ɵɵInputTransformsFeature, ɵɵStandaloneFeature],
     ngContentSelectors: _c03,
     decls: 7,
     vars: 14,
-    consts: [["pRipple", "", 3, "click", "focus", "blur", "ngStyle", "disabled", "ngClass"], [4, "ngTemplateOutlet"], [4, "ngIf"], ["class", "p-button-label", 4, "ngIf"], [3, "ngClass", "class", 4, "ngIf"], ["class", "p-button-loading-icon", 3, "ngClass", 4, "ngIf"], [3, "class", "ngClass", 4, "ngIf"], [3, "styleClass", "spin", 4, "ngIf"], [3, "ngClass"], [3, "styleClass", "spin"], [1, "p-button-loading-icon", 3, "ngClass"], [3, "ngClass", 4, "ngIf"], [3, "ngIf"], [1, "p-button-label"]],
+    consts: [["pRipple", "", "pAutoFocus", "", 3, "click", "focus", "blur", "ngStyle", "disabled", "ngClass", "autofocus"], [4, "ngTemplateOutlet"], [4, "ngIf"], ["class", "p-button-label", 4, "ngIf"], [3, "ngClass", "class", 4, "ngIf"], [4, "ngTemplateOutlet", "ngTemplateOutletContext"], [3, "ngClass", 4, "ngIf"], [3, "styleClass", "spin", 4, "ngIf"], [3, "ngClass"], [3, "styleClass", "spin"], [3, "ngIf"], [1, "p-button-label"]],
     template: function Button_Template(rf, ctx) {
       if (rf & 1) {
         ɵɵprojectionDef();
@@ -2908,13 +3247,12 @@ var Button = class _Button {
           return ctx.onBlur.emit($event);
         });
         ɵɵprojection(1);
-        ɵɵtemplate(2, Button_ng_container_2_Template, 1, 0, "ng-container", 1)(3, Button_ng_container_3_Template, 3, 2, "ng-container", 2)(4, Button_ng_container_4_Template, 3, 2, "ng-container", 2)(5, Button_span_5_Template, 2, 3, "span", 3)(6, Button_span_6_Template, 2, 5, "span", 4);
+        ɵɵtemplate(2, Button_ng_container_2_Template, 1, 0, "ng-container", 1)(3, Button_ng_container_3_Template, 3, 5, "ng-container", 2)(4, Button_ng_container_4_Template, 3, 5, "ng-container", 2)(5, Button_span_5_Template, 2, 3, "span", 3)(6, Button_span_6_Template, 2, 5, "span", 4);
         ɵɵelementEnd();
       }
       if (rf & 2) {
-        ɵɵclassMap(ctx.styleClass);
-        ɵɵproperty("ngStyle", ctx.style)("disabled", ctx.disabled || ctx.loading)("ngClass", ctx.buttonClass());
-        ɵɵattribute("type", ctx.type)("aria-label", ctx.ariaLabel)("data-pc-name", "button")("data-pc-section", "root");
+        ɵɵproperty("ngStyle", ctx.style)("disabled", ctx.disabled || ctx.loading)("ngClass", ctx.buttonClass)("autofocus", ctx.autofocus);
+        ɵɵattribute("type", ctx.type)("aria-label", ctx.ariaLabel)("data-pc-name", "button")("data-pc-section", "root")("tabindex", ctx.tabindex);
         ɵɵadvance(2);
         ɵɵproperty("ngTemplateOutlet", ctx.contentTemplate);
         ɵɵadvance();
@@ -2927,7 +3265,7 @@ var Button = class _Button {
         ɵɵproperty("ngIf", !ctx.contentTemplate && ctx.badge);
       }
     },
-    dependencies: () => [NgClass, NgIf, NgTemplateOutlet, NgStyle, Ripple, SpinnerIcon],
+    dependencies: [NgIf, NgTemplateOutlet, NgStyle, NgClass, Ripple, AutoFocus, SpinnerIcon],
     encapsulation: 2,
     changeDetection: 0
   });
@@ -2937,37 +3275,37 @@ var Button = class _Button {
     type: Component,
     args: [{
       selector: "p-button",
+      standalone: true,
+      imports: [NgIf, NgTemplateOutlet, NgStyle, NgClass, Ripple, AutoFocus, SpinnerIcon],
       template: `
         <button
             [attr.type]="type"
             [attr.aria-label]="ariaLabel"
-            [class]="styleClass"
             [ngStyle]="style"
             [disabled]="disabled || loading"
-            [ngClass]="buttonClass()"
+            [ngClass]="buttonClass"
             (click)="onClick.emit($event)"
             (focus)="onFocus.emit($event)"
             (blur)="onBlur.emit($event)"
             pRipple
             [attr.data-pc-name]="'button'"
             [attr.data-pc-section]="'root'"
+            [attr.tabindex]="tabindex"
+            pAutoFocus
+            [autofocus]="autofocus"
         >
             <ng-content></ng-content>
             <ng-container *ngTemplateOutlet="contentTemplate"></ng-container>
             <ng-container *ngIf="loading">
                 <ng-container *ngIf="!loadingIconTemplate">
-                    <span *ngIf="loadingIcon" [class]="'p-button-loading-icon pi-spin ' + loadingIcon" [ngClass]="iconClass()" [attr.aria-hidden]="true" [attr.data-pc-section]="'loadingicon'"></span>
+                    <span *ngIf="loadingIcon" [ngClass]="iconClass()" [attr.aria-hidden]="true" [attr.data-pc-section]="'loadingicon'"></span>
                     <SpinnerIcon *ngIf="!loadingIcon" [styleClass]="spinnerIconClass()" [spin]="true" [attr.aria-hidden]="true" [attr.data-pc-section]="'loadingicon'" />
                 </ng-container>
-                <span *ngIf="loadingIconTemplate" class="p-button-loading-icon" [ngClass]="iconClass()" [attr.aria-hidden]="true" [attr.data-pc-section]="'loadingicon'">
-                    <ng-template *ngTemplateOutlet="loadingIconTemplate"></ng-template>
-                </span>
+                <ng-template [ngIf]="loadingIconTemplate" *ngTemplateOutlet="loadingIconTemplate; context: { class: iconClass() }"></ng-template>
             </ng-container>
             <ng-container *ngIf="!loading">
-                <span *ngIf="icon && !iconTemplate" [class]="icon" [ngClass]="iconClass()" [attr.data-pc-section]="'icon'"></span>
-                <span *ngIf="!icon && iconTemplate" [ngClass]="iconClass()" [attr.data-pc-section]="'icon'">
-                    <ng-template [ngIf]="!icon" *ngTemplateOutlet="iconTemplate"></ng-template>
-                </span>
+                <span *ngIf="icon && !iconTemplate" [ngClass]="iconClass()" [attr.data-pc-section]="'icon'"></span>
+                <ng-template [ngIf]="!icon && iconTemplate" *ngTemplateOutlet="iconTemplate; context: { class: iconClass() }"></ng-template>
             </ng-container>
             <span class="p-button-label" [attr.aria-hidden]="icon && !label" *ngIf="!contentTemplate && label" [attr.data-pc-section]="'label'">{{ label }}</span>
             <span [ngClass]="badgeStyleClass()" [class]="badgeClass" *ngIf="!contentTemplate && badge" [attr.data-pc-section]="'badge'">{{ badge }}</span>
@@ -2980,7 +3318,9 @@ var Button = class _Button {
         "[class.p-disabled]": "disabled"
       }
     }]
-  }], null, {
+  }], () => [{
+    type: ElementRef
+  }], {
     type: [{
       type: Input
     }],
@@ -2997,34 +3337,64 @@ var Button = class _Button {
       type: Input
     }],
     disabled: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     loading: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     loadingIcon: [{
       type: Input
     }],
     raised: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     rounded: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     text: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     plain: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     severity: [{
       type: Input
     }],
     outlined: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     link: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
+    }],
+    tabindex: [{
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     size: [{
       type: Input
@@ -3040,6 +3410,12 @@ var Button = class _Button {
     }],
     ariaLabel: [{
       type: Input
+    }],
+    autofocus: [{
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     onClick: [{
       type: Output
@@ -3062,21 +3438,19 @@ var ButtonModule = class _ButtonModule {
   };
   static ɵmod = ɵɵdefineNgModule({
     type: _ButtonModule,
-    declarations: [ButtonDirective, Button],
-    imports: [CommonModule, RippleModule, SharedModule, SpinnerIcon],
+    imports: [ButtonDirective, Button],
     exports: [ButtonDirective, Button, SharedModule]
   });
   static ɵinj = ɵɵdefineInjector({
-    imports: [CommonModule, RippleModule, SharedModule, SpinnerIcon, SharedModule]
+    imports: [Button, SharedModule]
   });
 };
 (() => {
   (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ButtonModule, [{
     type: NgModule,
     args: [{
-      imports: [CommonModule, RippleModule, SharedModule, SpinnerIcon],
-      exports: [ButtonDirective, Button, SharedModule],
-      declarations: [ButtonDirective, Button]
+      imports: [ButtonDirective, Button],
+      exports: [ButtonDirective, Button, SharedModule]
     }]
   }], null, null);
 })();
@@ -3383,18 +3757,25 @@ var CalendarIcon = class _CalendarIcon extends BaseIcon {
 
 // node_modules/primeng/fesm2022/primeng-calendar.mjs
 var _c04 = ["container"];
-var _c1 = ["inputfield"];
+var _c12 = ["inputfield"];
 var _c2 = ["contentWrapper"];
 var _c3 = [[["p-header"]], [["p-footer"]]];
 var _c4 = ["p-header", "p-footer"];
-var _c5 = (a0, a1, a2, a3) => ({
+var _c5 = (a0, a1, a2, a3, a4) => ({
   "p-calendar": true,
-  "p-calendar-w-btn": a0,
-  "p-calendar-timeonly": a1,
-  "p-calendar-disabled": a2,
-  "p-focus": a3
+  "p-input-icon-right": a0,
+  "p-calendar-w-btn": a1,
+  "p-calendar-timeonly": a2,
+  "p-calendar-disabled": a3,
+  "p-focus": a4
 });
-var _c6 = (a0, a1, a2, a3, a4, a5) => ({
+var _c6 = (a0) => ({
+  clickCallBack: a0
+});
+var _c7 = (a0) => ({
+  "p-datepicker-icon": a0
+});
+var _c8 = (a0, a1, a2, a3, a4, a5) => ({
   "p-datepicker p-component": true,
   "p-datepicker-inline": a0,
   "p-disabled": a1,
@@ -3403,30 +3784,34 @@ var _c6 = (a0, a1, a2, a3, a4, a5) => ({
   "p-datepicker-monthpicker": a4,
   "p-datepicker-touch-ui": a5
 });
-var _c7 = (a0, a1) => ({
+var _c9 = (a0, a1) => ({
   showTransitionParams: a0,
   hideTransitionParams: a1
 });
-var _c8 = (a0) => ({
+var _c10 = (a0) => ({
   value: "visibleTouchUI",
   params: a0
 });
-var _c9 = (a0) => ({
+var _c11 = (a0) => ({
   value: "visible",
   params: a0
 });
-var _c10 = (a0) => ({
+var _c122 = (a0) => ({
   $implicit: a0
 });
-var _c11 = (a0, a1) => ({
+var _c13 = (a0, a1) => ({
   "p-datepicker-other-month": a0,
   "p-datepicker-today": a1
 });
-var _c12 = (a0, a1) => ({
+var _c14 = (a0, a1) => ({
+  "p-highlight p-datepicker-current-day": a0,
+  "p-disabled": a1
+});
+var _c15 = (a0, a1) => ({
   "p-highlight": a0,
   "p-disabled": a1
 });
-var _c13 = (a0) => [a0];
+var _c16 = (a0) => [a0];
 function Calendar_ng_template_2_ng_container_2_TimesIcon_1_Template(rf, ctx) {
   if (rf & 1) {
     const _r3 = ɵɵgetCurrentView();
@@ -3531,13 +3916,49 @@ function Calendar_ng_template_2_button_3_Template(rf, ctx) {
     ɵɵelementEnd();
   }
   if (rf & 2) {
+    let tmp_6_0;
     const ctx_r1 = ɵɵnextContext(2);
     ɵɵproperty("disabled", ctx_r1.disabled);
-    ɵɵattribute("aria-label", ctx_r1.iconButtonAriaLabel)("aria-expanded", ctx_r1.overlayVisible)("aria-controls", ctx_r1.panelId);
+    ɵɵattribute("aria-label", ctx_r1.iconButtonAriaLabel)("aria-expanded", (tmp_6_0 = ctx_r1.overlayVisible) !== null && tmp_6_0 !== void 0 ? tmp_6_0 : false)("aria-controls", ctx_r1.overlayVisible ? ctx_r1.panelId : null);
     ɵɵadvance();
     ɵɵproperty("ngIf", ctx_r1.icon);
     ɵɵadvance();
     ɵɵproperty("ngIf", !ctx_r1.icon);
+  }
+}
+function Calendar_ng_template_2_ng_container_4_CalendarIcon_1_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r7 = ɵɵgetCurrentView();
+    ɵɵelementStart(0, "CalendarIcon", 19);
+    ɵɵlistener("click", function Calendar_ng_template_2_ng_container_4_CalendarIcon_1_Template_CalendarIcon_click_0_listener($event) {
+      ɵɵrestoreView(_r7);
+      const ctx_r1 = ɵɵnextContext(3);
+      return ɵɵresetView(ctx_r1.onButtonClick($event));
+    });
+    ɵɵelementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r1 = ɵɵnextContext(3);
+    ɵɵproperty("ngClass", ɵɵpureFunction1(1, _c7, ctx_r1.showOnFocus));
+  }
+}
+function Calendar_ng_template_2_ng_container_4_ng_container_2_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵelementContainer(0);
+  }
+}
+function Calendar_ng_template_2_ng_container_4_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵelementContainerStart(0);
+    ɵɵtemplate(1, Calendar_ng_template_2_ng_container_4_CalendarIcon_1_Template, 1, 3, "CalendarIcon", 17)(2, Calendar_ng_template_2_ng_container_4_ng_container_2_Template, 1, 0, "ng-container", 18);
+    ɵɵelementContainerEnd();
+  }
+  if (rf & 2) {
+    const ctx_r1 = ɵɵnextContext(2);
+    ɵɵadvance();
+    ɵɵproperty("ngIf", !ctx_r1.inputIconTemplate);
+    ɵɵadvance();
+    ɵɵproperty("ngTemplateOutlet", ctx_r1.inputIconTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(3, _c6, ctx_r1.onButtonClick.bind(ctx_r1)));
   }
 }
 function Calendar_ng_template_2_Template(rf, ctx) {
@@ -3566,17 +3987,20 @@ function Calendar_ng_template_2_Template(rf, ctx) {
       return ɵɵresetView(ctx_r1.onUserInput($event));
     });
     ɵɵelementEnd();
-    ɵɵtemplate(2, Calendar_ng_template_2_ng_container_2_Template, 3, 2, "ng-container", 7)(3, Calendar_ng_template_2_button_3_Template, 3, 6, "button", 8);
+    ɵɵtemplate(2, Calendar_ng_template_2_ng_container_2_Template, 3, 2, "ng-container", 7)(3, Calendar_ng_template_2_button_3_Template, 3, 6, "button", 8)(4, Calendar_ng_template_2_ng_container_4_Template, 3, 5, "ng-container", 7);
   }
   if (rf & 2) {
+    let tmp_15_0;
     const ctx_r1 = ɵɵnextContext();
     ɵɵclassMap(ctx_r1.inputStyleClass);
-    ɵɵproperty("value", ctx_r1.inputFieldValue)("readonly", ctx_r1.readonlyInput)("ngStyle", ctx_r1.inputStyle)("placeholder", ctx_r1.placeholder || "")("disabled", ctx_r1.disabled)("ngClass", "p-inputtext p-component");
-    ɵɵattribute("id", ctx_r1.inputId)("name", ctx_r1.name)("required", ctx_r1.required)("aria-required", ctx_r1.required)("aria-expanded", ctx_r1.overlayVisible)("aria-controls", ctx_r1.panelId)("aria-labelledby", ctx_r1.ariaLabelledBy)("aria-label", ctx_r1.ariaLabel)("tabindex", ctx_r1.tabindex)("inputmode", ctx_r1.touchUI ? "off" : null);
+    ɵɵproperty("value", ctx_r1.inputFieldValue)("readonly", ctx_r1.readonlyInput)("ngStyle", ctx_r1.inputStyle)("placeholder", ctx_r1.placeholder || "")("disabled", ctx_r1.disabled)("ngClass", ctx_r1.inputClass)("autofocus", ctx_r1.autofocus);
+    ɵɵattribute("id", ctx_r1.inputId)("name", ctx_r1.name)("required", ctx_r1.required)("aria-required", ctx_r1.required)("aria-expanded", (tmp_15_0 = ctx_r1.overlayVisible) !== null && tmp_15_0 !== void 0 ? tmp_15_0 : false)("aria-controls", ctx_r1.overlayVisible ? ctx_r1.panelId : null)("aria-labelledby", ctx_r1.ariaLabelledBy)("aria-label", ctx_r1.ariaLabel)("tabindex", ctx_r1.tabindex)("inputmode", ctx_r1.touchUI ? "off" : null);
     ɵɵadvance(2);
     ɵɵproperty("ngIf", ctx_r1.showClear && !ctx_r1.disabled && ctx_r1.value != null);
     ɵɵadvance();
-    ɵɵproperty("ngIf", ctx_r1.showIcon);
+    ɵɵproperty("ngIf", ctx_r1.showIcon && ctx_r1.iconDisplay === "button");
+    ɵɵadvance();
+    ɵɵproperty("ngIf", ctx_r1.iconDisplay === "input" && ctx_r1.showIcon);
   }
 }
 function Calendar_div_3_ng_container_3_Template(rf, ctx) {
@@ -3586,7 +4010,7 @@ function Calendar_div_3_ng_container_3_Template(rf, ctx) {
 }
 function Calendar_div_3_ng_container_4_div_2_button_2_ChevronLeftIcon_1_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelement(0, "ChevronLeftIcon", 37);
+    ɵɵelement(0, "ChevronLeftIcon", 40);
   }
   if (rf & 2) {
     ɵɵproperty("styleClass", "p-datepicker-prev-icon");
@@ -3601,7 +4025,7 @@ function Calendar_div_3_ng_container_4_div_2_button_2_span_2_1_Template(rf, ctx)
 }
 function Calendar_div_3_ng_container_4_div_2_button_2_span_2_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "span", 38);
+    ɵɵelementStart(0, "span", 41);
     ɵɵtemplate(1, Calendar_div_3_ng_container_4_div_2_button_2_span_2_1_Template, 1, 0, null, 13);
     ɵɵelementEnd();
   }
@@ -3613,18 +4037,18 @@ function Calendar_div_3_ng_container_4_div_2_button_2_span_2_Template(rf, ctx) {
 }
 function Calendar_div_3_ng_container_4_div_2_button_2_Template(rf, ctx) {
   if (rf & 1) {
-    const _r9 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "button", 35);
+    const _r10 = ɵɵgetCurrentView();
+    ɵɵelementStart(0, "button", 38);
     ɵɵlistener("keydown", function Calendar_div_3_ng_container_4_div_2_button_2_Template_button_keydown_0_listener($event) {
-      ɵɵrestoreView(_r9);
+      ɵɵrestoreView(_r10);
       const ctx_r1 = ɵɵnextContext(4);
       return ɵɵresetView(ctx_r1.onContainerButtonKeydown($event));
     })("click", function Calendar_div_3_ng_container_4_div_2_button_2_Template_button_click_0_listener($event) {
-      ɵɵrestoreView(_r9);
+      ɵɵrestoreView(_r10);
       const ctx_r1 = ɵɵnextContext(4);
       return ɵɵresetView(ctx_r1.onPrevButtonClick($event));
     });
-    ɵɵtemplate(1, Calendar_div_3_ng_container_4_div_2_button_2_ChevronLeftIcon_1_Template, 1, 1, "ChevronLeftIcon", 32)(2, Calendar_div_3_ng_container_4_div_2_button_2_span_2_Template, 2, 1, "span", 36);
+    ɵɵtemplate(1, Calendar_div_3_ng_container_4_div_2_button_2_ChevronLeftIcon_1_Template, 1, 1, "ChevronLeftIcon", 35)(2, Calendar_div_3_ng_container_4_div_2_button_2_span_2_Template, 2, 1, "span", 39);
     ɵɵelementEnd();
   }
   if (rf & 2) {
@@ -3638,14 +4062,14 @@ function Calendar_div_3_ng_container_4_div_2_button_2_Template(rf, ctx) {
 }
 function Calendar_div_3_ng_container_4_div_2_button_4_Template(rf, ctx) {
   if (rf & 1) {
-    const _r10 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "button", 39);
+    const _r11 = ɵɵgetCurrentView();
+    ɵɵelementStart(0, "button", 42);
     ɵɵlistener("click", function Calendar_div_3_ng_container_4_div_2_button_4_Template_button_click_0_listener($event) {
-      ɵɵrestoreView(_r10);
+      ɵɵrestoreView(_r11);
       const ctx_r1 = ɵɵnextContext(4);
       return ɵɵresetView(ctx_r1.switchToMonthView($event));
     })("keydown", function Calendar_div_3_ng_container_4_div_2_button_4_Template_button_keydown_0_listener($event) {
-      ɵɵrestoreView(_r10);
+      ɵɵrestoreView(_r11);
       const ctx_r1 = ɵɵnextContext(4);
       return ɵɵresetView(ctx_r1.onContainerButtonKeydown($event));
     });
@@ -3653,24 +4077,24 @@ function Calendar_div_3_ng_container_4_div_2_button_4_Template(rf, ctx) {
     ɵɵelementEnd();
   }
   if (rf & 2) {
-    const month_r11 = ɵɵnextContext().$implicit;
+    const month_r12 = ɵɵnextContext().$implicit;
     const ctx_r1 = ɵɵnextContext(3);
     ɵɵproperty("disabled", ctx_r1.switchViewButtonDisabled());
     ɵɵattribute("aria-label", ctx_r1.getTranslation("chooseMonth"));
     ɵɵadvance();
-    ɵɵtextInterpolate1(" ", ctx_r1.getMonthName(month_r11.month), " ");
+    ɵɵtextInterpolate1(" ", ctx_r1.getMonthName(month_r12.month), " ");
   }
 }
 function Calendar_div_3_ng_container_4_div_2_button_5_Template(rf, ctx) {
   if (rf & 1) {
-    const _r12 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "button", 40);
+    const _r13 = ɵɵgetCurrentView();
+    ɵɵelementStart(0, "button", 43);
     ɵɵlistener("click", function Calendar_div_3_ng_container_4_div_2_button_5_Template_button_click_0_listener($event) {
-      ɵɵrestoreView(_r12);
+      ɵɵrestoreView(_r13);
       const ctx_r1 = ɵɵnextContext(4);
       return ɵɵresetView(ctx_r1.switchToYearView($event));
     })("keydown", function Calendar_div_3_ng_container_4_div_2_button_5_Template_button_keydown_0_listener($event) {
-      ɵɵrestoreView(_r12);
+      ɵɵrestoreView(_r13);
       const ctx_r1 = ɵɵnextContext(4);
       return ɵɵresetView(ctx_r1.onContainerButtonKeydown($event));
     });
@@ -3678,12 +4102,12 @@ function Calendar_div_3_ng_container_4_div_2_button_5_Template(rf, ctx) {
     ɵɵelementEnd();
   }
   if (rf & 2) {
-    const month_r11 = ɵɵnextContext().$implicit;
+    const month_r12 = ɵɵnextContext().$implicit;
     const ctx_r1 = ɵɵnextContext(3);
     ɵɵproperty("disabled", ctx_r1.switchViewButtonDisabled());
     ɵɵattribute("aria-label", ctx_r1.getTranslation("chooseYear"));
     ɵɵadvance();
-    ɵɵtextInterpolate1(" ", ctx_r1.getYear(month_r11), " ");
+    ɵɵtextInterpolate1(" ", ctx_r1.getYear(month_r12), " ");
   }
 }
 function Calendar_div_3_ng_container_4_div_2_span_6_ng_container_1_Template(rf, ctx) {
@@ -3705,8 +4129,8 @@ function Calendar_div_3_ng_container_4_div_2_span_6_ng_container_2_Template(rf, 
 }
 function Calendar_div_3_ng_container_4_div_2_span_6_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "span", 41);
-    ɵɵtemplate(1, Calendar_div_3_ng_container_4_div_2_span_6_ng_container_1_Template, 2, 2, "ng-container", 7)(2, Calendar_div_3_ng_container_4_div_2_span_6_ng_container_2_Template, 1, 0, "ng-container", 42);
+    ɵɵelementStart(0, "span", 44);
+    ɵɵtemplate(1, Calendar_div_3_ng_container_4_div_2_span_6_ng_container_1_Template, 2, 2, "ng-container", 7)(2, Calendar_div_3_ng_container_4_div_2_span_6_ng_container_2_Template, 1, 0, "ng-container", 18);
     ɵɵelementEnd();
   }
   if (rf & 2) {
@@ -3714,12 +4138,12 @@ function Calendar_div_3_ng_container_4_div_2_span_6_Template(rf, ctx) {
     ɵɵadvance();
     ɵɵproperty("ngIf", !ctx_r1.decadeTemplate);
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", ctx_r1.decadeTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(3, _c10, ctx_r1.yearPickerValues));
+    ɵɵproperty("ngTemplateOutlet", ctx_r1.decadeTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(3, _c122, ctx_r1.yearPickerValues));
   }
 }
 function Calendar_div_3_ng_container_4_div_2_ChevronRightIcon_8_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelement(0, "ChevronRightIcon", 37);
+    ɵɵelement(0, "ChevronRightIcon", 40);
   }
   if (rf & 2) {
     ɵɵproperty("styleClass", "p-datepicker-next-icon");
@@ -3734,7 +4158,7 @@ function Calendar_div_3_ng_container_4_div_2_span_9_1_Template(rf, ctx) {
 }
 function Calendar_div_3_ng_container_4_div_2_span_9_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "span", 43);
+    ɵɵelementStart(0, "span", 45);
     ɵɵtemplate(1, Calendar_div_3_ng_container_4_div_2_span_9_1_Template, 1, 0, null, 13);
     ɵɵelementEnd();
   }
@@ -3746,7 +4170,7 @@ function Calendar_div_3_ng_container_4_div_2_span_9_Template(rf, ctx) {
 }
 function Calendar_div_3_ng_container_4_div_2_div_10_th_4_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "th", 49)(1, "span");
+    ɵɵelementStart(0, "th", 51)(1, "span");
     ɵɵtext(2);
     ɵɵelementEnd()();
   }
@@ -3758,27 +4182,27 @@ function Calendar_div_3_ng_container_4_div_2_div_10_th_4_Template(rf, ctx) {
 }
 function Calendar_div_3_ng_container_4_div_2_div_10_th_5_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "th", 50)(1, "span");
+    ɵɵelementStart(0, "th", 52)(1, "span");
     ɵɵtext(2);
     ɵɵelementEnd()();
   }
   if (rf & 2) {
-    const weekDay_r13 = ctx.$implicit;
+    const weekDay_r14 = ctx.$implicit;
     ɵɵadvance(2);
-    ɵɵtextInterpolate(weekDay_r13);
+    ɵɵtextInterpolate(weekDay_r14);
   }
 }
 function Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_1_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "td", 53)(1, "span", 54);
+    ɵɵelementStart(0, "td", 55)(1, "span", 56);
     ɵɵtext(2);
     ɵɵelementEnd()();
   }
   if (rf & 2) {
-    const j_r14 = ɵɵnextContext().index;
-    const month_r11 = ɵɵnextContext(2).$implicit;
+    const j_r15 = ɵɵnextContext().index;
+    const month_r12 = ɵɵnextContext(2).$implicit;
     ɵɵadvance(2);
-    ɵɵtextInterpolate1(" ", month_r11.weekNumbers[j_r14], " ");
+    ɵɵtextInterpolate1(" ", month_r12.weekNumbers[j_r15], " ");
   }
 }
 function Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_ng_container_1_ng_container_2_Template(rf, ctx) {
@@ -3788,9 +4212,9 @@ function Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_ng_container_1_ng_
     ɵɵelementContainerEnd();
   }
   if (rf & 2) {
-    const date_r16 = ɵɵnextContext(2).$implicit;
+    const date_r17 = ɵɵnextContext(2).$implicit;
     ɵɵadvance();
-    ɵɵtextInterpolate(date_r16.day);
+    ɵɵtextInterpolate(date_r17.day);
   }
 }
 function Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_ng_container_1_ng_container_3_ng_container_1_Template(rf, ctx) {
@@ -3801,14 +4225,14 @@ function Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_ng_container_1_ng_
 function Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_ng_container_1_ng_container_3_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainerStart(0);
-    ɵɵtemplate(1, Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_ng_container_1_ng_container_3_ng_container_1_Template, 1, 0, "ng-container", 42);
+    ɵɵtemplate(1, Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_ng_container_1_ng_container_3_ng_container_1_Template, 1, 0, "ng-container", 18);
     ɵɵelementContainerEnd();
   }
   if (rf & 2) {
-    const date_r16 = ɵɵnextContext(2).$implicit;
+    const date_r17 = ɵɵnextContext(2).$implicit;
     const ctx_r1 = ɵɵnextContext(6);
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", ctx_r1.dateTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(2, _c10, date_r16));
+    ɵɵproperty("ngTemplateOutlet", ctx_r1.dateTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(2, _c122, date_r17));
   }
 }
 function Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_ng_container_1_ng_container_4_ng_container_1_Template(rf, ctx) {
@@ -3819,143 +4243,144 @@ function Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_ng_container_1_ng_
 function Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_ng_container_1_ng_container_4_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainerStart(0);
-    ɵɵtemplate(1, Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_ng_container_1_ng_container_4_ng_container_1_Template, 1, 0, "ng-container", 42);
+    ɵɵtemplate(1, Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_ng_container_1_ng_container_4_ng_container_1_Template, 1, 0, "ng-container", 18);
     ɵɵelementContainerEnd();
   }
   if (rf & 2) {
-    const date_r16 = ɵɵnextContext(2).$implicit;
+    const date_r17 = ɵɵnextContext(2).$implicit;
     const ctx_r1 = ɵɵnextContext(6);
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", ctx_r1.disabledDateTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(2, _c10, date_r16));
+    ɵɵproperty("ngTemplateOutlet", ctx_r1.disabledDateTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(2, _c122, date_r17));
   }
 }
 function Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_ng_container_1_div_5_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "div", 57);
+    ɵɵelementStart(0, "div", 59);
     ɵɵtext(1);
     ɵɵelementEnd();
   }
   if (rf & 2) {
-    const date_r16 = ɵɵnextContext(2).$implicit;
+    const date_r17 = ɵɵnextContext(2).$implicit;
     ɵɵadvance();
-    ɵɵtextInterpolate1(" ", date_r16.day, " ");
+    ɵɵtextInterpolate1(" ", date_r17.day, " ");
   }
 }
 function Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_ng_container_1_Template(rf, ctx) {
   if (rf & 1) {
-    const _r15 = ɵɵgetCurrentView();
+    const _r16 = ɵɵgetCurrentView();
     ɵɵelementContainerStart(0);
-    ɵɵelementStart(1, "span", 55);
+    ɵɵelementStart(1, "span", 57);
     ɵɵlistener("click", function Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_ng_container_1_Template_span_click_1_listener($event) {
-      ɵɵrestoreView(_r15);
-      const date_r16 = ɵɵnextContext().$implicit;
+      ɵɵrestoreView(_r16);
+      const date_r17 = ɵɵnextContext().$implicit;
       const ctx_r1 = ɵɵnextContext(6);
-      return ɵɵresetView(ctx_r1.onDateSelect($event, date_r16));
+      return ɵɵresetView(ctx_r1.onDateSelect($event, date_r17));
     })("keydown", function Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_ng_container_1_Template_span_keydown_1_listener($event) {
-      ɵɵrestoreView(_r15);
-      const date_r16 = ɵɵnextContext().$implicit;
-      const i_r17 = ɵɵnextContext(3).index;
+      ɵɵrestoreView(_r16);
+      const date_r17 = ɵɵnextContext().$implicit;
+      const i_r18 = ɵɵnextContext(3).index;
       const ctx_r1 = ɵɵnextContext(3);
-      return ɵɵresetView(ctx_r1.onDateCellKeydown($event, date_r16, i_r17));
+      return ɵɵresetView(ctx_r1.onDateCellKeydown($event, date_r17, i_r18));
     });
     ɵɵtemplate(2, Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_ng_container_1_ng_container_2_Template, 2, 1, "ng-container", 7)(3, Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_ng_container_1_ng_container_3_Template, 2, 4, "ng-container", 7)(4, Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_ng_container_1_ng_container_4_Template, 2, 4, "ng-container", 7);
     ɵɵelementEnd();
-    ɵɵtemplate(5, Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_ng_container_1_div_5_Template, 2, 1, "div", 56);
+    ɵɵtemplate(5, Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_ng_container_1_div_5_Template, 2, 1, "div", 58);
     ɵɵelementContainerEnd();
   }
   if (rf & 2) {
-    const date_r16 = ɵɵnextContext().$implicit;
+    const date_r17 = ɵɵnextContext().$implicit;
     const ctx_r1 = ɵɵnextContext(6);
     ɵɵadvance();
-    ɵɵproperty("ngClass", ɵɵpureFunction2(5, _c12, ctx_r1.isSelected(date_r16) && date_r16.selectable, !date_r16.selectable));
+    ɵɵproperty("ngClass", ɵɵpureFunction2(6, _c14, ctx_r1.isSelected(date_r17) && date_r17.selectable, !date_r17.selectable));
+    ɵɵattribute("data-date", ctx_r1.formatDateKey(ctx_r1.formatDateMetaToDate(date_r17)));
     ɵɵadvance();
-    ɵɵproperty("ngIf", !ctx_r1.dateTemplate && (date_r16.selectable || !ctx_r1.disabledDateTemplate));
+    ɵɵproperty("ngIf", !ctx_r1.dateTemplate && (date_r17.selectable || !ctx_r1.disabledDateTemplate));
     ɵɵadvance();
-    ɵɵproperty("ngIf", date_r16.selectable || !ctx_r1.disabledDateTemplate);
+    ɵɵproperty("ngIf", date_r17.selectable || !ctx_r1.disabledDateTemplate);
     ɵɵadvance();
-    ɵɵproperty("ngIf", !date_r16.selectable);
+    ɵɵproperty("ngIf", !date_r17.selectable);
     ɵɵadvance();
-    ɵɵproperty("ngIf", ctx_r1.isSelected(date_r16));
+    ɵɵproperty("ngIf", ctx_r1.isSelected(date_r17));
   }
 }
 function Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementStart(0, "td", 16);
-    ɵɵtemplate(1, Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_ng_container_1_Template, 6, 8, "ng-container", 7);
+    ɵɵtemplate(1, Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_ng_container_1_Template, 6, 9, "ng-container", 7);
     ɵɵelementEnd();
   }
   if (rf & 2) {
-    const date_r16 = ctx.$implicit;
+    const date_r17 = ctx.$implicit;
     const ctx_r1 = ɵɵnextContext(6);
-    ɵɵproperty("ngClass", ɵɵpureFunction2(3, _c11, date_r16.otherMonth, date_r16.today));
-    ɵɵattribute("aria-label", date_r16.day);
+    ɵɵproperty("ngClass", ɵɵpureFunction2(3, _c13, date_r17.otherMonth, date_r17.today));
+    ɵɵattribute("aria-label", date_r17.day);
     ɵɵadvance();
-    ɵɵproperty("ngIf", date_r16.otherMonth ? ctx_r1.showOtherMonths : true);
+    ɵɵproperty("ngIf", date_r17.otherMonth ? ctx_r1.showOtherMonths : true);
   }
 }
 function Calendar_div_3_ng_container_4_div_2_div_10_tr_7_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementStart(0, "tr");
-    ɵɵtemplate(1, Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_1_Template, 3, 1, "td", 51)(2, Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_Template, 2, 6, "td", 52);
+    ɵɵtemplate(1, Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_1_Template, 3, 1, "td", 53)(2, Calendar_div_3_ng_container_4_div_2_div_10_tr_7_td_2_Template, 2, 6, "td", 54);
     ɵɵelementEnd();
   }
   if (rf & 2) {
-    const week_r18 = ctx.$implicit;
+    const week_r19 = ctx.$implicit;
     const ctx_r1 = ɵɵnextContext(5);
     ɵɵadvance();
     ɵɵproperty("ngIf", ctx_r1.showWeek);
     ɵɵadvance();
-    ɵɵproperty("ngForOf", week_r18);
+    ɵɵproperty("ngForOf", week_r19);
   }
 }
 function Calendar_div_3_ng_container_4_div_2_div_10_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "div", 44)(1, "table", 45)(2, "thead")(3, "tr");
-    ɵɵtemplate(4, Calendar_div_3_ng_container_4_div_2_div_10_th_4_Template, 3, 1, "th", 46)(5, Calendar_div_3_ng_container_4_div_2_div_10_th_5_Template, 3, 1, "th", 47);
+    ɵɵelementStart(0, "div", 46)(1, "table", 47)(2, "thead")(3, "tr");
+    ɵɵtemplate(4, Calendar_div_3_ng_container_4_div_2_div_10_th_4_Template, 3, 1, "th", 48)(5, Calendar_div_3_ng_container_4_div_2_div_10_th_5_Template, 3, 1, "th", 49);
     ɵɵelementEnd()();
     ɵɵelementStart(6, "tbody");
-    ɵɵtemplate(7, Calendar_div_3_ng_container_4_div_2_div_10_tr_7_Template, 3, 2, "tr", 48);
+    ɵɵtemplate(7, Calendar_div_3_ng_container_4_div_2_div_10_tr_7_Template, 3, 2, "tr", 50);
     ɵɵelementEnd()()();
   }
   if (rf & 2) {
-    const month_r11 = ɵɵnextContext().$implicit;
+    const month_r12 = ɵɵnextContext().$implicit;
     const ctx_r1 = ɵɵnextContext(3);
     ɵɵadvance(4);
     ɵɵproperty("ngIf", ctx_r1.showWeek);
     ɵɵadvance();
     ɵɵproperty("ngForOf", ctx_r1.weekDays);
     ɵɵadvance(2);
-    ɵɵproperty("ngForOf", month_r11.dates);
+    ɵɵproperty("ngForOf", month_r12.dates);
   }
 }
 function Calendar_div_3_ng_container_4_div_2_Template(rf, ctx) {
   if (rf & 1) {
-    const _r8 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "div", 24)(1, "div", 25);
-    ɵɵtemplate(2, Calendar_div_3_ng_container_4_div_2_button_2_Template, 3, 3, "button", 26);
-    ɵɵelementStart(3, "div", 27);
-    ɵɵtemplate(4, Calendar_div_3_ng_container_4_div_2_button_4_Template, 2, 3, "button", 28)(5, Calendar_div_3_ng_container_4_div_2_button_5_Template, 2, 3, "button", 29)(6, Calendar_div_3_ng_container_4_div_2_span_6_Template, 3, 5, "span", 30);
+    const _r9 = ɵɵgetCurrentView();
+    ɵɵelementStart(0, "div", 27)(1, "div", 28);
+    ɵɵtemplate(2, Calendar_div_3_ng_container_4_div_2_button_2_Template, 3, 3, "button", 29);
+    ɵɵelementStart(3, "div", 30);
+    ɵɵtemplate(4, Calendar_div_3_ng_container_4_div_2_button_4_Template, 2, 3, "button", 31)(5, Calendar_div_3_ng_container_4_div_2_button_5_Template, 2, 3, "button", 32)(6, Calendar_div_3_ng_container_4_div_2_span_6_Template, 3, 5, "span", 33);
     ɵɵelementEnd();
-    ɵɵelementStart(7, "button", 31);
+    ɵɵelementStart(7, "button", 34);
     ɵɵlistener("keydown", function Calendar_div_3_ng_container_4_div_2_Template_button_keydown_7_listener($event) {
-      ɵɵrestoreView(_r8);
+      ɵɵrestoreView(_r9);
       const ctx_r1 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r1.onContainerButtonKeydown($event));
     })("click", function Calendar_div_3_ng_container_4_div_2_Template_button_click_7_listener($event) {
-      ɵɵrestoreView(_r8);
+      ɵɵrestoreView(_r9);
       const ctx_r1 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r1.onNextButtonClick($event));
     });
-    ɵɵtemplate(8, Calendar_div_3_ng_container_4_div_2_ChevronRightIcon_8_Template, 1, 1, "ChevronRightIcon", 32)(9, Calendar_div_3_ng_container_4_div_2_span_9_Template, 2, 1, "span", 33);
+    ɵɵtemplate(8, Calendar_div_3_ng_container_4_div_2_ChevronRightIcon_8_Template, 1, 1, "ChevronRightIcon", 35)(9, Calendar_div_3_ng_container_4_div_2_span_9_Template, 2, 1, "span", 36);
     ɵɵelementEnd()();
-    ɵɵtemplate(10, Calendar_div_3_ng_container_4_div_2_div_10_Template, 8, 3, "div", 34);
+    ɵɵtemplate(10, Calendar_div_3_ng_container_4_div_2_div_10_Template, 8, 3, "div", 37);
     ɵɵelementEnd();
   }
   if (rf & 2) {
-    const i_r17 = ctx.index;
+    const i_r18 = ctx.index;
     const ctx_r1 = ɵɵnextContext(3);
     ɵɵadvance(2);
-    ɵɵproperty("ngIf", i_r17 === 0);
+    ɵɵproperty("ngIf", i_r18 === 0);
     ɵɵadvance(2);
     ɵɵproperty("ngIf", ctx_r1.currentView === "date");
     ɵɵadvance();
@@ -3963,7 +4388,7 @@ function Calendar_div_3_ng_container_4_div_2_Template(rf, ctx) {
     ɵɵadvance();
     ɵɵproperty("ngIf", ctx_r1.currentView === "year");
     ɵɵadvance();
-    ɵɵstyleProp("display", ctx_r1.numberOfMonths === 1 ? "inline-flex" : i_r17 === ctx_r1.numberOfMonths - 1 ? "inline-flex" : "none");
+    ɵɵstyleProp("display", ctx_r1.numberOfMonths === 1 ? "inline-flex" : i_r18 === ctx_r1.numberOfMonths - 1 ? "inline-flex" : "none");
     ɵɵattribute("aria-label", ctx_r1.nextIconAriaLabel);
     ɵɵadvance();
     ɵɵproperty("ngIf", !ctx_r1.nextIconTemplate);
@@ -3975,48 +4400,48 @@ function Calendar_div_3_ng_container_4_div_2_Template(rf, ctx) {
 }
 function Calendar_div_3_ng_container_4_div_3_span_1_div_2_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "div", 57);
+    ɵɵelementStart(0, "div", 59);
     ɵɵtext(1);
     ɵɵelementEnd();
   }
   if (rf & 2) {
-    const m_r21 = ɵɵnextContext().$implicit;
+    const m_r22 = ɵɵnextContext().$implicit;
     ɵɵadvance();
-    ɵɵtextInterpolate1(" ", m_r21, " ");
+    ɵɵtextInterpolate1(" ", m_r22, " ");
   }
 }
 function Calendar_div_3_ng_container_4_div_3_span_1_Template(rf, ctx) {
   if (rf & 1) {
-    const _r19 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "span", 60);
+    const _r20 = ɵɵgetCurrentView();
+    ɵɵelementStart(0, "span", 62);
     ɵɵlistener("click", function Calendar_div_3_ng_container_4_div_3_span_1_Template_span_click_0_listener($event) {
-      const i_r20 = ɵɵrestoreView(_r19).index;
+      const i_r21 = ɵɵrestoreView(_r20).index;
       const ctx_r1 = ɵɵnextContext(4);
-      return ɵɵresetView(ctx_r1.onMonthSelect($event, i_r20));
+      return ɵɵresetView(ctx_r1.onMonthSelect($event, i_r21));
     })("keydown", function Calendar_div_3_ng_container_4_div_3_span_1_Template_span_keydown_0_listener($event) {
-      const i_r20 = ɵɵrestoreView(_r19).index;
+      const i_r21 = ɵɵrestoreView(_r20).index;
       const ctx_r1 = ɵɵnextContext(4);
-      return ɵɵresetView(ctx_r1.onMonthCellKeydown($event, i_r20));
+      return ɵɵresetView(ctx_r1.onMonthCellKeydown($event, i_r21));
     });
     ɵɵtext(1);
-    ɵɵtemplate(2, Calendar_div_3_ng_container_4_div_3_span_1_div_2_Template, 2, 1, "div", 56);
+    ɵɵtemplate(2, Calendar_div_3_ng_container_4_div_3_span_1_div_2_Template, 2, 1, "div", 58);
     ɵɵelementEnd();
   }
   if (rf & 2) {
-    const m_r21 = ctx.$implicit;
-    const i_r20 = ctx.index;
+    const m_r22 = ctx.$implicit;
+    const i_r21 = ctx.index;
     const ctx_r1 = ɵɵnextContext(4);
-    ɵɵproperty("ngClass", ɵɵpureFunction2(3, _c12, ctx_r1.isMonthSelected(i_r20), ctx_r1.isMonthDisabled(i_r20)));
+    ɵɵproperty("ngClass", ɵɵpureFunction2(3, _c15, ctx_r1.isMonthSelected(i_r21), ctx_r1.isMonthDisabled(i_r21)));
     ɵɵadvance();
-    ɵɵtextInterpolate1(" ", m_r21, " ");
+    ɵɵtextInterpolate1(" ", m_r22, " ");
     ɵɵadvance();
-    ɵɵproperty("ngIf", ctx_r1.isMonthSelected(i_r20));
+    ɵɵproperty("ngIf", ctx_r1.isMonthSelected(i_r21));
   }
 }
 function Calendar_div_3_ng_container_4_div_3_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "div", 58);
-    ɵɵtemplate(1, Calendar_div_3_ng_container_4_div_3_span_1_Template, 3, 6, "span", 59);
+    ɵɵelementStart(0, "div", 60);
+    ɵɵtemplate(1, Calendar_div_3_ng_container_4_div_3_span_1_Template, 3, 6, "span", 61);
     ɵɵelementEnd();
   }
   if (rf & 2) {
@@ -4027,47 +4452,47 @@ function Calendar_div_3_ng_container_4_div_3_Template(rf, ctx) {
 }
 function Calendar_div_3_ng_container_4_div_4_span_1_div_2_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "div", 57);
+    ɵɵelementStart(0, "div", 59);
     ɵɵtext(1);
     ɵɵelementEnd();
   }
   if (rf & 2) {
-    const y_r23 = ɵɵnextContext().$implicit;
+    const y_r24 = ɵɵnextContext().$implicit;
     ɵɵadvance();
-    ɵɵtextInterpolate1(" ", y_r23, " ");
+    ɵɵtextInterpolate1(" ", y_r24, " ");
   }
 }
 function Calendar_div_3_ng_container_4_div_4_span_1_Template(rf, ctx) {
   if (rf & 1) {
-    const _r22 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "span", 63);
+    const _r23 = ɵɵgetCurrentView();
+    ɵɵelementStart(0, "span", 65);
     ɵɵlistener("click", function Calendar_div_3_ng_container_4_div_4_span_1_Template_span_click_0_listener($event) {
-      const y_r23 = ɵɵrestoreView(_r22).$implicit;
+      const y_r24 = ɵɵrestoreView(_r23).$implicit;
       const ctx_r1 = ɵɵnextContext(4);
-      return ɵɵresetView(ctx_r1.onYearSelect($event, y_r23));
+      return ɵɵresetView(ctx_r1.onYearSelect($event, y_r24));
     })("keydown", function Calendar_div_3_ng_container_4_div_4_span_1_Template_span_keydown_0_listener($event) {
-      const y_r23 = ɵɵrestoreView(_r22).$implicit;
+      const y_r24 = ɵɵrestoreView(_r23).$implicit;
       const ctx_r1 = ɵɵnextContext(4);
-      return ɵɵresetView(ctx_r1.onYearCellKeydown($event, y_r23));
+      return ɵɵresetView(ctx_r1.onYearCellKeydown($event, y_r24));
     });
     ɵɵtext(1);
-    ɵɵtemplate(2, Calendar_div_3_ng_container_4_div_4_span_1_div_2_Template, 2, 1, "div", 56);
+    ɵɵtemplate(2, Calendar_div_3_ng_container_4_div_4_span_1_div_2_Template, 2, 1, "div", 58);
     ɵɵelementEnd();
   }
   if (rf & 2) {
-    const y_r23 = ctx.$implicit;
+    const y_r24 = ctx.$implicit;
     const ctx_r1 = ɵɵnextContext(4);
-    ɵɵproperty("ngClass", ɵɵpureFunction2(3, _c12, ctx_r1.isYearSelected(y_r23), ctx_r1.isYearDisabled(y_r23)));
+    ɵɵproperty("ngClass", ɵɵpureFunction2(3, _c15, ctx_r1.isYearSelected(y_r24), ctx_r1.isYearDisabled(y_r24)));
     ɵɵadvance();
-    ɵɵtextInterpolate1(" ", y_r23, " ");
+    ɵɵtextInterpolate1(" ", y_r24, " ");
     ɵɵadvance();
-    ɵɵproperty("ngIf", ctx_r1.isYearSelected(y_r23));
+    ɵɵproperty("ngIf", ctx_r1.isYearSelected(y_r24));
   }
 }
 function Calendar_div_3_ng_container_4_div_4_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "div", 61);
-    ɵɵtemplate(1, Calendar_div_3_ng_container_4_div_4_span_1_Template, 3, 6, "span", 62);
+    ɵɵelementStart(0, "div", 63);
+    ɵɵtemplate(1, Calendar_div_3_ng_container_4_div_4_span_1_Template, 3, 6, "span", 64);
     ɵɵelementEnd();
   }
   if (rf & 2) {
@@ -4079,10 +4504,10 @@ function Calendar_div_3_ng_container_4_div_4_Template(rf, ctx) {
 function Calendar_div_3_ng_container_4_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainerStart(0);
-    ɵɵelementStart(1, "div", 20);
-    ɵɵtemplate(2, Calendar_div_3_ng_container_4_div_2_Template, 11, 10, "div", 21);
+    ɵɵelementStart(1, "div", 23);
+    ɵɵtemplate(2, Calendar_div_3_ng_container_4_div_2_Template, 11, 10, "div", 24);
     ɵɵelementEnd();
-    ɵɵtemplate(3, Calendar_div_3_ng_container_4_div_3_Template, 2, 1, "div", 22)(4, Calendar_div_3_ng_container_4_div_4_Template, 2, 1, "div", 23);
+    ɵɵtemplate(3, Calendar_div_3_ng_container_4_div_3_Template, 2, 1, "div", 25)(4, Calendar_div_3_ng_container_4_div_4_Template, 2, 1, "div", 26);
     ɵɵelementContainerEnd();
   }
   if (rf & 2) {
@@ -4159,7 +4584,7 @@ function Calendar_div_3_div_5_23_Template(rf, ctx) {
 }
 function Calendar_div_3_div_5_div_24_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "div", 67)(1, "span");
+    ɵɵelementStart(0, "div", 69)(1, "span");
     ɵɵtext(2);
     ɵɵelementEnd()();
   }
@@ -4202,38 +4627,38 @@ function Calendar_div_3_div_5_div_25_9_Template(rf, ctx) {
 }
 function Calendar_div_3_div_5_div_25_Template(rf, ctx) {
   if (rf & 1) {
-    const _r25 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "div", 72)(1, "button", 66);
+    const _r26 = ɵɵgetCurrentView();
+    ɵɵelementStart(0, "div", 74)(1, "button", 68);
     ɵɵlistener("keydown", function Calendar_div_3_div_5_div_25_Template_button_keydown_1_listener($event) {
-      ɵɵrestoreView(_r25);
+      ɵɵrestoreView(_r26);
       const ctx_r1 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r1.onContainerButtonKeydown($event));
     })("keydown.enter", function Calendar_div_3_div_5_div_25_Template_button_keydown_enter_1_listener($event) {
-      ɵɵrestoreView(_r25);
+      ɵɵrestoreView(_r26);
       const ctx_r1 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r1.incrementSecond($event));
     })("keydown.space", function Calendar_div_3_div_5_div_25_Template_button_keydown_space_1_listener($event) {
-      ɵɵrestoreView(_r25);
+      ɵɵrestoreView(_r26);
       const ctx_r1 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r1.incrementSecond($event));
     })("mousedown", function Calendar_div_3_div_5_div_25_Template_button_mousedown_1_listener($event) {
-      ɵɵrestoreView(_r25);
+      ɵɵrestoreView(_r26);
       const ctx_r1 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseDown($event, 2, 1));
     })("mouseup", function Calendar_div_3_div_5_div_25_Template_button_mouseup_1_listener($event) {
-      ɵɵrestoreView(_r25);
+      ɵɵrestoreView(_r26);
       const ctx_r1 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseUp($event));
     })("keyup.enter", function Calendar_div_3_div_5_div_25_Template_button_keyup_enter_1_listener($event) {
-      ɵɵrestoreView(_r25);
+      ɵɵrestoreView(_r26);
       const ctx_r1 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseUp($event));
     })("keyup.space", function Calendar_div_3_div_5_div_25_Template_button_keyup_space_1_listener($event) {
-      ɵɵrestoreView(_r25);
+      ɵɵrestoreView(_r26);
       const ctx_r1 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseUp($event));
     })("mouseleave", function Calendar_div_3_div_5_div_25_Template_button_mouseleave_1_listener() {
-      ɵɵrestoreView(_r25);
+      ɵɵrestoreView(_r26);
       const ctx_r1 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseLeave());
     });
@@ -4243,37 +4668,37 @@ function Calendar_div_3_div_5_div_25_Template(rf, ctx) {
     ɵɵtemplate(5, Calendar_div_3_div_5_div_25_ng_container_5_Template, 2, 0, "ng-container", 7);
     ɵɵtext(6);
     ɵɵelementEnd();
-    ɵɵelementStart(7, "button", 66);
+    ɵɵelementStart(7, "button", 68);
     ɵɵlistener("keydown", function Calendar_div_3_div_5_div_25_Template_button_keydown_7_listener($event) {
-      ɵɵrestoreView(_r25);
+      ɵɵrestoreView(_r26);
       const ctx_r1 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r1.onContainerButtonKeydown($event));
     })("keydown.enter", function Calendar_div_3_div_5_div_25_Template_button_keydown_enter_7_listener($event) {
-      ɵɵrestoreView(_r25);
+      ɵɵrestoreView(_r26);
       const ctx_r1 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r1.decrementSecond($event));
     })("keydown.space", function Calendar_div_3_div_5_div_25_Template_button_keydown_space_7_listener($event) {
-      ɵɵrestoreView(_r25);
+      ɵɵrestoreView(_r26);
       const ctx_r1 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r1.decrementSecond($event));
     })("mousedown", function Calendar_div_3_div_5_div_25_Template_button_mousedown_7_listener($event) {
-      ɵɵrestoreView(_r25);
+      ɵɵrestoreView(_r26);
       const ctx_r1 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseDown($event, 2, -1));
     })("mouseup", function Calendar_div_3_div_5_div_25_Template_button_mouseup_7_listener($event) {
-      ɵɵrestoreView(_r25);
+      ɵɵrestoreView(_r26);
       const ctx_r1 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseUp($event));
     })("keyup.enter", function Calendar_div_3_div_5_div_25_Template_button_keyup_enter_7_listener($event) {
-      ɵɵrestoreView(_r25);
+      ɵɵrestoreView(_r26);
       const ctx_r1 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseUp($event));
     })("keyup.space", function Calendar_div_3_div_5_div_25_Template_button_keyup_space_7_listener($event) {
-      ɵɵrestoreView(_r25);
+      ɵɵrestoreView(_r26);
       const ctx_r1 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseUp($event));
     })("mouseleave", function Calendar_div_3_div_5_div_25_Template_button_mouseleave_7_listener() {
-      ɵɵrestoreView(_r25);
+      ɵɵrestoreView(_r26);
       const ctx_r1 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseLeave());
     });
@@ -4326,18 +4751,18 @@ function Calendar_div_3_div_5_div_26_8_Template(rf, ctx) {
 }
 function Calendar_div_3_div_5_div_26_Template(rf, ctx) {
   if (rf & 1) {
-    const _r26 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "div", 73)(1, "button", 74);
+    const _r27 = ɵɵgetCurrentView();
+    ɵɵelementStart(0, "div", 75)(1, "button", 76);
     ɵɵlistener("keydown", function Calendar_div_3_div_5_div_26_Template_button_keydown_1_listener($event) {
-      ɵɵrestoreView(_r26);
+      ɵɵrestoreView(_r27);
       const ctx_r1 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r1.onContainerButtonKeydown($event));
     })("click", function Calendar_div_3_div_5_div_26_Template_button_click_1_listener($event) {
-      ɵɵrestoreView(_r26);
+      ɵɵrestoreView(_r27);
       const ctx_r1 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r1.toggleAMPM($event));
     })("keydown.enter", function Calendar_div_3_div_5_div_26_Template_button_keydown_enter_1_listener($event) {
-      ɵɵrestoreView(_r26);
+      ɵɵrestoreView(_r27);
       const ctx_r1 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r1.toggleAMPM($event));
     });
@@ -4346,17 +4771,17 @@ function Calendar_div_3_div_5_div_26_Template(rf, ctx) {
     ɵɵelementStart(4, "span");
     ɵɵtext(5);
     ɵɵelementEnd();
-    ɵɵelementStart(6, "button", 74);
+    ɵɵelementStart(6, "button", 76);
     ɵɵlistener("keydown", function Calendar_div_3_div_5_div_26_Template_button_keydown_6_listener($event) {
-      ɵɵrestoreView(_r26);
+      ɵɵrestoreView(_r27);
       const ctx_r1 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r1.onContainerButtonKeydown($event));
     })("click", function Calendar_div_3_div_5_div_26_Template_button_click_6_listener($event) {
-      ɵɵrestoreView(_r26);
+      ɵɵrestoreView(_r27);
       const ctx_r1 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r1.toggleAMPM($event));
     })("keydown.enter", function Calendar_div_3_div_5_div_26_Template_button_keydown_enter_6_listener($event) {
-      ɵɵrestoreView(_r26);
+      ɵɵrestoreView(_r27);
       const ctx_r1 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r1.toggleAMPM($event));
     });
@@ -4383,38 +4808,38 @@ function Calendar_div_3_div_5_div_26_Template(rf, ctx) {
 }
 function Calendar_div_3_div_5_Template(rf, ctx) {
   if (rf & 1) {
-    const _r24 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "div", 64)(1, "div", 65)(2, "button", 66);
+    const _r25 = ɵɵgetCurrentView();
+    ɵɵelementStart(0, "div", 66)(1, "div", 67)(2, "button", 68);
     ɵɵlistener("keydown", function Calendar_div_3_div_5_Template_button_keydown_2_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onContainerButtonKeydown($event));
     })("keydown.enter", function Calendar_div_3_div_5_Template_button_keydown_enter_2_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.incrementHour($event));
     })("keydown.space", function Calendar_div_3_div_5_Template_button_keydown_space_2_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.incrementHour($event));
     })("mousedown", function Calendar_div_3_div_5_Template_button_mousedown_2_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseDown($event, 0, 1));
     })("mouseup", function Calendar_div_3_div_5_Template_button_mouseup_2_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseUp($event));
     })("keyup.enter", function Calendar_div_3_div_5_Template_button_keyup_enter_2_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseUp($event));
     })("keyup.space", function Calendar_div_3_div_5_Template_button_keyup_space_2_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseUp($event));
     })("mouseleave", function Calendar_div_3_div_5_Template_button_mouseleave_2_listener() {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseLeave());
     });
@@ -4424,76 +4849,76 @@ function Calendar_div_3_div_5_Template(rf, ctx) {
     ɵɵtemplate(6, Calendar_div_3_div_5_ng_container_6_Template, 2, 0, "ng-container", 7);
     ɵɵtext(7);
     ɵɵelementEnd();
-    ɵɵelementStart(8, "button", 66);
+    ɵɵelementStart(8, "button", 68);
     ɵɵlistener("keydown", function Calendar_div_3_div_5_Template_button_keydown_8_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onContainerButtonKeydown($event));
     })("keydown.enter", function Calendar_div_3_div_5_Template_button_keydown_enter_8_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.decrementHour($event));
     })("keydown.space", function Calendar_div_3_div_5_Template_button_keydown_space_8_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.decrementHour($event));
     })("mousedown", function Calendar_div_3_div_5_Template_button_mousedown_8_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseDown($event, 0, -1));
     })("mouseup", function Calendar_div_3_div_5_Template_button_mouseup_8_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseUp($event));
     })("keyup.enter", function Calendar_div_3_div_5_Template_button_keyup_enter_8_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseUp($event));
     })("keyup.space", function Calendar_div_3_div_5_Template_button_keyup_space_8_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseUp($event));
     })("mouseleave", function Calendar_div_3_div_5_Template_button_mouseleave_8_listener() {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseLeave());
     });
     ɵɵtemplate(9, Calendar_div_3_div_5_ChevronDownIcon_9_Template, 1, 0, "ChevronDownIcon", 7)(10, Calendar_div_3_div_5_10_Template, 1, 0, null, 13);
     ɵɵelementEnd()();
-    ɵɵelementStart(11, "div", 67)(12, "span");
+    ɵɵelementStart(11, "div", 69)(12, "span");
     ɵɵtext(13);
     ɵɵelementEnd()();
-    ɵɵelementStart(14, "div", 68)(15, "button", 66);
+    ɵɵelementStart(14, "div", 70)(15, "button", 68);
     ɵɵlistener("keydown", function Calendar_div_3_div_5_Template_button_keydown_15_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onContainerButtonKeydown($event));
     })("keydown.enter", function Calendar_div_3_div_5_Template_button_keydown_enter_15_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.incrementMinute($event));
     })("keydown.space", function Calendar_div_3_div_5_Template_button_keydown_space_15_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.incrementMinute($event));
     })("mousedown", function Calendar_div_3_div_5_Template_button_mousedown_15_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseDown($event, 1, 1));
     })("mouseup", function Calendar_div_3_div_5_Template_button_mouseup_15_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseUp($event));
     })("keyup.enter", function Calendar_div_3_div_5_Template_button_keyup_enter_15_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseUp($event));
     })("keyup.space", function Calendar_div_3_div_5_Template_button_keyup_space_15_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseUp($event));
     })("mouseleave", function Calendar_div_3_div_5_Template_button_mouseleave_15_listener() {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseLeave());
     });
@@ -4503,43 +4928,43 @@ function Calendar_div_3_div_5_Template(rf, ctx) {
     ɵɵtemplate(19, Calendar_div_3_div_5_ng_container_19_Template, 2, 0, "ng-container", 7);
     ɵɵtext(20);
     ɵɵelementEnd();
-    ɵɵelementStart(21, "button", 66);
+    ɵɵelementStart(21, "button", 68);
     ɵɵlistener("keydown", function Calendar_div_3_div_5_Template_button_keydown_21_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onContainerButtonKeydown($event));
     })("keydown.enter", function Calendar_div_3_div_5_Template_button_keydown_enter_21_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.decrementMinute($event));
     })("keydown.space", function Calendar_div_3_div_5_Template_button_keydown_space_21_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.decrementMinute($event));
     })("mousedown", function Calendar_div_3_div_5_Template_button_mousedown_21_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseDown($event, 1, -1));
     })("mouseup", function Calendar_div_3_div_5_Template_button_mouseup_21_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseUp($event));
     })("keyup.enter", function Calendar_div_3_div_5_Template_button_keyup_enter_21_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseUp($event));
     })("keyup.space", function Calendar_div_3_div_5_Template_button_keyup_space_21_listener($event) {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseUp($event));
     })("mouseleave", function Calendar_div_3_div_5_Template_button_mouseleave_21_listener() {
-      ɵɵrestoreView(_r24);
+      ɵɵrestoreView(_r25);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onTimePickerElementMouseLeave());
     });
     ɵɵtemplate(22, Calendar_div_3_div_5_ChevronDownIcon_22_Template, 1, 0, "ChevronDownIcon", 7)(23, Calendar_div_3_div_5_23_Template, 1, 0, null, 13);
     ɵɵelementEnd()();
-    ɵɵtemplate(24, Calendar_div_3_div_5_div_24_Template, 3, 1, "div", 69)(25, Calendar_div_3_div_5_div_25_Template, 10, 8, "div", 70)(26, Calendar_div_3_div_5_div_26_Template, 9, 7, "div", 71);
+    ɵɵtemplate(24, Calendar_div_3_div_5_div_24_Template, 3, 1, "div", 71)(25, Calendar_div_3_div_5_div_25_Template, 10, 8, "div", 72)(26, Calendar_div_3_div_5_div_26_Template, 9, 7, "div", 73);
     ɵɵelementEnd();
   }
   if (rf & 2) {
@@ -4588,25 +5013,25 @@ function Calendar_div_3_div_5_Template(rf, ctx) {
 }
 function Calendar_div_3_div_6_Template(rf, ctx) {
   if (rf & 1) {
-    const _r27 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "div", 75)(1, "button", 76);
+    const _r28 = ɵɵgetCurrentView();
+    ɵɵelementStart(0, "div", 77)(1, "button", 78);
     ɵɵlistener("keydown", function Calendar_div_3_div_6_Template_button_keydown_1_listener($event) {
-      ɵɵrestoreView(_r27);
+      ɵɵrestoreView(_r28);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onContainerButtonKeydown($event));
     })("click", function Calendar_div_3_div_6_Template_button_click_1_listener($event) {
-      ɵɵrestoreView(_r27);
+      ɵɵrestoreView(_r28);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onTodayButtonClick($event));
     });
     ɵɵelementEnd();
-    ɵɵelementStart(2, "button", 76);
+    ɵɵelementStart(2, "button", 78);
     ɵɵlistener("keydown", function Calendar_div_3_div_6_Template_button_keydown_2_listener($event) {
-      ɵɵrestoreView(_r27);
+      ɵɵrestoreView(_r28);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onContainerButtonKeydown($event));
     })("click", function Calendar_div_3_div_6_Template_button_click_2_listener($event) {
-      ɵɵrestoreView(_r27);
+      ɵɵrestoreView(_r28);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onClearButtonClick($event));
     });
@@ -4615,9 +5040,9 @@ function Calendar_div_3_div_6_Template(rf, ctx) {
   if (rf & 2) {
     const ctx_r1 = ɵɵnextContext(2);
     ɵɵadvance();
-    ɵɵproperty("label", ctx_r1.getTranslation("today"))("ngClass", ɵɵpureFunction1(4, _c13, ctx_r1.todayButtonStyleClass));
+    ɵɵproperty("label", ctx_r1.getTranslation("today"))("ngClass", ɵɵpureFunction1(4, _c16, ctx_r1.todayButtonStyleClass));
     ɵɵadvance();
-    ɵɵproperty("label", ctx_r1.getTranslation("clear"))("ngClass", ɵɵpureFunction1(6, _c13, ctx_r1.clearButtonStyleClass));
+    ɵɵproperty("label", ctx_r1.getTranslation("clear"))("ngClass", ɵɵpureFunction1(6, _c16, ctx_r1.clearButtonStyleClass));
   }
 }
 function Calendar_div_3_ng_container_8_Template(rf, ctx) {
@@ -4627,23 +5052,23 @@ function Calendar_div_3_ng_container_8_Template(rf, ctx) {
 }
 function Calendar_div_3_Template(rf, ctx) {
   if (rf & 1) {
-    const _r7 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "div", 17, 2);
+    const _r8 = ɵɵgetCurrentView();
+    ɵɵelementStart(0, "div", 20, 2);
     ɵɵlistener("@overlayAnimation.start", function Calendar_div_3_Template_div_animation_overlayAnimation_start_0_listener($event) {
-      ɵɵrestoreView(_r7);
+      ɵɵrestoreView(_r8);
       const ctx_r1 = ɵɵnextContext();
       return ɵɵresetView(ctx_r1.onOverlayAnimationStart($event));
     })("@overlayAnimation.done", function Calendar_div_3_Template_div_animation_overlayAnimation_done_0_listener($event) {
-      ɵɵrestoreView(_r7);
+      ɵɵrestoreView(_r8);
       const ctx_r1 = ɵɵnextContext();
       return ɵɵresetView(ctx_r1.onOverlayAnimationDone($event));
     })("click", function Calendar_div_3_Template_div_click_0_listener($event) {
-      ɵɵrestoreView(_r7);
+      ɵɵrestoreView(_r8);
       const ctx_r1 = ɵɵnextContext();
       return ɵɵresetView(ctx_r1.onOverlayClick($event));
     });
     ɵɵprojection(2);
-    ɵɵtemplate(3, Calendar_div_3_ng_container_3_Template, 1, 0, "ng-container", 13)(4, Calendar_div_3_ng_container_4_Template, 5, 3, "ng-container", 7)(5, Calendar_div_3_div_5_Template, 27, 20, "div", 18)(6, Calendar_div_3_div_6_Template, 3, 8, "div", 19);
+    ɵɵtemplate(3, Calendar_div_3_ng_container_3_Template, 1, 0, "ng-container", 13)(4, Calendar_div_3_ng_container_4_Template, 5, 3, "ng-container", 7)(5, Calendar_div_3_div_5_Template, 27, 20, "div", 21)(6, Calendar_div_3_div_6_Template, 3, 8, "div", 22);
     ɵɵprojection(7, 1);
     ɵɵtemplate(8, Calendar_div_3_ng_container_8_Template, 1, 0, "ng-container", 13);
     ɵɵelementEnd();
@@ -4651,8 +5076,8 @@ function Calendar_div_3_Template(rf, ctx) {
   if (rf & 2) {
     const ctx_r1 = ɵɵnextContext();
     ɵɵclassMap(ctx_r1.panelStyleClass);
-    ɵɵproperty("ngStyle", ctx_r1.panelStyle)("ngClass", ɵɵpureFunction6(14, _c6, ctx_r1.inline, ctx_r1.disabled, ctx_r1.timeOnly, ctx_r1.numberOfMonths > 1, ctx_r1.view === "month", ctx_r1.touchUI))("@overlayAnimation", ctx_r1.touchUI ? ɵɵpureFunction1(24, _c8, ɵɵpureFunction2(21, _c7, ctx_r1.showTransitionOptions, ctx_r1.hideTransitionOptions)) : ɵɵpureFunction1(29, _c9, ɵɵpureFunction2(26, _c7, ctx_r1.showTransitionOptions, ctx_r1.hideTransitionOptions)))("@.disabled", ctx_r1.inline === true);
-    ɵɵattribute("aria-label", ctx_r1.getTranslation("chooseDate"))("role", ctx_r1.inline ? null : "dialog")("aria-modal", ctx_r1.inline ? null : "true");
+    ɵɵproperty("ngStyle", ctx_r1.panelStyle)("ngClass", ɵɵpureFunction6(15, _c8, ctx_r1.inline, ctx_r1.disabled, ctx_r1.timeOnly, ctx_r1.numberOfMonths > 1, ctx_r1.view === "month", ctx_r1.touchUI))("@overlayAnimation", ctx_r1.touchUI ? ɵɵpureFunction1(25, _c10, ɵɵpureFunction2(22, _c9, ctx_r1.showTransitionOptions, ctx_r1.hideTransitionOptions)) : ɵɵpureFunction1(30, _c11, ɵɵpureFunction2(27, _c9, ctx_r1.showTransitionOptions, ctx_r1.hideTransitionOptions)))("@.disabled", ctx_r1.inline === true);
+    ɵɵattribute("id", ctx_r1.panelId)("aria-label", ctx_r1.getTranslation("chooseDate"))("role", ctx_r1.inline ? null : "dialog")("aria-modal", ctx_r1.inline ? null : "true");
     ɵɵadvance(3);
     ɵɵproperty("ngTemplateOutlet", ctx_r1.headerTemplate);
     ɵɵadvance();
@@ -4678,6 +5103,7 @@ var Calendar = class _Calendar {
   zone;
   config;
   overlayService;
+  iconDisplay = "button";
   /**
    * Inline style of the component.
    * @group Props
@@ -4811,6 +5237,11 @@ var Calendar = class _Calendar {
    */
   timeOnly;
   /**
+   * Years to change per step in yearpicker.
+   * @group Props
+   */
+  stepYearPicker = 10;
+  /**
    * Hours to change per step.
    * @group Props
    */
@@ -4846,6 +5277,11 @@ var Calendar = class _Calendar {
    */
   showWeek = false;
   /**
+   * When enabled, calendar will start week numbers from first day of the year.
+   * @group Props
+   */
+  startWeekFromFirstDayOfYear = false;
+  /**
    * When enabled, a clear icon is displayed to clear the value.
    * @group Props
    */
@@ -4880,6 +5316,11 @@ var Calendar = class _Calendar {
    * @group Props
    */
   clearButtonStyleClass = "p-button-text";
+  /**
+   * When present, it specifies that the component should automatically get focus on load.
+   * @group Props
+   */
+  autofocus;
   /**
    * Whether to automatically manage layering.
    * @group Props
@@ -4940,6 +5381,11 @@ var Calendar = class _Calendar {
    * @group Props
    */
   tabindex;
+  /**
+   * Specifies the input variant of the component.
+   * @group Props
+   */
+  variant = "outlined";
   /**
    * The minimum selectable date.
    * @group Props
@@ -5094,6 +5540,12 @@ var Calendar = class _Calendar {
       this.createMonths(this.currentMonth, this.currentYear);
     }
   }
+  get inputClass() {
+    return {
+      "p-inputtext p-component": true,
+      "p-variant-filled": this.variant === "filled" || this.config.inputStyle() === "filled"
+    };
+  }
   /**
    * Callback to invoke on focus of input field.
    * @param {Event} event - browser event.
@@ -5225,6 +5677,7 @@ var Calendar = class _Calendar {
   clearIconTemplate;
   decrementIconTemplate;
   incrementIconTemplate;
+  inputIconTemplate;
   _disabledDates;
   _disabledDays;
   selectElement;
@@ -5246,6 +5699,7 @@ var Calendar = class _Calendar {
   _view = "date";
   preventFocus;
   _defaultDate;
+  _focusKey = null;
   window;
   get locale() {
     return this._locale;
@@ -5304,6 +5758,9 @@ var Calendar = class _Calendar {
           break;
         case "header":
           this.headerTemplate = item.template;
+          break;
+        case "inputicon":
+          this.inputIconTemplate = item.template;
           break;
         case "previousicon":
           this.previousIconTemplate = item.template;
@@ -5372,8 +5829,8 @@ var Calendar = class _Calendar {
   }
   yearPickerValues() {
     let yearPickerValues = [];
-    let base = this.currentYear - this.currentYear % 10;
-    for (let i = 0; i < 10; i++) {
+    let base = this.currentYear - this.currentYear % this.stepYearPicker;
+    for (let i = 0; i < this.stepYearPicker; i++) {
       yearPickerValues.push(base + i);
     }
     return yearPickerValues;
@@ -5392,7 +5849,12 @@ var Calendar = class _Calendar {
   }
   getWeekNumber(date) {
     let checkDate = new Date(date.getTime());
-    checkDate.setDate(checkDate.getDate() + 4 - (checkDate.getDay() || 7));
+    if (this.startWeekFromFirstDayOfYear) {
+      let firstDayOfWeek = +this.getFirstDateOfWeek();
+      checkDate.setDate(checkDate.getDate() + 6 + firstDayOfWeek - checkDate.getDay());
+    } else {
+      checkDate.setDate(checkDate.getDate() + 4 - (checkDate.getDay() || 7));
+    }
     let time = checkDate.getTime();
     checkDate.setMonth(0);
     checkDate.setDate(1);
@@ -5492,7 +5954,7 @@ var Calendar = class _Calendar {
         this.updateFocus();
       }, 1);
     } else if (this.currentView === "year") {
-      this.decrementDecade();
+      this.decrementYearPickerStep();
       setTimeout(() => {
         this.updateFocus();
       }, 1);
@@ -5522,7 +5984,7 @@ var Calendar = class _Calendar {
         this.updateFocus();
       }, 1);
     } else if (this.currentView === "year") {
-      this.incrementDecade();
+      this.incrementYearPickerStep();
       setTimeout(() => {
         this.updateFocus();
       }, 1);
@@ -5548,11 +6010,11 @@ var Calendar = class _Calendar {
       this.populateYearOptions(_yearOptions[0] - difference, _yearOptions[_yearOptions.length - 1] - difference);
     }
   }
-  decrementDecade() {
-    this.currentYear = this.currentYear - 10;
+  decrementYearPickerStep() {
+    this.currentYear = this.currentYear - this.stepYearPicker;
   }
-  incrementDecade() {
-    this.currentYear = this.currentYear + 10;
+  incrementYearPickerStep() {
+    this.currentYear = this.currentYear + this.stepYearPicker;
   }
   incrementYear() {
     this.currentYear++;
@@ -5588,7 +6050,7 @@ var Calendar = class _Calendar {
         this.selectDate(dateMeta);
       }
     }
-    if (this.isSingleSelection() && this.hideOnDateTimeSelect) {
+    if (this.hideOnDateTimeSelect && (this.isSingleSelection() || this.isRangeSelection() && this.value[1])) {
       setTimeout(() => {
         event2.preventDefault();
         this.hideOverlay();
@@ -5672,6 +6134,7 @@ var Calendar = class _Calendar {
   }
   formatDateTime(date) {
     let formattedValue = this.keepInvalid ? date : null;
+    const isDateValid = this.isValidDateForTimeConstraints(date);
     if (this.isValidDate(date)) {
       if (this.timeOnly) {
         formattedValue = this.formatTime(date);
@@ -5681,8 +6144,17 @@ var Calendar = class _Calendar {
           formattedValue += " " + this.formatTime(date);
         }
       }
+    } else if (this.dataType === "string") {
+      formattedValue = date;
     }
+    formattedValue = isDateValid ? formattedValue : "";
     return formattedValue;
+  }
+  formatDateMetaToDate(dateMeta) {
+    return new Date(dateMeta.year, dateMeta.month, dateMeta.day);
+  }
+  formatDateKey(date) {
+    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
   }
   setCurrentHourPM(hours) {
     if (this.hourFormat == "12") {
@@ -5702,7 +6174,7 @@ var Calendar = class _Calendar {
     this.alignOverlay();
   }
   selectDate(dateMeta) {
-    let date = new Date(dateMeta.year, dateMeta.month, dateMeta.day);
+    let date = this.formatDateMetaToDate(dateMeta);
     if (this.showTime) {
       if (this.hourFormat == "12") {
         if (this.currentHour === 12) date.setHours(this.pm ? 12 : 0);
@@ -5841,23 +6313,23 @@ var Calendar = class _Calendar {
     }
     return false;
   }
-  isMonthDisabled(month) {
-    for (let day = 1; day < this.getDaysCountInMonth(month, this.currentYear) + 1; day++) {
-      if (this.isSelectable(day, month, this.currentYear, false)) {
+  isMonthDisabled(month, year) {
+    const yearToCheck = year ?? this.currentYear;
+    for (let day = 1; day < this.getDaysCountInMonth(month, yearToCheck) + 1; day++) {
+      if (this.isSelectable(day, month, yearToCheck, false)) {
         return false;
       }
     }
     return true;
   }
   isYearDisabled(year) {
-    return !this.isSelectable(1, this.currentMonth, year, false);
+    return Array(12).fill(0).every((v, month) => this.isMonthDisabled(month, year));
   }
   isYearSelected(year) {
-    if (this.isComparable()) {
-      let value = this.isRangeSelection() ? this.value[0] : this.value;
-      return !this.isMultipleSelection() ? value.getFullYear() === year : false;
-    }
-    return false;
+    if (!this.isComparable()) return false;
+    if (this.isMultipleSelection()) return false;
+    let value = this.isRangeSelection() ? this.value[0] : this.value;
+    return value ? value.getFullYear() === year : false;
   }
   isDateEquals(value, dateMeta) {
     if (value && ObjectUtils.isDate(value)) return value.getDate() === dateMeta.day && value.getMonth() === dateMeta.month && value.getFullYear() === dateMeta.year;
@@ -5866,7 +6338,7 @@ var Calendar = class _Calendar {
   isDateBetween(start, end, dateMeta) {
     let between = false;
     if (ObjectUtils.isDate(start) && ObjectUtils.isDate(end)) {
-      let date = new Date(dateMeta.year, dateMeta.month, dateMeta.day);
+      let date = this.formatDateMetaToDate(dateMeta);
       return start.getTime() <= date.getTime() && end.getTime() >= date.getTime();
     }
     return between;
@@ -5894,7 +6366,7 @@ var Calendar = class _Calendar {
     if (this.minDate) {
       if (this.minDate.getFullYear() > year) {
         validMin = false;
-      } else if (this.minDate.getFullYear() === year) {
+      } else if (this.minDate.getFullYear() === year && this.currentView != "year") {
         if (this.minDate.getMonth() > month) {
           validMin = false;
         } else if (this.minDate.getMonth() === month) {
@@ -5963,7 +6435,7 @@ var Calendar = class _Calendar {
     }
     this.onModelTouched();
   }
-  onButtonClick(event2, inputfield) {
+  onButtonClick(event2, inputfield = this.inputfieldViewChild?.nativeElement) {
     if (!this.overlayVisible) {
       inputfield.focus();
       this.showOverlay();
@@ -6015,8 +6487,12 @@ var Calendar = class _Calendar {
         if (this.inline) {
           const headerElements = DomHandler.findSingle(this.containerViewChild?.nativeElement, ".p-datepicker-header");
           const element = event2.target;
-          if (element == headerElements.children[headerElements.children.length - 1]) {
-            this.initFocusableCell();
+          if (this.timeOnly) {
+            return;
+          } else {
+            if (element == headerElements.children[headerElements?.children?.length - 1]) {
+              this.initFocusableCell();
+            }
           }
         }
         break;
@@ -6051,9 +6527,10 @@ var Calendar = class _Calendar {
       }
     }
   }
-  onDateCellKeydown(event2, date, groupIndex) {
+  onDateCellKeydown(event2, dateMeta, groupIndex) {
     const cellContent = event2.currentTarget;
     const cell = cellContent.parentElement;
+    const currentDate = this.formatDateMetaToDate(dateMeta);
     switch (event2.which) {
       case 40: {
         cellContent.tabIndex = "-1";
@@ -6139,7 +6616,7 @@ var Calendar = class _Calendar {
       }
       case 13:
       case 32: {
-        this.onDateSelect(event2, date);
+        this.onDateSelect(event2, dateMeta);
         event2.preventDefault();
         break;
       }
@@ -6155,6 +6632,44 @@ var Calendar = class _Calendar {
         }
         break;
       }
+      case 33: {
+        cellContent.tabIndex = "-1";
+        const dateToFocus = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, currentDate.getDate());
+        const focusKey = this.formatDateKey(dateToFocus);
+        this.navigateToMonth(true, groupIndex, `span[data-date='${focusKey}']:not(.p-disabled):not(.p-ink)`);
+        event2.preventDefault();
+        break;
+      }
+      case 34: {
+        cellContent.tabIndex = "-1";
+        const dateToFocus = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate());
+        const focusKey = this.formatDateKey(dateToFocus);
+        this.navigateToMonth(false, groupIndex, `span[data-date='${focusKey}']:not(.p-disabled):not(.p-ink)`);
+        event2.preventDefault();
+        break;
+      }
+      case 36:
+        cellContent.tabIndex = "-1";
+        const firstDayDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+        const firstDayDateKey = this.formatDateKey(firstDayDate);
+        const firstDayCell = DomHandler.findSingle(cellContent.offsetParent, `span[data-date='${firstDayDateKey}']:not(.p-disabled):not(.p-ink)`);
+        if (firstDayCell) {
+          firstDayCell.tabIndex = "0";
+          firstDayCell.focus();
+        }
+        event2.preventDefault();
+        break;
+      case 35:
+        cellContent.tabIndex = "-1";
+        const lastDayDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+        const lastDayDateKey = this.formatDateKey(lastDayDate);
+        const lastDayCell = DomHandler.findSingle(cellContent.offsetParent, `span[data-date='${lastDayDateKey}']:not(.p-disabled):not(.p-ink)`);
+        if (lastDayDate) {
+          lastDayCell.tabIndex = "0";
+          lastDayCell.focus();
+        }
+        event2.preventDefault();
+        break;
       default:
         break;
     }
@@ -6293,31 +6808,45 @@ var Calendar = class _Calendar {
         break;
     }
   }
-  navigateToMonth(prev, groupIndex) {
+  navigateToMonth(prev, groupIndex, focusKey) {
     if (prev) {
       if (this.numberOfMonths === 1 || groupIndex === 0) {
         this.navigationState = {
           backward: true
         };
+        this._focusKey = focusKey;
         this.navBackward(event);
       } else {
         let prevMonthContainer = this.contentViewChild.nativeElement.children[groupIndex - 1];
-        let cells = DomHandler.find(prevMonthContainer, ".p-datepicker-calendar td span:not(.p-disabled):not(.p-ink)");
-        let focusCell = cells[cells.length - 1];
-        focusCell.tabIndex = "0";
-        focusCell.focus();
+        if (focusKey) {
+          const firstDayCell = DomHandler.findSingle(prevMonthContainer, focusKey);
+          firstDayCell.tabIndex = "0";
+          firstDayCell.focus();
+        } else {
+          let cells = DomHandler.find(prevMonthContainer, ".p-datepicker-calendar td span:not(.p-disabled):not(.p-ink)");
+          let focusCell = cells[cells.length - 1];
+          focusCell.tabIndex = "0";
+          focusCell.focus();
+        }
       }
     } else {
       if (this.numberOfMonths === 1 || groupIndex === this.numberOfMonths - 1) {
         this.navigationState = {
           backward: false
         };
+        this._focusKey = focusKey;
         this.navForward(event);
       } else {
         let nextMonthContainer = this.contentViewChild.nativeElement.children[groupIndex + 1];
-        let focusCell = DomHandler.findSingle(nextMonthContainer, ".p-datepicker-calendar td span:not(.p-disabled):not(.p-ink)");
-        focusCell.tabIndex = "0";
-        focusCell.focus();
+        if (focusKey) {
+          const firstDayCell = DomHandler.findSingle(nextMonthContainer, focusKey);
+          firstDayCell.tabIndex = "0";
+          firstDayCell.focus();
+        } else {
+          let focusCell = DomHandler.findSingle(nextMonthContainer, ".p-datepicker-calendar td span:not(.p-disabled):not(.p-ink)");
+          focusCell.tabIndex = "0";
+          focusCell.focus();
+        }
       }
     }
   }
@@ -6336,7 +6865,7 @@ var Calendar = class _Calendar {
           } else if (this.currentView === "year") {
             cells = DomHandler.find(this.contentViewChild.nativeElement, ".p-yearpicker .p-yearpicker-year:not(.p-disabled)");
           } else {
-            cells = DomHandler.find(this.contentViewChild.nativeElement, ".p-datepicker-calendar td span:not(.p-disabled):not(.p-ink)");
+            cells = DomHandler.find(this.contentViewChild.nativeElement, this._focusKey || ".p-datepicker-calendar td span:not(.p-disabled):not(.p-ink)");
           }
           if (cells && cells.length > 0) {
             cell = cells[cells.length - 1];
@@ -6347,7 +6876,7 @@ var Calendar = class _Calendar {
           } else if (this.currentView === "year") {
             cell = DomHandler.findSingle(this.contentViewChild.nativeElement, ".p-yearpicker .p-yearpicker-year:not(.p-disabled)");
           } else {
-            cell = DomHandler.findSingle(this.contentViewChild.nativeElement, ".p-datepicker-calendar td span:not(.p-disabled):not(.p-ink)");
+            cell = DomHandler.findSingle(this.contentViewChild.nativeElement, this._focusKey || ".p-datepicker-calendar td span:not(.p-disabled):not(.p-ink)");
           }
         }
         if (cell) {
@@ -6356,9 +6885,11 @@ var Calendar = class _Calendar {
         }
       }
       this.navigationState = null;
+      this._focusKey = null;
     } else {
       this.initFocusableCell();
     }
+    this.alignOverlay();
   }
   initFocusableCell() {
     const contentEl = this.contentViewChild?.nativeElement;
@@ -6457,7 +6988,7 @@ var Calendar = class _Calendar {
     });
     this.createMonths(this.currentMonth, this.currentYear);
   }
-  convertTo24Hour = function(hours, pm) {
+  convertTo24Hour(hours, pm) {
     if (this.hourFormat == "12") {
       if (hours === 12) {
         return pm ? 12 : 0;
@@ -6466,52 +6997,74 @@ var Calendar = class _Calendar {
       }
     }
     return hours;
-  };
-  validateTime(hour, minute, second, pm) {
+  }
+  constrainTime(hour, minute, second, pm) {
+    let returnTimeTriple = [hour, minute, second];
+    let minHoursExceeds12;
     let value = this.value;
     const convertedHour = this.convertTo24Hour(hour, pm);
-    if (this.isRangeSelection()) {
-      value = this.value[1] || this.value[0];
-    }
-    if (this.isMultipleSelection()) {
-      value = this.value[this.value.length - 1];
+    const isRange = this.isRangeSelection(), isMultiple = this.isMultipleSelection(), isMultiValue = isRange || isMultiple;
+    if (isMultiValue) {
+      if (!this.value) {
+        this.value = [/* @__PURE__ */ new Date(), /* @__PURE__ */ new Date()];
+      }
+      if (isRange) {
+        value = this.value[1] || this.value[0];
+      }
+      if (isMultiple) {
+        value = this.value[this.value.length - 1];
+      }
     }
     const valueDateString = value ? value.toDateString() : null;
-    if (this.minDate && valueDateString && this.minDate.toDateString() === valueDateString) {
-      if (this.minDate.getHours() > convertedHour) {
-        return false;
-      }
-      if (this.minDate.getHours() === convertedHour) {
-        if (this.minDate.getMinutes() > minute) {
-          return false;
-        }
-        if (this.minDate.getMinutes() === minute) {
-          if (this.minDate.getSeconds() > second) {
-            return false;
-          }
-        }
-      }
+    let isMinDate = this.minDate && valueDateString && this.minDate.toDateString() === valueDateString;
+    let isMaxDate = this.maxDate && valueDateString && this.maxDate.toDateString() === valueDateString;
+    if (isMinDate) {
+      minHoursExceeds12 = this.minDate.getHours() >= 12;
     }
-    if (this.maxDate && valueDateString && this.maxDate.toDateString() === valueDateString) {
-      if (this.maxDate.getHours() < convertedHour) {
-        return false;
-      }
-      if (this.maxDate.getHours() === convertedHour) {
-        if (this.maxDate.getMinutes() < minute) {
-          return false;
-        }
-        if (this.maxDate.getMinutes() === minute) {
-          if (this.maxDate.getSeconds() < second) {
-            return false;
-          }
-        }
-      }
+    switch (true) {
+      case (isMinDate && minHoursExceeds12 && this.minDate.getHours() === 12 && this.minDate.getHours() > convertedHour):
+        returnTimeTriple[0] = 11;
+      case (isMinDate && this.minDate.getHours() === convertedHour && this.minDate.getMinutes() > minute):
+        returnTimeTriple[1] = this.minDate.getMinutes();
+      case (isMinDate && this.minDate.getHours() === convertedHour && this.minDate.getMinutes() === minute && this.minDate.getSeconds() > second):
+        returnTimeTriple[2] = this.minDate.getSeconds();
+        break;
+      case (isMinDate && !minHoursExceeds12 && this.minDate.getHours() - 1 === convertedHour && this.minDate.getHours() > convertedHour):
+        returnTimeTriple[0] = 11;
+        this.pm = true;
+      case (isMinDate && this.minDate.getHours() === convertedHour && this.minDate.getMinutes() > minute):
+        returnTimeTriple[1] = this.minDate.getMinutes();
+      case (isMinDate && this.minDate.getHours() === convertedHour && this.minDate.getMinutes() === minute && this.minDate.getSeconds() > second):
+        returnTimeTriple[2] = this.minDate.getSeconds();
+        break;
+      case (isMinDate && minHoursExceeds12 && this.minDate.getHours() > convertedHour && convertedHour !== 12):
+        this.setCurrentHourPM(this.minDate.getHours());
+        returnTimeTriple[0] = this.currentHour;
+      case (isMinDate && this.minDate.getHours() === convertedHour && this.minDate.getMinutes() > minute):
+        returnTimeTriple[1] = this.minDate.getMinutes();
+      case (isMinDate && this.minDate.getHours() === convertedHour && this.minDate.getMinutes() === minute && this.minDate.getSeconds() > second):
+        returnTimeTriple[2] = this.minDate.getSeconds();
+        break;
+      case (isMinDate && this.minDate.getHours() > convertedHour):
+        returnTimeTriple[0] = this.minDate.getHours();
+      case (isMinDate && this.minDate.getHours() === convertedHour && this.minDate.getMinutes() > minute):
+        returnTimeTriple[1] = this.minDate.getMinutes();
+      case (isMinDate && this.minDate.getHours() === convertedHour && this.minDate.getMinutes() === minute && this.minDate.getSeconds() > second):
+        returnTimeTriple[2] = this.minDate.getSeconds();
+        break;
+      case (isMaxDate && this.maxDate.getHours() < convertedHour):
+        returnTimeTriple[0] = this.maxDate.getHours();
+      case (isMaxDate && this.maxDate.getHours() === convertedHour && this.maxDate.getMinutes() < minute):
+        returnTimeTriple[1] = this.maxDate.getMinutes();
+      case (isMaxDate && this.maxDate.getHours() === convertedHour && this.maxDate.getMinutes() === minute && this.maxDate.getSeconds() < second):
+        returnTimeTriple[2] = this.maxDate.getSeconds();
+        break;
     }
-    return true;
+    return returnTimeTriple;
   }
   incrementHour(event2) {
-    const prevHour = this.currentHour;
-    let newHour = this.currentHour + this.stepHour;
+    const prevHour = this.currentHour ?? 0;
+    let newHour = (this.currentHour ?? 0) + this.stepHour;
     let newPM = this.pm;
     if (this.hourFormat == "24") newHour = newHour >= 24 ? newHour - 24 : newHour;
     else if (this.hourFormat == "12") {
@@ -6520,11 +7073,22 @@ var Calendar = class _Calendar {
       }
       newHour = newHour >= 13 ? newHour - 12 : newHour;
     }
-    if (this.validateTime(newHour, this.currentMinute, this.currentSecond, newPM)) {
-      this.currentHour = newHour;
+    this.toggleAMPMIfNotMinDate(newPM);
+    [this.currentHour, this.currentMinute, this.currentSecond] = this.constrainTime(newHour, this.currentMinute, this.currentSecond, newPM);
+    event2.preventDefault();
+  }
+  toggleAMPMIfNotMinDate(newPM) {
+    let value = this.value;
+    if ((this.selectionMode == "range" || this.selectionMode == "multiple") && Array.isArray(value) && value.length > 0) {
+      value = value[value.length - 1];
+    }
+    const valueDateString = value ? value.toDateString() : null;
+    let isMinDate = this.minDate && valueDateString && this.minDate.toDateString() === valueDateString;
+    if (isMinDate && this.minDate.getHours() >= 12) {
+      this.pm = true;
+    } else {
       this.pm = newPM;
     }
-    event2.preventDefault();
   }
   onTimePickerElementMouseDown(event2, type, direction) {
     if (!this.disabled) {
@@ -6574,7 +7138,7 @@ var Calendar = class _Calendar {
     }
   }
   decrementHour(event2) {
-    let newHour = this.currentHour - this.stepHour;
+    let newHour = (this.currentHour ?? 0) - this.stepHour;
     let newPM = this.pm;
     if (this.hourFormat == "24") newHour = newHour < 0 ? 24 + newHour : newHour;
     else if (this.hourFormat == "12") {
@@ -6583,42 +7147,32 @@ var Calendar = class _Calendar {
       }
       newHour = newHour <= 0 ? 12 + newHour : newHour;
     }
-    if (this.validateTime(newHour, this.currentMinute, this.currentSecond, newPM)) {
-      this.currentHour = newHour;
-      this.pm = newPM;
-    }
+    this.toggleAMPMIfNotMinDate(newPM);
+    [this.currentHour, this.currentMinute, this.currentSecond] = this.constrainTime(newHour, this.currentMinute, this.currentSecond, newPM);
     event2.preventDefault();
   }
   incrementMinute(event2) {
-    let newMinute = this.currentMinute + this.stepMinute;
+    let newMinute = (this.currentMinute ?? 0) + this.stepMinute;
     newMinute = newMinute > 59 ? newMinute - 60 : newMinute;
-    if (this.validateTime(this.currentHour, newMinute, this.currentSecond, this.pm)) {
-      this.currentMinute = newMinute;
-    }
+    [this.currentHour, this.currentMinute, this.currentSecond] = this.constrainTime(this.currentHour, newMinute, this.currentSecond, this.pm);
     event2.preventDefault();
   }
   decrementMinute(event2) {
-    let newMinute = this.currentMinute - this.stepMinute;
+    let newMinute = (this.currentMinute ?? 0) - this.stepMinute;
     newMinute = newMinute < 0 ? 60 + newMinute : newMinute;
-    if (this.validateTime(this.currentHour, newMinute, this.currentSecond, this.pm)) {
-      this.currentMinute = newMinute;
-    }
+    [this.currentHour, this.currentMinute, this.currentSecond] = this.constrainTime(this.currentHour, newMinute, this.currentSecond, this.pm);
     event2.preventDefault();
   }
   incrementSecond(event2) {
     let newSecond = this.currentSecond + this.stepSecond;
     newSecond = newSecond > 59 ? newSecond - 60 : newSecond;
-    if (this.validateTime(this.currentHour, this.currentMinute, newSecond, this.pm)) {
-      this.currentSecond = newSecond;
-    }
+    [this.currentHour, this.currentMinute, this.currentSecond] = this.constrainTime(this.currentHour, this.currentMinute, newSecond, this.pm);
     event2.preventDefault();
   }
   decrementSecond(event2) {
     let newSecond = this.currentSecond - this.stepSecond;
     newSecond = newSecond < 0 ? 60 + newSecond : newSecond;
-    if (this.validateTime(this.currentHour, this.currentMinute, newSecond, this.pm)) {
-      this.currentSecond = newSecond;
-    }
+    [this.currentHour, this.currentMinute, this.currentSecond] = this.constrainTime(this.currentHour, this.currentMinute, newSecond, this.pm);
     event2.preventDefault();
   }
   updateTime() {
@@ -6651,10 +7205,9 @@ var Calendar = class _Calendar {
   }
   toggleAMPM(event2) {
     const newPM = !this.pm;
-    if (this.validateTime(this.currentHour, this.currentMinute, this.currentSecond, newPM)) {
-      this.pm = newPM;
-      this.updateTime();
-    }
+    this.pm = newPM;
+    [this.currentHour, this.currentMinute, this.currentSecond] = this.constrainTime(this.currentHour, this.currentMinute, this.currentSecond, newPM);
+    this.updateTime();
     event2.preventDefault();
   }
   onUserInput(event2) {
@@ -6679,15 +7232,12 @@ var Calendar = class _Calendar {
     this.onInput.emit(event2);
   }
   isValidSelection(value) {
-    let isValid = true;
     if (this.isSingleSelection()) {
-      if (!this.isSelectable(value.getDate(), value.getMonth(), value.getFullYear(), false)) {
-        isValid = false;
-      }
-    } else if (value.every((v) => this.isSelectable(v.getDate(), v.getMonth(), v.getFullYear(), false))) {
-      if (this.isRangeSelection()) {
-        isValid = value.length > 1 && value[1] > value[0] ? true : false;
-      }
+      return this.isSelectable(value.getDate(), value.getMonth(), value.getFullYear(), false);
+    }
+    let isValid = value.every((v) => this.isSelectable(v.getDate(), v.getMonth(), v.getFullYear(), false));
+    if (isValid && this.isRangeSelection()) {
+      isValid = value.length === 1 || value.length > 1 && value[1] >= value[0];
     }
     return isValid;
   }
@@ -6748,7 +7298,7 @@ var Calendar = class _Calendar {
   updateUI() {
     let propValue = this.value;
     if (Array.isArray(propValue)) {
-      propValue = propValue[0];
+      propValue = propValue[1] || propValue[0];
     }
     let val = this.defaultDate && this.isValidDate(this.defaultDate) && !this.value ? this.defaultDate : propValue && this.isValidDate(propValue) ? propValue : /* @__PURE__ */ new Date();
     this.currentMonth = val.getMonth();
@@ -6845,10 +7395,16 @@ var Calendar = class _Calendar {
     } else if (this.overlay) {
       if (this.appendTo) {
         if (this.view === "date") {
-          this.overlay.style.width = DomHandler.getOuterWidth(this.overlay) + "px";
-          this.overlay.style.minWidth = DomHandler.getOuterWidth(this.inputfieldViewChild?.nativeElement) + "px";
+          if (!this.overlay.style.width) {
+            this.overlay.style.width = DomHandler.getOuterWidth(this.overlay) + "px";
+          }
+          if (!this.overlay.style.minWidth) {
+            this.overlay.style.minWidth = DomHandler.getOuterWidth(this.inputfieldViewChild?.nativeElement) + "px";
+          }
         } else {
-          this.overlay.style.width = DomHandler.getOuterWidth(this.inputfieldViewChild?.nativeElement) + "px";
+          if (!this.overlay.style.width) {
+            this.overlay.style.width = DomHandler.getOuterWidth(this.inputfieldViewChild?.nativeElement) + "px";
+          }
         }
         DomHandler.absolutePosition(this.overlay, this.inputfieldViewChild?.nativeElement);
       } else {
@@ -7217,6 +7773,12 @@ var Calendar = class _Calendar {
   updateFilledState() {
     this.filled = this.inputFieldValue && this.inputFieldValue != "";
   }
+  isValidDateForTimeConstraints(selectedDate) {
+    if (this.keepInvalid) {
+      return true;
+    }
+    return (!this.minDate || selectedDate >= this.minDate) && (!this.maxDate || selectedDate <= this.maxDate);
+  }
   onTodayButtonClick(event2) {
     const date = /* @__PURE__ */ new Date();
     const dateMeta = {
@@ -7229,7 +7791,7 @@ var Calendar = class _Calendar {
     };
     this.createMonths(date.getMonth(), date.getFullYear());
     this.onDateSelect(event2, dateMeta);
-    this.onTodayClick.emit(event2);
+    this.onTodayClick.emit(date);
   }
   onClearButtonClick(event2) {
     this.updateModel(null);
@@ -7242,6 +7804,7 @@ var Calendar = class _Calendar {
       if (!this.responsiveStyleElement) {
         this.responsiveStyleElement = this.renderer.createElement("style");
         this.responsiveStyleElement.type = "text/css";
+        DomHandler.setAttribute(this.responsiveStyleElement, "nonce", this.config?.csp()?.nonce);
         this.renderer.appendChild(this.document.body, this.responsiveStyleElement);
       }
       let innerHTML = "";
@@ -7385,7 +7948,7 @@ var Calendar = class _Calendar {
     viewQuery: function Calendar_Query(rf, ctx) {
       if (rf & 1) {
         ɵɵviewQuery(_c04, 5);
-        ɵɵviewQuery(_c1, 5);
+        ɵɵviewQuery(_c12, 5);
         ɵɵviewQuery(_c2, 5);
       }
       if (rf & 2) {
@@ -7403,6 +7966,7 @@ var Calendar = class _Calendar {
       }
     },
     inputs: {
+      iconDisplay: "iconDisplay",
       style: "style",
       styleClass: "styleClass",
       inputStyle: "inputStyle",
@@ -7413,48 +7977,52 @@ var Calendar = class _Calendar {
       ariaLabelledBy: "ariaLabelledBy",
       ariaLabel: "ariaLabel",
       iconAriaLabel: "iconAriaLabel",
-      disabled: "disabled",
+      disabled: [InputFlags.HasDecoratorInputTransform, "disabled", "disabled", booleanAttribute],
       dateFormat: "dateFormat",
       multipleSeparator: "multipleSeparator",
       rangeSeparator: "rangeSeparator",
-      inline: "inline",
-      showOtherMonths: "showOtherMonths",
-      selectOtherMonths: "selectOtherMonths",
-      showIcon: "showIcon",
+      inline: [InputFlags.HasDecoratorInputTransform, "inline", "inline", booleanAttribute],
+      showOtherMonths: [InputFlags.HasDecoratorInputTransform, "showOtherMonths", "showOtherMonths", booleanAttribute],
+      selectOtherMonths: [InputFlags.HasDecoratorInputTransform, "selectOtherMonths", "selectOtherMonths", booleanAttribute],
+      showIcon: [InputFlags.HasDecoratorInputTransform, "showIcon", "showIcon", booleanAttribute],
       icon: "icon",
       appendTo: "appendTo",
-      readonlyInput: "readonlyInput",
+      readonlyInput: [InputFlags.HasDecoratorInputTransform, "readonlyInput", "readonlyInput", booleanAttribute],
       shortYearCutoff: "shortYearCutoff",
-      monthNavigator: "monthNavigator",
-      yearNavigator: "yearNavigator",
+      monthNavigator: [InputFlags.HasDecoratorInputTransform, "monthNavigator", "monthNavigator", booleanAttribute],
+      yearNavigator: [InputFlags.HasDecoratorInputTransform, "yearNavigator", "yearNavigator", booleanAttribute],
       hourFormat: "hourFormat",
-      timeOnly: "timeOnly",
-      stepHour: "stepHour",
-      stepMinute: "stepMinute",
-      stepSecond: "stepSecond",
-      showSeconds: "showSeconds",
-      required: "required",
-      showOnFocus: "showOnFocus",
-      showWeek: "showWeek",
-      showClear: "showClear",
+      timeOnly: [InputFlags.HasDecoratorInputTransform, "timeOnly", "timeOnly", booleanAttribute],
+      stepYearPicker: [InputFlags.HasDecoratorInputTransform, "stepYearPicker", "stepYearPicker", numberAttribute],
+      stepHour: [InputFlags.HasDecoratorInputTransform, "stepHour", "stepHour", numberAttribute],
+      stepMinute: [InputFlags.HasDecoratorInputTransform, "stepMinute", "stepMinute", numberAttribute],
+      stepSecond: [InputFlags.HasDecoratorInputTransform, "stepSecond", "stepSecond", numberAttribute],
+      showSeconds: [InputFlags.HasDecoratorInputTransform, "showSeconds", "showSeconds", booleanAttribute],
+      required: [InputFlags.HasDecoratorInputTransform, "required", "required", booleanAttribute],
+      showOnFocus: [InputFlags.HasDecoratorInputTransform, "showOnFocus", "showOnFocus", booleanAttribute],
+      showWeek: [InputFlags.HasDecoratorInputTransform, "showWeek", "showWeek", booleanAttribute],
+      startWeekFromFirstDayOfYear: "startWeekFromFirstDayOfYear",
+      showClear: [InputFlags.HasDecoratorInputTransform, "showClear", "showClear", booleanAttribute],
       dataType: "dataType",
       selectionMode: "selectionMode",
-      maxDateCount: "maxDateCount",
-      showButtonBar: "showButtonBar",
+      maxDateCount: [InputFlags.HasDecoratorInputTransform, "maxDateCount", "maxDateCount", numberAttribute],
+      showButtonBar: [InputFlags.HasDecoratorInputTransform, "showButtonBar", "showButtonBar", booleanAttribute],
       todayButtonStyleClass: "todayButtonStyleClass",
       clearButtonStyleClass: "clearButtonStyleClass",
-      autoZIndex: "autoZIndex",
-      baseZIndex: "baseZIndex",
+      autofocus: [InputFlags.HasDecoratorInputTransform, "autofocus", "autofocus", booleanAttribute],
+      autoZIndex: [InputFlags.HasDecoratorInputTransform, "autoZIndex", "autoZIndex", booleanAttribute],
+      baseZIndex: [InputFlags.HasDecoratorInputTransform, "baseZIndex", "baseZIndex", numberAttribute],
       panelStyleClass: "panelStyleClass",
       panelStyle: "panelStyle",
-      keepInvalid: "keepInvalid",
-      hideOnDateTimeSelect: "hideOnDateTimeSelect",
-      touchUI: "touchUI",
+      keepInvalid: [InputFlags.HasDecoratorInputTransform, "keepInvalid", "keepInvalid", booleanAttribute],
+      hideOnDateTimeSelect: [InputFlags.HasDecoratorInputTransform, "hideOnDateTimeSelect", "hideOnDateTimeSelect", booleanAttribute],
+      touchUI: [InputFlags.HasDecoratorInputTransform, "touchUI", "touchUI", booleanAttribute],
       timeSeparator: "timeSeparator",
-      focusTrap: "focusTrap",
+      focusTrap: [InputFlags.HasDecoratorInputTransform, "focusTrap", "focusTrap", booleanAttribute],
       showTransitionOptions: "showTransitionOptions",
       hideTransitionOptions: "hideTransitionOptions",
-      tabindex: "tabindex",
+      tabindex: [InputFlags.HasDecoratorInputTransform, "tabindex", "tabindex", numberAttribute],
+      variant: "variant",
       minDate: "minDate",
       maxDate: "maxDate",
       disabledDates: "disabledDates",
@@ -7482,29 +8050,29 @@ var Calendar = class _Calendar {
       onClickOutside: "onClickOutside",
       onShow: "onShow"
     },
-    features: [ɵɵProvidersFeature([CALENDAR_VALUE_ACCESSOR])],
+    features: [ɵɵProvidersFeature([CALENDAR_VALUE_ACCESSOR]), ɵɵInputTransformsFeature],
     ngContentSelectors: _c4,
     decls: 4,
-    vars: 11,
-    consts: [["container", ""], ["inputfield", ""], ["contentWrapper", ""], [3, "ngClass", "ngStyle"], [3, "ngIf"], [3, "class", "ngStyle", "ngClass", "click", 4, "ngIf"], ["type", "text", "role", "combobox", "aria-autocomplete", "none", "aria-haspopup", "dialog", "autocomplete", "off", 3, "focus", "keydown", "click", "blur", "input", "value", "readonly", "ngStyle", "placeholder", "disabled", "ngClass"], [4, "ngIf"], ["type", "button", "aria-haspopup", "dialog", "pButton", "", "pRipple", "", "class", "p-datepicker-trigger p-button-icon-only", "tabindex", "0", 3, "disabled", "click", 4, "ngIf"], [3, "styleClass", "click", 4, "ngIf"], ["class", "p-calendar-clear-icon", 3, "click", 4, "ngIf"], [3, "click", "styleClass"], [1, "p-calendar-clear-icon", 3, "click"], [4, "ngTemplateOutlet"], ["type", "button", "aria-haspopup", "dialog", "pButton", "", "pRipple", "", "tabindex", "0", 1, "p-datepicker-trigger", "p-button-icon-only", 3, "click", "disabled"], [3, "ngClass", 4, "ngIf"], [3, "ngClass"], [3, "click", "ngStyle", "ngClass"], ["class", "p-timepicker", 4, "ngIf"], ["class", "p-datepicker-buttonbar", 4, "ngIf"], [1, "p-datepicker-group-container"], ["class", "p-datepicker-group", 4, "ngFor", "ngForOf"], ["class", "p-monthpicker", 4, "ngIf"], ["class", "p-yearpicker", 4, "ngIf"], [1, "p-datepicker-group"], [1, "p-datepicker-header"], ["class", "p-datepicker-prev p-link", "type", "button", "pRipple", "", 3, "keydown", "click", 4, "ngIf"], [1, "p-datepicker-title"], ["type", "button", "class", "p-datepicker-month p-link", 3, "disabled", "click", "keydown", 4, "ngIf"], ["type", "button", "class", "p-datepicker-year p-link", 3, "disabled", "click", "keydown", 4, "ngIf"], ["class", "p-datepicker-decade", 4, "ngIf"], ["type", "button", "pRipple", "", 1, "p-datepicker-next", "p-link", 3, "keydown", "click"], [3, "styleClass", 4, "ngIf"], ["class", "p-datepicker-next-icon", 4, "ngIf"], ["class", "p-datepicker-calendar-container", 4, "ngIf"], ["type", "button", "pRipple", "", 1, "p-datepicker-prev", "p-link", 3, "keydown", "click"], ["class", "p-datepicker-prev-icon", 4, "ngIf"], [3, "styleClass"], [1, "p-datepicker-prev-icon"], ["type", "button", 1, "p-datepicker-month", "p-link", 3, "click", "keydown", "disabled"], ["type", "button", 1, "p-datepicker-year", "p-link", 3, "click", "keydown", "disabled"], [1, "p-datepicker-decade"], [4, "ngTemplateOutlet", "ngTemplateOutletContext"], [1, "p-datepicker-next-icon"], [1, "p-datepicker-calendar-container"], ["role", "grid", 1, "p-datepicker-calendar"], ["class", "p-datepicker-weekheader p-disabled", 4, "ngIf"], ["scope", "col", 4, "ngFor", "ngForOf"], [4, "ngFor", "ngForOf"], [1, "p-datepicker-weekheader", "p-disabled"], ["scope", "col"], ["class", "p-datepicker-weeknumber", 4, "ngIf"], [3, "ngClass", 4, "ngFor", "ngForOf"], [1, "p-datepicker-weeknumber"], [1, "p-disabled"], ["draggable", "false", "pRipple", "", 3, "click", "keydown", "ngClass"], ["class", "p-hidden-accessible", "aria-live", "polite", 4, "ngIf"], ["aria-live", "polite", 1, "p-hidden-accessible"], [1, "p-monthpicker"], ["class", "p-monthpicker-month", "pRipple", "", 3, "ngClass", "click", "keydown", 4, "ngFor", "ngForOf"], ["pRipple", "", 1, "p-monthpicker-month", 3, "click", "keydown", "ngClass"], [1, "p-yearpicker"], ["class", "p-yearpicker-year", "pRipple", "", 3, "ngClass", "click", "keydown", 4, "ngFor", "ngForOf"], ["pRipple", "", 1, "p-yearpicker-year", 3, "click", "keydown", "ngClass"], [1, "p-timepicker"], [1, "p-hour-picker"], ["type", "button", "pRipple", "", 1, "p-link", 3, "keydown", "keydown.enter", "keydown.space", "mousedown", "mouseup", "keyup.enter", "keyup.space", "mouseleave"], [1, "p-separator"], [1, "p-minute-picker"], ["class", "p-separator", 4, "ngIf"], ["class", "p-second-picker", 4, "ngIf"], ["class", "p-ampm-picker", 4, "ngIf"], [1, "p-second-picker"], [1, "p-ampm-picker"], ["type", "button", "pRipple", "", 1, "p-link", 3, "keydown", "click", "keydown.enter"], [1, "p-datepicker-buttonbar"], ["type", "button", "pButton", "", "pRipple", "", 3, "keydown", "click", "label", "ngClass"]],
+    vars: 12,
+    consts: [["container", ""], ["inputfield", ""], ["contentWrapper", ""], [3, "ngClass", "ngStyle"], [3, "ngIf"], [3, "class", "ngStyle", "ngClass", "click", 4, "ngIf"], ["type", "text", "role", "combobox", "aria-autocomplete", "none", "aria-haspopup", "dialog", "autocomplete", "off", "pAutoFocus", "", 3, "focus", "keydown", "click", "blur", "input", "value", "readonly", "ngStyle", "placeholder", "disabled", "ngClass", "autofocus"], [4, "ngIf"], ["type", "button", "aria-haspopup", "dialog", "pButton", "", "pRipple", "", "class", "p-datepicker-trigger p-button-icon-only", "tabindex", "0", 3, "disabled", "click", 4, "ngIf"], [3, "styleClass", "click", 4, "ngIf"], ["class", "p-calendar-clear-icon", 3, "click", 4, "ngIf"], [3, "click", "styleClass"], [1, "p-calendar-clear-icon", 3, "click"], [4, "ngTemplateOutlet"], ["type", "button", "aria-haspopup", "dialog", "pButton", "", "pRipple", "", "tabindex", "0", 1, "p-datepicker-trigger", "p-button-icon-only", 3, "click", "disabled"], [3, "ngClass", 4, "ngIf"], [3, "ngClass"], [3, "ngClass", "click", 4, "ngIf"], [4, "ngTemplateOutlet", "ngTemplateOutletContext"], [3, "click", "ngClass"], [3, "click", "ngStyle", "ngClass"], ["class", "p-timepicker", 4, "ngIf"], ["class", "p-datepicker-buttonbar", 4, "ngIf"], [1, "p-datepicker-group-container"], ["class", "p-datepicker-group", 4, "ngFor", "ngForOf"], ["class", "p-monthpicker", 4, "ngIf"], ["class", "p-yearpicker", 4, "ngIf"], [1, "p-datepicker-group"], [1, "p-datepicker-header"], ["class", "p-datepicker-prev p-link", "type", "button", "pRipple", "", 3, "keydown", "click", 4, "ngIf"], [1, "p-datepicker-title"], ["type", "button", "class", "p-datepicker-month p-link", 3, "disabled", "click", "keydown", 4, "ngIf"], ["type", "button", "class", "p-datepicker-year p-link", 3, "disabled", "click", "keydown", 4, "ngIf"], ["class", "p-datepicker-decade", 4, "ngIf"], ["type", "button", "pRipple", "", 1, "p-datepicker-next", "p-link", 3, "keydown", "click"], [3, "styleClass", 4, "ngIf"], ["class", "p-datepicker-next-icon", 4, "ngIf"], ["class", "p-datepicker-calendar-container", 4, "ngIf"], ["type", "button", "pRipple", "", 1, "p-datepicker-prev", "p-link", 3, "keydown", "click"], ["class", "p-datepicker-prev-icon", 4, "ngIf"], [3, "styleClass"], [1, "p-datepicker-prev-icon"], ["type", "button", 1, "p-datepicker-month", "p-link", 3, "click", "keydown", "disabled"], ["type", "button", 1, "p-datepicker-year", "p-link", 3, "click", "keydown", "disabled"], [1, "p-datepicker-decade"], [1, "p-datepicker-next-icon"], [1, "p-datepicker-calendar-container"], ["role", "grid", 1, "p-datepicker-calendar"], ["class", "p-datepicker-weekheader p-disabled", 4, "ngIf"], ["scope", "col", 4, "ngFor", "ngForOf"], [4, "ngFor", "ngForOf"], [1, "p-datepicker-weekheader", "p-disabled"], ["scope", "col"], ["class", "p-datepicker-weeknumber", 4, "ngIf"], [3, "ngClass", 4, "ngFor", "ngForOf"], [1, "p-datepicker-weeknumber"], [1, "p-disabled"], ["draggable", "false", "pRipple", "", 3, "click", "keydown", "ngClass"], ["class", "p-hidden-accessible", "aria-live", "polite", 4, "ngIf"], ["aria-live", "polite", 1, "p-hidden-accessible"], [1, "p-monthpicker"], ["class", "p-monthpicker-month", "pRipple", "", 3, "ngClass", "click", "keydown", 4, "ngFor", "ngForOf"], ["pRipple", "", 1, "p-monthpicker-month", 3, "click", "keydown", "ngClass"], [1, "p-yearpicker"], ["class", "p-yearpicker-year", "pRipple", "", 3, "ngClass", "click", "keydown", 4, "ngFor", "ngForOf"], ["pRipple", "", 1, "p-yearpicker-year", 3, "click", "keydown", "ngClass"], [1, "p-timepicker"], [1, "p-hour-picker"], ["type", "button", "pRipple", "", 1, "p-link", 3, "keydown", "keydown.enter", "keydown.space", "mousedown", "mouseup", "keyup.enter", "keyup.space", "mouseleave"], [1, "p-separator"], [1, "p-minute-picker"], ["class", "p-separator", 4, "ngIf"], ["class", "p-second-picker", 4, "ngIf"], ["class", "p-ampm-picker", 4, "ngIf"], [1, "p-second-picker"], [1, "p-ampm-picker"], ["type", "button", "pRipple", "", 1, "p-link", 3, "keydown", "click", "keydown.enter"], [1, "p-datepicker-buttonbar"], ["type", "button", "pButton", "", "pRipple", "", 3, "keydown", "click", "label", "ngClass"]],
     template: function Calendar_Template(rf, ctx) {
       if (rf & 1) {
         ɵɵprojectionDef(_c3);
         ɵɵelementStart(0, "span", 3, 0);
-        ɵɵtemplate(2, Calendar_ng_template_2_Template, 4, 20, "ng-template", 4)(3, Calendar_div_3_Template, 9, 31, "div", 5);
+        ɵɵtemplate(2, Calendar_ng_template_2_Template, 5, 22, "ng-template", 4)(3, Calendar_div_3_Template, 9, 32, "div", 5);
         ɵɵelementEnd();
       }
       if (rf & 2) {
         ɵɵclassMap(ctx.styleClass);
-        ɵɵproperty("ngClass", ɵɵpureFunction4(6, _c5, ctx.showIcon, ctx.timeOnly, ctx.disabled, ctx.focus || ctx.overlayVisible))("ngStyle", ctx.style);
+        ɵɵproperty("ngClass", ɵɵpureFunction5(6, _c5, ctx.showIcon && ctx.iconDisplay === "input", ctx.showIcon && ctx.iconDisplay === "button", ctx.timeOnly, ctx.disabled, ctx.focus || ctx.overlayVisible))("ngStyle", ctx.style);
         ɵɵadvance(2);
         ɵɵproperty("ngIf", !ctx.inline);
         ɵɵadvance();
         ɵɵproperty("ngIf", ctx.inline || ctx.overlayVisible);
       }
     },
-    dependencies: () => [NgClass, NgForOf, NgIf, NgTemplateOutlet, NgStyle, ButtonDirective, Ripple, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon, ChevronDownIcon, TimesIcon, CalendarIcon],
-    styles: ["@layer primeng{.p-calendar{position:relative;display:inline-flex;max-width:100%}.p-calendar .p-inputtext{flex:1 1 auto;width:1%}.p-calendar-w-btn .p-inputtext{border-top-right-radius:0;border-bottom-right-radius:0}.p-calendar-w-btn .p-datepicker-trigger{border-top-left-radius:0;border-bottom-left-radius:0}.p-fluid .p-calendar{display:flex}.p-fluid .p-calendar .p-inputtext{width:1%}.p-calendar .p-datepicker{min-width:100%}.p-datepicker{width:auto;position:absolute;top:0;left:0}.p-datepicker-inline{display:inline-block;position:static;overflow-x:auto}.p-datepicker-header{display:flex;align-items:center;justify-content:space-between}.p-datepicker-header .p-datepicker-title{margin:0 auto}.p-datepicker-prev,.p-datepicker-next{cursor:pointer;display:inline-flex;justify-content:center;align-items:center;overflow:hidden;position:relative}.p-datepicker-multiple-month .p-datepicker-group-container .p-datepicker-group{flex:1 1 auto}.p-datepicker-multiple-month .p-datepicker-group-container{display:flex}.p-datepicker table{width:100%;border-collapse:collapse}.p-datepicker td>span{display:flex;justify-content:center;align-items:center;cursor:pointer;margin:0 auto;overflow:hidden;position:relative}.p-monthpicker-month{width:33.3%;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative}.p-datepicker-buttonbar{display:flex;justify-content:space-between;align-items:center}.p-timepicker{display:flex;justify-content:center;align-items:center}.p-timepicker button{display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative}.p-timepicker>div{display:flex;align-items:center;flex-direction:column}.p-datepicker-touch-ui,.p-calendar .p-datepicker-touch-ui{position:fixed;top:50%;left:50%;min-width:80vw;transform:translate(-50%,-50%)}.p-yearpicker-year{width:50%;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative}.p-calendar-clear-icon{position:absolute;top:50%;margin-top:-.5rem;cursor:pointer}.p-calendar-clearable{position:relative}}\n"],
+    dependencies: () => [NgClass, NgForOf, NgIf, NgTemplateOutlet, NgStyle, ButtonDirective, Ripple, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon, ChevronDownIcon, TimesIcon, CalendarIcon, AutoFocus],
+    styles: ["@layer primeng{.p-calendar{position:relative;display:inline-flex;max-width:100%}.p-calendar .p-inputtext{flex:1 1 auto;width:1%;text-overflow:ellipsis}.p-calendar-w-btn .p-inputtext{border-top-right-radius:0;border-bottom-right-radius:0}.p-calendar-w-btn .p-datepicker-trigger{border-top-left-radius:0;border-bottom-left-radius:0}.p-fluid .p-calendar{display:flex}.p-fluid .p-calendar .p-inputtext{width:1%}.p-calendar .p-datepicker{min-width:100%}.p-datepicker{width:auto;position:absolute;top:0;left:0}.p-datepicker-inline{display:inline-block;position:static;overflow-x:auto}.p-datepicker-header{display:flex;align-items:center;justify-content:space-between}.p-datepicker-header .p-datepicker-title{margin:0 auto}.p-datepicker-prev,.p-datepicker-next{cursor:pointer;display:inline-flex;justify-content:center;align-items:center;overflow:hidden;position:relative}.p-datepicker-multiple-month .p-datepicker-group-container .p-datepicker-group{flex:1 1 auto}.p-datepicker-multiple-month .p-datepicker-group-container{display:flex}.p-datepicker table{width:100%;border-collapse:collapse}.p-datepicker td>span{display:flex;justify-content:center;align-items:center;cursor:pointer;margin:0 auto;overflow:hidden;position:relative}.p-monthpicker-month{width:33.3%;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative}.p-datepicker-buttonbar{display:flex;justify-content:space-between;align-items:center}.p-timepicker{display:flex;justify-content:center;align-items:center}.p-timepicker button{display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative}.p-timepicker>div{display:flex;align-items:center;flex-direction:column}.p-datepicker-touch-ui,.p-calendar .p-datepicker-touch-ui{position:fixed;top:50%;left:50%;min-width:80vw;transform:translate(-50%,-50%)}.p-yearpicker-year{width:50%;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative}.p-calendar-clear-icon{position:absolute;top:50%;margin-top:-.5rem;cursor:pointer}.p-datepicker-icon{pointer-events:none}.p-calendar-clearable{position:relative}}\n"],
     encapsulation: 2,
     data: {
       animation: [trigger("overlayAnimation", [state("visibleTouchUI", style({
@@ -7535,7 +8103,19 @@ var Calendar = class _Calendar {
     args: [{
       selector: "p-calendar",
       template: `
-        <span #container [ngClass]="{ 'p-calendar': true, 'p-calendar-w-btn': showIcon, 'p-calendar-timeonly': timeOnly, 'p-calendar-disabled': disabled, 'p-focus': focus || overlayVisible }" [ngStyle]="style" [class]="styleClass">
+        <span
+            #container
+            [ngClass]="{
+                'p-calendar': true,
+                'p-input-icon-right': showIcon && iconDisplay === 'input',
+                'p-calendar-w-btn': showIcon && iconDisplay === 'button',
+                'p-calendar-timeonly': timeOnly,
+                'p-calendar-disabled': disabled,
+                'p-focus': focus || overlayVisible
+            }"
+            [ngStyle]="style"
+            [class]="styleClass"
+        >
             <ng-template [ngIf]="!inline">
                 <input
                     #inputfield
@@ -7547,8 +8127,8 @@ var Calendar = class _Calendar {
                     [attr.aria-required]="required"
                     aria-autocomplete="none"
                     aria-haspopup="dialog"
-                    [attr.aria-expanded]="overlayVisible"
-                    [attr.aria-controls]="panelId"
+                    [attr.aria-expanded]="overlayVisible ?? false"
+                    [attr.aria-controls]="overlayVisible ? panelId : null"
                     [attr.aria-labelledby]="ariaLabelledBy"
                     [attr.aria-label]="ariaLabel"
                     [value]="inputFieldValue"
@@ -7564,8 +8144,10 @@ var Calendar = class _Calendar {
                     [disabled]="disabled"
                     [attr.tabindex]="tabindex"
                     [attr.inputmode]="touchUI ? 'off' : null"
-                    [ngClass]="'p-inputtext p-component'"
+                    [ngClass]="inputClass"
                     autocomplete="off"
+                    pAutoFocus
+                    [autofocus]="autofocus"
                 />
                 <ng-container *ngIf="showClear && !disabled && value != null">
                     <TimesIcon *ngIf="!clearIconTemplate" [styleClass]="'p-calendar-clear-icon'" (click)="clear()" />
@@ -7577,11 +8159,11 @@ var Calendar = class _Calendar {
                     type="button"
                     [attr.aria-label]="iconButtonAriaLabel"
                     aria-haspopup="dialog"
-                    [attr.aria-expanded]="overlayVisible"
-                    [attr.aria-controls]="panelId"
+                    [attr.aria-expanded]="overlayVisible ?? false"
+                    [attr.aria-controls]="overlayVisible ? panelId : null"
                     pButton
                     pRipple
-                    *ngIf="showIcon"
+                    *ngIf="showIcon && iconDisplay === 'button'"
                     (click)="onButtonClick($event, inputfield)"
                     class="p-datepicker-trigger p-button-icon-only"
                     [disabled]="disabled"
@@ -7593,9 +8175,20 @@ var Calendar = class _Calendar {
                         <ng-template *ngTemplateOutlet="triggerIconTemplate"></ng-template>
                     </ng-container>
                 </button>
+                <ng-container *ngIf="iconDisplay === 'input' && showIcon">
+                    <CalendarIcon
+                        (click)="onButtonClick($event)"
+                        *ngIf="!inputIconTemplate"
+                        [ngClass]="{
+                            'p-datepicker-icon': showOnFocus
+                        }"
+                    />
+                    <ng-container *ngTemplateOutlet="inputIconTemplate; context: { clickCallBack: onButtonClick.bind(this) }"></ng-container>
+                </ng-container>
             </ng-template>
             <div
                 #contentWrapper
+                [attr.id]="panelId"
                 [class]="panelStyleClass"
                 [ngStyle]="panelStyle"
                 [ngClass]="{
@@ -7698,9 +8291,10 @@ var Calendar = class _Calendar {
                                             <td *ngFor="let date of week" [attr.aria-label]="date.day" [ngClass]="{ 'p-datepicker-other-month': date.otherMonth, 'p-datepicker-today': date.today }">
                                                 <ng-container *ngIf="date.otherMonth ? showOtherMonths : true">
                                                     <span
-                                                        [ngClass]="{ 'p-highlight': isSelected(date) && date.selectable, 'p-disabled': !date.selectable }"
+                                                        [ngClass]="{ 'p-highlight p-datepicker-current-day': isSelected(date) && date.selectable, 'p-disabled': !date.selectable }"
                                                         (click)="onDateSelect($event, date)"
                                                         draggable="false"
+                                                        [attr.data-date]="formatDateKey(formatDateMetaToDate(date))"
                                                         (keydown)="onDateCellKeydown($event, date, i)"
                                                         pRipple
                                                     >
@@ -7920,7 +8514,7 @@ var Calendar = class _Calendar {
       providers: [CALENDAR_VALUE_ACCESSOR],
       changeDetection: ChangeDetectionStrategy.OnPush,
       encapsulation: ViewEncapsulation$1.None,
-      styles: ["@layer primeng{.p-calendar{position:relative;display:inline-flex;max-width:100%}.p-calendar .p-inputtext{flex:1 1 auto;width:1%}.p-calendar-w-btn .p-inputtext{border-top-right-radius:0;border-bottom-right-radius:0}.p-calendar-w-btn .p-datepicker-trigger{border-top-left-radius:0;border-bottom-left-radius:0}.p-fluid .p-calendar{display:flex}.p-fluid .p-calendar .p-inputtext{width:1%}.p-calendar .p-datepicker{min-width:100%}.p-datepicker{width:auto;position:absolute;top:0;left:0}.p-datepicker-inline{display:inline-block;position:static;overflow-x:auto}.p-datepicker-header{display:flex;align-items:center;justify-content:space-between}.p-datepicker-header .p-datepicker-title{margin:0 auto}.p-datepicker-prev,.p-datepicker-next{cursor:pointer;display:inline-flex;justify-content:center;align-items:center;overflow:hidden;position:relative}.p-datepicker-multiple-month .p-datepicker-group-container .p-datepicker-group{flex:1 1 auto}.p-datepicker-multiple-month .p-datepicker-group-container{display:flex}.p-datepicker table{width:100%;border-collapse:collapse}.p-datepicker td>span{display:flex;justify-content:center;align-items:center;cursor:pointer;margin:0 auto;overflow:hidden;position:relative}.p-monthpicker-month{width:33.3%;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative}.p-datepicker-buttonbar{display:flex;justify-content:space-between;align-items:center}.p-timepicker{display:flex;justify-content:center;align-items:center}.p-timepicker button{display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative}.p-timepicker>div{display:flex;align-items:center;flex-direction:column}.p-datepicker-touch-ui,.p-calendar .p-datepicker-touch-ui{position:fixed;top:50%;left:50%;min-width:80vw;transform:translate(-50%,-50%)}.p-yearpicker-year{width:50%;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative}.p-calendar-clear-icon{position:absolute;top:50%;margin-top:-.5rem;cursor:pointer}.p-calendar-clearable{position:relative}}\n"]
+      styles: ["@layer primeng{.p-calendar{position:relative;display:inline-flex;max-width:100%}.p-calendar .p-inputtext{flex:1 1 auto;width:1%;text-overflow:ellipsis}.p-calendar-w-btn .p-inputtext{border-top-right-radius:0;border-bottom-right-radius:0}.p-calendar-w-btn .p-datepicker-trigger{border-top-left-radius:0;border-bottom-left-radius:0}.p-fluid .p-calendar{display:flex}.p-fluid .p-calendar .p-inputtext{width:1%}.p-calendar .p-datepicker{min-width:100%}.p-datepicker{width:auto;position:absolute;top:0;left:0}.p-datepicker-inline{display:inline-block;position:static;overflow-x:auto}.p-datepicker-header{display:flex;align-items:center;justify-content:space-between}.p-datepicker-header .p-datepicker-title{margin:0 auto}.p-datepicker-prev,.p-datepicker-next{cursor:pointer;display:inline-flex;justify-content:center;align-items:center;overflow:hidden;position:relative}.p-datepicker-multiple-month .p-datepicker-group-container .p-datepicker-group{flex:1 1 auto}.p-datepicker-multiple-month .p-datepicker-group-container{display:flex}.p-datepicker table{width:100%;border-collapse:collapse}.p-datepicker td>span{display:flex;justify-content:center;align-items:center;cursor:pointer;margin:0 auto;overflow:hidden;position:relative}.p-monthpicker-month{width:33.3%;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative}.p-datepicker-buttonbar{display:flex;justify-content:space-between;align-items:center}.p-timepicker{display:flex;justify-content:center;align-items:center}.p-timepicker button{display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative}.p-timepicker>div{display:flex;align-items:center;flex-direction:column}.p-datepicker-touch-ui,.p-calendar .p-datepicker-touch-ui{position:fixed;top:50%;left:50%;min-width:80vw;transform:translate(-50%,-50%)}.p-yearpicker-year{width:50%;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative}.p-calendar-clear-icon{position:absolute;top:50%;margin-top:-.5rem;cursor:pointer}.p-datepicker-icon{pointer-events:none}.p-calendar-clearable{position:relative}}\n"]
     }]
   }], () => [{
     type: Document,
@@ -7941,6 +8535,9 @@ var Calendar = class _Calendar {
   }, {
     type: OverlayService
   }], {
+    iconDisplay: [{
+      type: Input
+    }],
     style: [{
       type: Input
     }],
@@ -7972,7 +8569,10 @@ var Calendar = class _Calendar {
       type: Input
     }],
     disabled: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     dateFormat: [{
       type: Input
@@ -7984,16 +8584,28 @@ var Calendar = class _Calendar {
       type: Input
     }],
     inline: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     showOtherMonths: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     selectOtherMonths: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     showIcon: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     icon: [{
       type: Input
@@ -8002,46 +8614,91 @@ var Calendar = class _Calendar {
       type: Input
     }],
     readonlyInput: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     shortYearCutoff: [{
       type: Input
     }],
     monthNavigator: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     yearNavigator: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     hourFormat: [{
       type: Input
     }],
     timeOnly: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
+    }],
+    stepYearPicker: [{
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     stepHour: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     stepMinute: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     stepSecond: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     showSeconds: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     required: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     showOnFocus: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     showWeek: [{
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
+    }],
+    startWeekFromFirstDayOfYear: [{
       type: Input
     }],
     showClear: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     dataType: [{
       type: Input
@@ -8050,10 +8707,16 @@ var Calendar = class _Calendar {
       type: Input
     }],
     maxDateCount: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     showButtonBar: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     todayButtonStyleClass: [{
       type: Input
@@ -8061,11 +8724,23 @@ var Calendar = class _Calendar {
     clearButtonStyleClass: [{
       type: Input
     }],
+    autofocus: [{
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
+    }],
     autoZIndex: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     baseZIndex: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     panelStyleClass: [{
       type: Input
@@ -8074,19 +8749,31 @@ var Calendar = class _Calendar {
       type: Input
     }],
     keepInvalid: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     hideOnDateTimeSelect: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     touchUI: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     timeSeparator: [{
       type: Input
     }],
     focusTrap: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     showTransitionOptions: [{
       type: Input
@@ -8095,6 +8782,12 @@ var Calendar = class _Calendar {
       type: Input
     }],
     tabindex: [{
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
+    }],
+    variant: [{
       type: Input
     }],
     minDate: [{
@@ -8200,107 +8893,27 @@ var CalendarModule = class _CalendarModule {
   static ɵmod = ɵɵdefineNgModule({
     type: _CalendarModule,
     declarations: [Calendar],
-    imports: [CommonModule, ButtonModule, SharedModule, RippleModule, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon, ChevronDownIcon, TimesIcon, CalendarIcon],
+    imports: [CommonModule, ButtonModule, SharedModule, RippleModule, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon, ChevronDownIcon, TimesIcon, CalendarIcon, AutoFocusModule],
     exports: [Calendar, ButtonModule, SharedModule]
   });
   static ɵinj = ɵɵdefineInjector({
-    imports: [CommonModule, ButtonModule, SharedModule, RippleModule, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon, ChevronDownIcon, TimesIcon, CalendarIcon, ButtonModule, SharedModule]
+    imports: [CommonModule, ButtonModule, SharedModule, RippleModule, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon, ChevronDownIcon, TimesIcon, CalendarIcon, AutoFocusModule, ButtonModule, SharedModule]
   });
 };
 (() => {
   (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(CalendarModule, [{
     type: NgModule,
     args: [{
-      imports: [CommonModule, ButtonModule, SharedModule, RippleModule, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon, ChevronDownIcon, TimesIcon, CalendarIcon],
+      imports: [CommonModule, ButtonModule, SharedModule, RippleModule, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon, ChevronDownIcon, TimesIcon, CalendarIcon, AutoFocusModule],
       exports: [Calendar, ButtonModule, SharedModule],
       declarations: [Calendar]
     }]
   }], null, null);
 })();
 
-// node_modules/primeng/fesm2022/primeng-autofocus.mjs
-var AutoFocus = class _AutoFocus {
-  host;
-  constructor(host) {
-    this.host = host;
-  }
-  /**
-   * When present, it specifies that the component should automatically get focus on load.
-   * @group Props
-   */
-  autofocus;
-  focused = false;
-  ngAfterContentChecked() {
-    if (!this.focused) {
-      if (this.autofocus) {
-        const focusableElements = DomHandler.getFocusableElements(this.host.nativeElement);
-        if (focusableElements.length === 0) {
-          this.host.nativeElement.focus();
-        }
-        if (focusableElements.length > 0) {
-          focusableElements[0].focus();
-        }
-        this.focused = true;
-      }
-    }
-  }
-  static ɵfac = function AutoFocus_Factory(t) {
-    return new (t || _AutoFocus)(ɵɵdirectiveInject(ElementRef));
-  };
-  static ɵdir = ɵɵdefineDirective({
-    type: _AutoFocus,
-    selectors: [["", "pAutoFocus", ""]],
-    hostAttrs: [1, "p-element"],
-    inputs: {
-      autofocus: "autofocus"
-    }
-  });
-};
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(AutoFocus, [{
-    type: Directive,
-    args: [{
-      selector: "[pAutoFocus]",
-      host: {
-        class: "p-element"
-      }
-    }]
-  }], () => [{
-    type: ElementRef
-  }], {
-    autofocus: [{
-      type: Input
-    }]
-  });
-})();
-var AutoFocusModule = class _AutoFocusModule {
-  static ɵfac = function AutoFocusModule_Factory(t) {
-    return new (t || _AutoFocusModule)();
-  };
-  static ɵmod = ɵɵdefineNgModule({
-    type: _AutoFocusModule,
-    declarations: [AutoFocus],
-    imports: [CommonModule],
-    exports: [AutoFocus]
-  });
-  static ɵinj = ɵɵdefineInjector({
-    imports: [CommonModule]
-  });
-};
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(AutoFocusModule, [{
-    type: NgModule,
-    args: [{
-      imports: [CommonModule],
-      exports: [AutoFocus],
-      declarations: [AutoFocus]
-    }]
-  }], null, null);
-})();
-
 // node_modules/primeng/fesm2022/primeng-overlay.mjs
 var _c05 = ["overlay"];
-var _c14 = ["content"];
+var _c17 = ["content"];
 var _c22 = ["*"];
 var _c32 = (a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13) => ({
   "p-overlay p-component": true,
@@ -8787,17 +9400,21 @@ var Overlay = class _Overlay {
     const container = this.overlayEl || event2.element.parentElement;
     switch (event2.toState) {
       case "visible":
-        this.show(container, true);
+        if (this.visible) {
+          this.show(container, true);
+        }
         this.bindListeners();
         break;
       case "void":
-        this.hide(container, true);
-        this.unbindListeners();
-        DomHandler.appendOverlay(this.overlayEl, this.targetEl, this.appendTo);
-        zindexutils.clear(container);
-        this.modalVisible = false;
-        this.cd.markForCheck();
-        break;
+        if (!this.visible) {
+          this.hide(container, true);
+          this.modalVisible = false;
+          this.unbindListeners();
+          DomHandler.appendOverlay(this.overlayEl, this.targetEl, this.appendTo);
+          zindexutils.clear(container);
+          this.cd.markForCheck();
+          break;
+        }
     }
     this.handleEvents("onAnimationDone", event2);
   }
@@ -8807,6 +9424,7 @@ var Overlay = class _Overlay {
     this.config?.overlayOptions && (this.config?.overlayOptions)[name] && (this.config?.overlayOptions)[name](params);
   }
   bindListeners() {
+    this.unbindListeners();
     this.bindScrollListener();
     this.bindDocumentClickListener();
     this.bindDocumentResizeListener();
@@ -8933,7 +9551,7 @@ var Overlay = class _Overlay {
     viewQuery: function Overlay_Query(rf, ctx) {
       if (rf & 1) {
         ɵɵviewQuery(_c05, 5);
-        ɵɵviewQuery(_c14, 5);
+        ɵɵviewQuery(_c17, 5);
       }
       if (rf & 2) {
         let _t;
@@ -9178,7 +9796,7 @@ var OverlayModule = class _OverlayModule {
 
 // node_modules/primeng/fesm2022/primeng-scroller.mjs
 var _c06 = ["element"];
-var _c15 = ["content"];
+var _c18 = ["content"];
 var _c23 = ["*"];
 var _c33 = (a0, a1, a2) => ({
   "p-scroller": true,
@@ -9321,7 +9939,7 @@ function Scroller_ng_container_0_div_7_ng_template_2_ng_template_1_Template(rf, 
     ɵɵelement(0, "SpinnerIcon", 16);
   }
   if (rf & 2) {
-    ɵɵproperty("styleClass", "p-scroller-loading-icon");
+    ɵɵproperty("styleClass", "p-scroller-loading-icon pi-spin");
     ɵɵattribute("data-pc-section", "loadingIcon");
   }
 }
@@ -9732,7 +10350,7 @@ var Scroller = class _Scroller {
   scrollTimeout;
   resizeTimeout;
   initialized = false;
-  windowResizeListener;
+  resizeObserver;
   defaultWidth;
   defaultHeight;
   defaultContentWidth;
@@ -9762,9 +10380,6 @@ var Scroller = class _Scroller {
       return this.d_loading && this._loaderDisabled ? this.both ? this.loaderArr[0] : this.loaderArr : this._columns.slice(this.both ? this.first.cols : this.first, this.both ? this.last.cols : this.last);
     }
     return this._columns;
-  }
-  get isPageChanged() {
-    return this._step ? this.page !== this.getPageByFirst() : true;
   }
   constructor(document2, platformId, renderer, cd, zone) {
     this.document = document2;
@@ -9861,15 +10476,18 @@ var Scroller = class _Scroller {
     this.initialized = false;
   }
   viewInit() {
-    if (isPlatformBrowser(this.platformId)) {
+    if (isPlatformBrowser(this.platformId) && !this.initialized) {
       if (DomHandler.isVisible(this.elementViewChild?.nativeElement)) {
         this.setInitialState();
         this.setContentEl(this.contentEl);
         this.init();
+        this.calculateAutoSize();
         this.defaultWidth = DomHandler.getWidth(this.elementViewChild?.nativeElement);
         this.defaultHeight = DomHandler.getHeight(this.elementViewChild?.nativeElement);
         this.defaultContentWidth = DomHandler.getWidth(this.contentEl);
         this.defaultContentHeight = DomHandler.getHeight(this.contentEl);
+        this.resizeObserver = new ResizeObserver(() => this.onResize());
+        this.resizeObserver.observe(this.elementViewChild?.nativeElement);
         this.initialized = true;
       }
     }
@@ -9879,7 +10497,6 @@ var Scroller = class _Scroller {
       this.setSize();
       this.calculateOptions();
       this.setSpacerSize();
-      this.bindResizeListener();
       this.cd.detectChanges();
     }
   }
@@ -9912,41 +10529,57 @@ var Scroller = class _Scroller {
   getElementRef() {
     return this.elementViewChild;
   }
-  getPageByFirst() {
-    return Math.floor((this.first + this.d_numToleratedItems * 4) / (this._step || 1));
+  getPageByFirst(first) {
+    return Math.floor(((first ?? this.first) + this.d_numToleratedItems * 4) / (this._step || 1));
+  }
+  isPageChanged(first) {
+    return this._step ? this.page !== this.getPageByFirst(first ?? this.first) : true;
   }
   scrollTo(options) {
-    this.lastScrollPos = this.both ? {
-      top: 0,
-      left: 0
-    } : 0;
     this.elementViewChild?.nativeElement?.scrollTo(options);
   }
   scrollToIndex(index, behavior = "auto") {
-    const {
-      numToleratedItems
-    } = this.calculateNumItems();
-    const contentPos = this.getContentPosition();
-    const calculateFirst = (_index = 0, _numT) => _index <= _numT ? 0 : _index;
-    const calculateCoord = (_first, _size, _cpos) => _first * _size + _cpos;
-    const scrollTo = (left = 0, top = 0) => this.scrollTo({
-      left,
-      top,
-      behavior
-    });
-    let newFirst = 0;
-    if (this.both) {
-      newFirst = {
-        rows: calculateFirst(index[0], numToleratedItems[0]),
-        cols: calculateFirst(index[1], numToleratedItems[1])
-      };
-      scrollTo(calculateCoord(newFirst.cols, this._itemSize[1], contentPos.left), calculateCoord(newFirst.rows, this._itemSize[0], contentPos.top));
-    } else {
-      newFirst = calculateFirst(index, numToleratedItems);
-      this.horizontal ? scrollTo(calculateCoord(newFirst, this._itemSize, contentPos.left), 0) : scrollTo(0, calculateCoord(newFirst, this._itemSize, contentPos.top));
+    const valid = this.both ? index.every((i) => i > -1) : index > -1;
+    if (valid) {
+      const first = this.first;
+      const {
+        scrollTop = 0,
+        scrollLeft = 0
+      } = this.elementViewChild?.nativeElement;
+      const {
+        numToleratedItems
+      } = this.calculateNumItems();
+      const contentPos = this.getContentPosition();
+      const itemSize = this.itemSize;
+      const calculateFirst = (_index = 0, _numT) => _index <= _numT ? 0 : _index;
+      const calculateCoord = (_first, _size, _cpos) => _first * _size + _cpos;
+      const scrollTo = (left = 0, top = 0) => this.scrollTo({
+        left,
+        top,
+        behavior
+      });
+      let newFirst = this.both ? {
+        rows: 0,
+        cols: 0
+      } : 0;
+      let isRangeChanged = false, isScrollChanged = false;
+      if (this.both) {
+        newFirst = {
+          rows: calculateFirst(index[0], numToleratedItems[0]),
+          cols: calculateFirst(index[1], numToleratedItems[1])
+        };
+        scrollTo(calculateCoord(newFirst.cols, itemSize[1], contentPos.left), calculateCoord(newFirst.rows, itemSize[0], contentPos.top));
+        isScrollChanged = this.lastScrollPos.top !== scrollTop || this.lastScrollPos.left !== scrollLeft;
+        isRangeChanged = newFirst.rows !== first.rows || newFirst.cols !== first.cols;
+      } else {
+        newFirst = calculateFirst(index, numToleratedItems);
+        this.horizontal ? scrollTo(calculateCoord(newFirst, itemSize, contentPos.left), scrollTop) : scrollTo(scrollLeft, calculateCoord(newFirst, itemSize, contentPos.top));
+        isScrollChanged = this.lastScrollPos !== (this.horizontal ? scrollLeft : scrollTop);
+        isRangeChanged = newFirst !== first;
+      }
+      this.isRangeChanged = isRangeChanged;
+      isScrollChanged && (this.first = newFirst);
     }
-    this.isRangeChanged = this.first !== newFirst;
-    this.first = newFirst;
   }
   scrollInView(index, to, behavior = "auto") {
     if (to) {
@@ -9993,7 +10626,7 @@ var Scroller = class _Scroller {
     }
   }
   getRenderedRange() {
-    const calculateFirstInViewport = (_pos, _size) => Math.floor(_pos / (_size || _pos));
+    const calculateFirstInViewport = (_pos, _size) => _size || _pos ? Math.floor(_pos / (_size || _pos)) : 0;
     let firstInViewport = this.first;
     let lastInViewport = 0;
     if (this.elementViewChild?.nativeElement) {
@@ -10029,7 +10662,7 @@ var Scroller = class _Scroller {
     const contentPos = this.getContentPosition();
     const contentWidth = (this.elementViewChild?.nativeElement ? this.elementViewChild.nativeElement.offsetWidth - contentPos.left : 0) || 0;
     const contentHeight = (this.elementViewChild?.nativeElement ? this.elementViewChild.nativeElement.offsetHeight - contentPos.top : 0) || 0;
-    const calculateNumItemsInViewport = (_contentSize, _itemSize) => Math.ceil(_contentSize / (_itemSize || _contentSize));
+    const calculateNumItemsInViewport = (_contentSize, _itemSize) => _itemSize || _contentSize ? Math.ceil(_contentSize / (_itemSize || _contentSize)) : 0;
     const calculateNumToleratedItems = (_numItems) => Math.ceil(_numItems / 2);
     const numItemsInViewport = this.both ? {
       rows: calculateNumItemsInViewport(contentHeight, this._itemSize[0]),
@@ -10088,11 +10721,15 @@ var Scroller = class _Scroller {
           contentWidth !== this.defaultContentWidth && (this.elementViewChild.nativeElement.style.width = "");
           contentHeight !== this.defaultContentHeight && (this.elementViewChild.nativeElement.style.height = "");
           const [width, height] = [DomHandler.getWidth(this.elementViewChild.nativeElement), DomHandler.getHeight(this.elementViewChild.nativeElement)];
-          (this.both || this.horizontal) && (this.elementViewChild.nativeElement.style.width = width < this.defaultWidth ? width + "px" : this._scrollWidth || this.defaultWidth + "px");
-          (this.both || this.vertical) && (this.elementViewChild.nativeElement.style.height = height < this.defaultHeight ? height + "px" : this._scrollHeight || this.defaultHeight + "px");
           this.contentEl.style.minHeight = this.contentEl.style.minWidth = "";
           this.contentEl.style.position = "";
           this.elementViewChild.nativeElement.style.contain = "";
+          this.defaultWidth = width;
+          this.defaultHeight = height;
+          this.defaultContentWidth = contentWidth;
+          this.defaultContentHeight = contentHeight;
+          (this.both || this.horizontal) && (this.elementViewChild.nativeElement.style.width = width < this.defaultWidth ? width + "px" : this._scrollWidth || this.defaultWidth + "px");
+          (this.both || this.vertical) && (this.elementViewChild.nativeElement.style.height = height < this.defaultHeight ? height + "px" : this._scrollHeight || this.defaultHeight + "px");
         }
       });
     }
@@ -10141,15 +10778,15 @@ var Scroller = class _Scroller {
   }
   setSpacerSize() {
     if (this._items) {
-      const contentPos = this.getContentPosition();
-      const setProp = (_name, _value, _size, _cpos = 0) => this.spacerStyle = __spreadValues(__spreadValues({}, this.spacerStyle), {
-        [`${_name}`]: (_value || []).length * _size + _cpos + "px"
+      const setProp = (_name, _count, _size) => this.spacerStyle = __spreadValues(__spreadValues({}, this.spacerStyle), {
+        [`${_name}`]: _count * _size + "px"
       });
+      const numItems = this._items.length;
       if (this.both) {
-        setProp("height", this._items, this._itemSize[0], contentPos.y);
-        setProp("width", this._columns || this._items[1], this._itemSize[1], contentPos.x);
+        setProp("height", numItems, this._itemSize[0]);
+        setProp("width", this._columns?.length || this._items[1]?.length, this._itemSize[1]);
       } else {
-        this.horizontal ? setProp("width", this._columns || this._items, this._itemSize, contentPos.x) : setProp("height", this._items, this._itemSize, contentPos.y);
+        this.horizontal ? setProp("width", this._columns?.length || this._items.length, this._itemSize) : setProp("height", numItems, this._itemSize);
       }
     }
   }
@@ -10172,7 +10809,7 @@ var Scroller = class _Scroller {
     const target = event2.target;
     const contentPos = this.getContentPosition();
     const calculateScrollPos = (_pos, _cpos) => _pos ? _pos > _cpos ? _pos - _cpos : _pos : 0;
-    const calculateCurrentIndex = (_pos, _size) => Math.floor(_pos / (_size || _pos));
+    const calculateCurrentIndex = (_pos, _size) => _size || _pos ? Math.floor(_pos / (_size || _pos)) : 0;
     const calculateTriggerIndex = (_currentIndex, _first, _last, _num, _numT, _isScrollDownOrRight) => {
       return _currentIndex <= _numT ? _numT : _isScrollDownOrRight ? _last - _num - _numT : _first + _numT - 1;
     };
@@ -10258,10 +10895,10 @@ var Scroller = class _Scroller {
       this.last = last;
       this.lastScrollPos = scrollPos;
       this.handleEvents("onScrollIndexChange", newState);
-      if (this._lazy && this.isPageChanged) {
+      if (this._lazy && this.isPageChanged(first)) {
         const lazyLoadState = {
-          first: this._step ? Math.min(this.getPageByFirst() * this._step, this.items.length - this._step) : first,
-          last: Math.min(this._step ? (this.getPageByFirst() + 1) * this._step : last, this.items.length)
+          first: this._step ? Math.min(this.getPageByFirst(first) * this._step, this.items.length - this._step) : first,
+          last: Math.min(this._step ? (this.getPageByFirst(first) + 1) * this._step : last, this.items.length)
         };
         const isLazyStateChanged = this.lazyLoadState.first !== lazyLoadState.first || this.lazyLoadState.last !== lazyLoadState.last;
         isLazyStateChanged && this.handleEvents("onLazyLoad", lazyLoadState);
@@ -10273,7 +10910,7 @@ var Scroller = class _Scroller {
     this.handleEvents("onScroll", {
       originalEvent: event2
     });
-    if (this._delay && this.isPageChanged) {
+    if (this._delay && this.isPageChanged()) {
       if (this.scrollTimeout) {
         clearTimeout(this.scrollTimeout);
       }
@@ -10281,7 +10918,7 @@ var Scroller = class _Scroller {
         const {
           isRangeChanged
         } = this.onScrollPositionChange(event2);
-        const changed = isRangeChanged || (this._step ? this.isPageChanged : false);
+        const changed = isRangeChanged || (this._step ? this.isPageChanged() : false);
         if (changed) {
           this.d_loading = true;
           this.cd.detectChanges();
@@ -10299,24 +10936,13 @@ var Scroller = class _Scroller {
       !this.d_loading && this.onScrollChange(event2);
     }
   }
-  bindResizeListener() {
-    if (isPlatformBrowser(this.platformId)) {
-      if (!this.windowResizeListener) {
-        this.zone.runOutsideAngular(() => {
-          const window2 = this.document.defaultView;
-          const event2 = DomHandler.isTouchDevice() ? "orientationchange" : "resize";
-          this.windowResizeListener = this.renderer.listen(window2, event2, this.onWindowResize.bind(this));
-        });
-      }
-    }
-  }
   unbindResizeListener() {
-    if (this.windowResizeListener) {
-      this.windowResizeListener();
-      this.windowResizeListener = null;
+    if (this.resizeObserver) {
+      this.resizeObserver.unobserve(this.elementViewChild?.nativeElement);
+      this.resizeObserver = null;
     }
   }
-  onWindowResize() {
+  onResize() {
     if (this.resizeTimeout) {
       clearTimeout(this.resizeTimeout);
     }
@@ -10327,11 +10953,8 @@ var Scroller = class _Scroller {
         const reinit = this.both ? isDiffWidth || isDiffHeight : this.horizontal ? isDiffWidth : this.vertical ? isDiffHeight : false;
         reinit && this.zone.run(() => {
           this.d_numToleratedItems = this._numToleratedItems;
-          this.defaultWidth = width;
-          this.defaultHeight = height;
-          this.defaultContentWidth = DomHandler.getWidth(this.contentEl);
-          this.defaultContentHeight = DomHandler.getHeight(this.contentEl);
           this.init();
+          this.calculateAutoSize();
         });
       }
     }, this._resizeDelay);
@@ -10397,7 +11020,7 @@ var Scroller = class _Scroller {
     viewQuery: function Scroller_Query(rf, ctx) {
       if (rf & 1) {
         ɵɵviewQuery(_c06, 5);
-        ɵɵviewQuery(_c15, 5);
+        ɵɵviewQuery(_c18, 5);
       }
       if (rf & 2) {
         let _t;
@@ -10498,7 +11121,7 @@ var Scroller = class _Scroller {
                             <ng-container *ngTemplateOutlet="loaderIconTemplate; context: { options: { styleClass: 'p-scroller-loading-icon' } }"></ng-container>
                         </ng-container>
                         <ng-template #buildInLoaderIcon>
-                            <SpinnerIcon [styleClass]="'p-scroller-loading-icon'" [attr.data-pc-section]="'loadingIcon'" />
+                            <SpinnerIcon [styleClass]="'p-scroller-loading-icon pi-spin'" [attr.data-pc-section]="'loadingIcon'" />
                         </ng-template>
                     </ng-template>
                 </div>
@@ -10797,8 +11420,10 @@ var Tooltip = class _Tooltip {
   clickListener;
   focusListener;
   blurListener;
+  documentEscapeListener;
   scrollHandler;
   resizeListener;
+  interactionInProgress = false;
   constructor(platformId, el, zone, config, renderer, viewContainer) {
     this.platformId = platformId;
     this.el = el;
@@ -10810,22 +11435,36 @@ var Tooltip = class _Tooltip {
   ngAfterViewInit() {
     if (isPlatformBrowser(this.platformId)) {
       this.zone.runOutsideAngular(() => {
-        if (this.getOption("tooltipEvent") === "hover") {
+        const tooltipEvent = this.getOption("tooltipEvent");
+        if (tooltipEvent === "hover" || tooltipEvent === "both") {
           this.mouseEnterListener = this.onMouseEnter.bind(this);
           this.mouseLeaveListener = this.onMouseLeave.bind(this);
           this.clickListener = this.onInputClick.bind(this);
           this.el.nativeElement.addEventListener("mouseenter", this.mouseEnterListener);
           this.el.nativeElement.addEventListener("click", this.clickListener);
           this.el.nativeElement.addEventListener("mouseleave", this.mouseLeaveListener);
-        } else if (this.getOption("tooltipEvent") === "focus") {
+        }
+        if (tooltipEvent === "focus" || tooltipEvent === "both") {
           this.focusListener = this.onFocus.bind(this);
           this.blurListener = this.onBlur.bind(this);
-          let target = this.getTarget(this.el.nativeElement);
+          let target = this.el.nativeElement.querySelector(".p-component");
+          if (!target) {
+            target = this.getTarget(this.el.nativeElement);
+          }
           target.addEventListener("focus", this.focusListener);
           target.addEventListener("blur", this.blurListener);
         }
       });
     }
+  }
+  setAriaDescribedBy() {
+    const tooltipId = this.getOption("id");
+    if (tooltipId && this.active) {
+      this.renderer.setAttribute(this.el.nativeElement, "aria-describedby", tooltipId);
+    }
+  }
+  removeAriaDescribedBy() {
+    this.renderer.removeAttribute(this.el.nativeElement, "aria-describedby");
   }
   ngOnChanges(simpleChange) {
     if (simpleChange.tooltipPosition) {
@@ -10962,26 +11601,31 @@ var Tooltip = class _Tooltip {
   onInputClick(e) {
     this.deactivate();
   }
-  onPressEscape() {
-    if (this.hideOnEscape) {
-      this.deactivate();
-    }
-  }
   activate() {
-    this.active = true;
-    this.clearHideTimeout();
-    if (this.getOption("showDelay")) this.showTimeout = setTimeout(() => {
-      this.show();
-    }, this.getOption("showDelay"));
-    else this.show();
-    if (this.getOption("life")) {
-      let duration = this.getOption("showDelay") ? this.getOption("life") + this.getOption("showDelay") : this.getOption("life");
-      this.hideTimeout = setTimeout(() => {
-        this.hide();
-      }, duration);
+    if (!this.interactionInProgress) {
+      this.active = true;
+      this.clearHideTimeout();
+      if (this.getOption("showDelay")) this.showTimeout = setTimeout(() => {
+        this.show();
+      }, this.getOption("showDelay"));
+      else this.show();
+      if (this.getOption("life")) {
+        let duration = this.getOption("showDelay") ? this.getOption("life") + this.getOption("showDelay") : this.getOption("life");
+        this.hideTimeout = setTimeout(() => {
+          this.hide();
+        }, duration);
+      }
+      if (this.getOption("hideOnEscape")) {
+        this.documentEscapeListener = this.renderer.listen("document", "keydown.escape", () => {
+          this.deactivate();
+          this.documentEscapeListener();
+        });
+      }
     }
+    this.interactionInProgress = true;
   }
   deactivate() {
+    this.interactionInProgress = false;
     this.active = false;
     this.clearShowTimeout();
     if (this.getOption("hideDelay")) {
@@ -10991,6 +11635,9 @@ var Tooltip = class _Tooltip {
       }, this.getOption("hideDelay"));
     } else {
       this.hide();
+    }
+    if (this.documentEscapeListener) {
+      this.documentEscapeListener();
     }
   }
   create() {
@@ -11024,6 +11671,7 @@ var Tooltip = class _Tooltip {
       this.container.style.pointerEvents = "unset";
       this.bindContainerMouseleaveListener();
     }
+    this.setAriaDescribedBy();
   }
   bindContainerMouseleaveListener() {
     if (!this.containerMouseleaveListener) {
@@ -11044,7 +11692,15 @@ var Tooltip = class _Tooltip {
       return;
     }
     this.create();
-    this.align();
+    const nativeElement = this.el.nativeElement;
+    const pDialogWrapper = nativeElement.closest("p-dialog");
+    if (pDialogWrapper) {
+      setTimeout(() => {
+        this.container && this.align();
+      }, 100);
+    } else {
+      this.align();
+    }
     DomHandler.fadeIn(this.container, 250);
     if (this.getOption("tooltipZIndex") === "auto") zindexutils.set("tooltip", this.container, this.config.zIndex.tooltip);
     else this.container.style.zIndex = this.getOption("tooltipZIndex");
@@ -11141,11 +11797,15 @@ var Tooltip = class _Tooltip {
   }
   alignRight() {
     this.preAlign("right");
-    let hostOffset = this.getHostOffset();
-    let left = hostOffset.left + DomHandler.getOuterWidth(this.el.nativeElement);
-    let top = hostOffset.top + (DomHandler.getOuterHeight(this.el.nativeElement) - DomHandler.getOuterHeight(this.container)) / 2;
+    const el = this.activeElement;
+    const hostOffset = this.getHostOffset();
+    const left = hostOffset.left + DomHandler.getOuterWidth(el);
+    const top = hostOffset.top + (DomHandler.getOuterHeight(el) - DomHandler.getOuterHeight(this.container)) / 2;
     this.container.style.left = left + this.getOption("positionLeft") + "px";
     this.container.style.top = top + this.getOption("positionTop") + "px";
+  }
+  get activeElement() {
+    return this.el.nativeElement.nodeName.includes("P-") ? DomHandler.findSingle(this.el.nativeElement, ".p-component") || this.el.nativeElement : this.el.nativeElement;
   }
   alignLeft() {
     this.preAlign("left");
@@ -11226,14 +11886,17 @@ var Tooltip = class _Tooltip {
     }
   }
   unbindEvents() {
-    if (this.getOption("tooltipEvent") === "hover") {
+    const tooltipEvent = this.getOption("tooltipEvent");
+    if (tooltipEvent === "hover" || tooltipEvent === "both") {
       this.el.nativeElement.removeEventListener("mouseenter", this.mouseEnterListener);
       this.el.nativeElement.removeEventListener("mouseleave", this.mouseLeaveListener);
       this.el.nativeElement.removeEventListener("click", this.clickListener);
-    } else if (this.getOption("tooltipEvent") === "focus") {
-      let target = this.getTarget(this.el.nativeElement);
-      target.removeEventListener("focus", this.focusListener);
-      target.removeEventListener("blur", this.blurListener);
+    }
+    if (tooltipEvent === "focus" || tooltipEvent === "both") {
+      let target = this.el.nativeElement.querySelector(".p-component");
+      if (!target) {
+        target = this.getTarget(this.el.nativeElement);
+      }
     }
     this.unbindDocumentResizeListener();
   }
@@ -11247,6 +11910,7 @@ var Tooltip = class _Tooltip {
     this.unbindScrollListener();
     this.unbindContainerMouseleaveListener();
     this.clearTimeouts();
+    this.removeAriaDescribedBy();
     this.container = null;
     this.scrollHandler = null;
   }
@@ -11276,6 +11940,9 @@ var Tooltip = class _Tooltip {
       this.scrollHandler.destroy();
       this.scrollHandler = null;
     }
+    if (this.documentEscapeListener) {
+      this.documentEscapeListener();
+    }
   }
   static ɵfac = function Tooltip_Factory(t) {
     return new (t || _Tooltip)(ɵɵdirectiveInject(PLATFORM_ID), ɵɵdirectiveInject(ElementRef), ɵɵdirectiveInject(NgZone), ɵɵdirectiveInject(PrimeNGConfig), ɵɵdirectiveInject(Renderer2), ɵɵdirectiveInject(ViewContainerRef));
@@ -11284,13 +11951,6 @@ var Tooltip = class _Tooltip {
     type: _Tooltip,
     selectors: [["", "pTooltip", ""]],
     hostAttrs: [1, "p-element"],
-    hostBindings: function Tooltip_HostBindings(rf, ctx) {
-      if (rf & 1) {
-        ɵɵlistener("keydown.escape", function Tooltip_keydown_escape_HostBindingHandler($event) {
-          return ctx.onPressEscape($event);
-        }, false, ɵɵresolveDocument);
-      }
-    },
     inputs: {
       tooltipPosition: "tooltipPosition",
       tooltipEvent: "tooltipEvent",
@@ -11298,20 +11958,20 @@ var Tooltip = class _Tooltip {
       positionStyle: "positionStyle",
       tooltipStyleClass: "tooltipStyleClass",
       tooltipZIndex: "tooltipZIndex",
-      escape: "escape",
-      showDelay: "showDelay",
-      hideDelay: "hideDelay",
-      life: "life",
-      positionTop: "positionTop",
-      positionLeft: "positionLeft",
-      autoHide: "autoHide",
-      fitContent: "fitContent",
-      hideOnEscape: "hideOnEscape",
+      escape: [InputFlags.HasDecoratorInputTransform, "escape", "escape", booleanAttribute],
+      showDelay: [InputFlags.HasDecoratorInputTransform, "showDelay", "showDelay", numberAttribute],
+      hideDelay: [InputFlags.HasDecoratorInputTransform, "hideDelay", "hideDelay", numberAttribute],
+      life: [InputFlags.HasDecoratorInputTransform, "life", "life", numberAttribute],
+      positionTop: [InputFlags.HasDecoratorInputTransform, "positionTop", "positionTop", numberAttribute],
+      positionLeft: [InputFlags.HasDecoratorInputTransform, "positionLeft", "positionLeft", numberAttribute],
+      autoHide: [InputFlags.HasDecoratorInputTransform, "autoHide", "autoHide", booleanAttribute],
+      fitContent: [InputFlags.HasDecoratorInputTransform, "fitContent", "fitContent", booleanAttribute],
+      hideOnEscape: [InputFlags.HasDecoratorInputTransform, "hideOnEscape", "hideOnEscape", booleanAttribute],
       content: [InputFlags.None, "pTooltip", "content"],
       disabled: [InputFlags.None, "tooltipDisabled", "disabled"],
       tooltipOptions: "tooltipOptions"
     },
-    features: [ɵɵNgOnChangesFeature]
+    features: [ɵɵInputTransformsFeature, ɵɵNgOnChangesFeature]
   });
 };
 (() => {
@@ -11359,31 +12019,58 @@ var Tooltip = class _Tooltip {
       type: Input
     }],
     escape: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     showDelay: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     hideDelay: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     life: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     positionTop: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     positionLeft: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     autoHide: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     fitContent: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     hideOnEscape: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     content: [{
       type: Input,
@@ -11395,10 +12082,6 @@ var Tooltip = class _Tooltip {
     }],
     tooltipOptions: [{
       type: Input
-    }],
-    onPressEscape: [{
-      type: HostListener,
-      args: ["document:keydown.escape", ["$event"]]
     }]
   });
 })();
@@ -11423,6 +12106,99 @@ var TooltipModule = class _TooltipModule {
       imports: [CommonModule],
       exports: [Tooltip],
       declarations: [Tooltip]
+    }]
+  }], null, null);
+})();
+
+// node_modules/primeng/fesm2022/primeng-icons-check.mjs
+var CheckIcon = class _CheckIcon extends BaseIcon {
+  static ɵfac = /* @__PURE__ */ (() => {
+    let ɵCheckIcon_BaseFactory;
+    return function CheckIcon_Factory(t) {
+      return (ɵCheckIcon_BaseFactory || (ɵCheckIcon_BaseFactory = ɵɵgetInheritedFactory(_CheckIcon)))(t || _CheckIcon);
+    };
+  })();
+  static ɵcmp = ɵɵdefineComponent({
+    type: _CheckIcon,
+    selectors: [["CheckIcon"]],
+    standalone: true,
+    features: [ɵɵInheritDefinitionFeature, ɵɵStandaloneFeature],
+    decls: 2,
+    vars: 5,
+    consts: [["width", "14", "height", "14", "viewBox", "0 0 14 14", "fill", "none", "xmlns", "http://www.w3.org/2000/svg"], ["d", "M4.86199 11.5948C4.78717 11.5923 4.71366 11.5745 4.64596 11.5426C4.57826 11.5107 4.51779 11.4652 4.46827 11.4091L0.753985 7.69483C0.683167 7.64891 0.623706 7.58751 0.580092 7.51525C0.536478 7.44299 0.509851 7.36177 0.502221 7.27771C0.49459 7.19366 0.506156 7.10897 0.536046 7.03004C0.565935 6.95111 0.613367 6.88 0.674759 6.82208C0.736151 6.76416 0.8099 6.72095 0.890436 6.69571C0.970973 6.67046 1.05619 6.66385 1.13966 6.67635C1.22313 6.68886 1.30266 6.72017 1.37226 6.76792C1.44186 6.81567 1.4997 6.8786 1.54141 6.95197L4.86199 10.2503L12.6397 2.49483C12.7444 2.42694 12.8689 2.39617 12.9932 2.40745C13.1174 2.41873 13.2343 2.47141 13.3251 2.55705C13.4159 2.64268 13.4753 2.75632 13.4938 2.87973C13.5123 3.00315 13.4888 3.1292 13.4271 3.23768L5.2557 11.4091C5.20618 11.4652 5.14571 11.5107 5.07801 11.5426C5.01031 11.5745 4.9368 11.5923 4.86199 11.5948Z", "fill", "currentColor"]],
+    template: function CheckIcon_Template(rf, ctx) {
+      if (rf & 1) {
+        ɵɵnamespaceSVG();
+        ɵɵelementStart(0, "svg", 0);
+        ɵɵelement(1, "path", 1);
+        ɵɵelementEnd();
+      }
+      if (rf & 2) {
+        ɵɵclassMap(ctx.getClassNames());
+        ɵɵattribute("aria-label", ctx.ariaLabel)("aria-hidden", ctx.ariaHidden)("role", ctx.role);
+      }
+    },
+    encapsulation: 2
+  });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(CheckIcon, [{
+    type: Component,
+    args: [{
+      selector: "CheckIcon",
+      standalone: true,
+      imports: [BaseIcon],
+      template: `
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" [attr.aria-label]="ariaLabel" [attr.aria-hidden]="ariaHidden" [attr.role]="role" [class]="getClassNames()">
+            <path
+                d="M4.86199 11.5948C4.78717 11.5923 4.71366 11.5745 4.64596 11.5426C4.57826 11.5107 4.51779 11.4652 4.46827 11.4091L0.753985 7.69483C0.683167 7.64891 0.623706 7.58751 0.580092 7.51525C0.536478 7.44299 0.509851 7.36177 0.502221 7.27771C0.49459 7.19366 0.506156 7.10897 0.536046 7.03004C0.565935 6.95111 0.613367 6.88 0.674759 6.82208C0.736151 6.76416 0.8099 6.72095 0.890436 6.69571C0.970973 6.67046 1.05619 6.66385 1.13966 6.67635C1.22313 6.68886 1.30266 6.72017 1.37226 6.76792C1.44186 6.81567 1.4997 6.8786 1.54141 6.95197L4.86199 10.2503L12.6397 2.49483C12.7444 2.42694 12.8689 2.39617 12.9932 2.40745C13.1174 2.41873 13.2343 2.47141 13.3251 2.55705C13.4159 2.64268 13.4753 2.75632 13.4938 2.87973C13.5123 3.00315 13.4888 3.1292 13.4271 3.23768L5.2557 11.4091C5.20618 11.4652 5.14571 11.5107 5.07801 11.5426C5.01031 11.5745 4.9368 11.5923 4.86199 11.5948Z"
+                fill="currentColor"
+            />
+        </svg>
+    `
+    }]
+  }], null, null);
+})();
+
+// node_modules/primeng/fesm2022/primeng-icons-blank.mjs
+var BlankIcon = class _BlankIcon extends BaseIcon {
+  static ɵfac = /* @__PURE__ */ (() => {
+    let ɵBlankIcon_BaseFactory;
+    return function BlankIcon_Factory(t) {
+      return (ɵBlankIcon_BaseFactory || (ɵBlankIcon_BaseFactory = ɵɵgetInheritedFactory(_BlankIcon)))(t || _BlankIcon);
+    };
+  })();
+  static ɵcmp = ɵɵdefineComponent({
+    type: _BlankIcon,
+    selectors: [["BlankIcon"]],
+    standalone: true,
+    features: [ɵɵInheritDefinitionFeature, ɵɵStandaloneFeature],
+    decls: 2,
+    vars: 0,
+    consts: [["width", "14", "height", "14", "viewBox", "0 0 14 14", "fill", "none", "xmlns", "http://www.w3.org/2000/svg", "v-bind", "pti()"], ["width", "1", "height", "1", "fill", "currentColor", "fill-opacity", "0"]],
+    template: function BlankIcon_Template(rf, ctx) {
+      if (rf & 1) {
+        ɵɵnamespaceSVG();
+        ɵɵelementStart(0, "svg", 0);
+        ɵɵelement(1, "rect", 1);
+        ɵɵelementEnd();
+      }
+    },
+    encapsulation: 2
+  });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(BlankIcon, [{
+    type: Component,
+    args: [{
+      selector: "BlankIcon",
+      standalone: true,
+      imports: [BaseIcon],
+      template: `
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" v-bind="pti()">
+            <rect width="1" height="1" fill="currentColor" fill-opacity="0" />
+        </svg>
+    `
     }]
   }], null, null);
 })();
@@ -11501,7 +12277,7 @@ var SearchIcon = class _SearchIcon extends BaseIcon {
 var _c07 = (a0) => ({
   height: a0
 });
-var _c16 = (a0, a1, a2) => ({
+var _c19 = (a0, a1, a2) => ({
   "p-dropdown-item": true,
   "p-highlight": a0,
   "p-disabled": a1,
@@ -11510,7 +12286,37 @@ var _c16 = (a0, a1, a2) => ({
 var _c24 = (a0) => ({
   $implicit: a0
 });
-function DropdownItem_span_1_Template(rf, ctx) {
+function DropdownItem_ng_container_1_CheckIcon_1_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵelement(0, "CheckIcon", 4);
+  }
+  if (rf & 2) {
+    ɵɵproperty("styleClass", "p-dropdown-check-icon");
+  }
+}
+function DropdownItem_ng_container_1_BlankIcon_2_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵelement(0, "BlankIcon", 4);
+  }
+  if (rf & 2) {
+    ɵɵproperty("styleClass", "p-dropdown-blank-icon");
+  }
+}
+function DropdownItem_ng_container_1_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵelementContainerStart(0);
+    ɵɵtemplate(1, DropdownItem_ng_container_1_CheckIcon_1_Template, 1, 1, "CheckIcon", 3)(2, DropdownItem_ng_container_1_BlankIcon_2_Template, 1, 1, "BlankIcon", 3);
+    ɵɵelementContainerEnd();
+  }
+  if (rf & 2) {
+    const ctx_r0 = ɵɵnextContext();
+    ɵɵadvance();
+    ɵɵproperty("ngIf", ctx_r0.selected);
+    ɵɵadvance();
+    ɵɵproperty("ngIf", !ctx_r0.selected);
+  }
+}
+function DropdownItem_span_2_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementStart(0, "span");
     ɵɵtext(1);
@@ -11523,7 +12329,7 @@ function DropdownItem_span_1_Template(rf, ctx) {
     ɵɵtextInterpolate((tmp_1_0 = ctx_r0.label) !== null && tmp_1_0 !== void 0 ? tmp_1_0 : "empty");
   }
 }
-function DropdownItem_ng_container_2_Template(rf, ctx) {
+function DropdownItem_ng_container_3_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainer(0);
   }
@@ -11537,14 +12343,20 @@ var _c83 = ["scroller"];
 var _c93 = ["overlay"];
 var _c103 = ["firstHiddenFocusableEl"];
 var _c112 = ["lastHiddenFocusableEl"];
-var _c122 = (a0) => ({
+var _c123 = (a0) => ({
+  "max-height": a0
+});
+var _c132 = (a0) => ({
   options: a0
 });
-var _c132 = (a0, a1) => ({
+var _c142 = (a0) => ({
+  "p-variant-filled": a0
+});
+var _c152 = (a0, a1) => ({
   $implicit: a0,
   options: a1
 });
-var _c142 = () => ({});
+var _c162 = () => ({});
 function Dropdown_span_2_ng_container_2_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainerStart(0);
@@ -11559,7 +12371,11 @@ function Dropdown_span_2_ng_container_2_Template(rf, ctx) {
 }
 function Dropdown_span_2_ng_container_3_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementContainer(0);
+    ɵɵelementContainer(0, 25);
+  }
+  if (rf & 2) {
+    const ctx_r2 = ɵɵnextContext(2);
+    ɵɵproperty("ngTemplateOutlet", ctx_r2.selectedItemTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(2, _c24, ctx_r2.selectedOption));
   }
 }
 function Dropdown_span_2_ng_template_4_span_0_Template(rf, ctx) {
@@ -11571,22 +12387,22 @@ function Dropdown_span_2_ng_template_4_span_0_Template(rf, ctx) {
   if (rf & 2) {
     const ctx_r2 = ɵɵnextContext(3);
     ɵɵadvance();
-    ɵɵtextInterpolate(ctx_r2.label() === "p-emptylabel" ? " " : ctx_r2.placeholder);
+    ɵɵtextInterpolate(ctx_r2.label() === "p-emptylabel" ? " " : ctx_r2.label());
   }
 }
 function Dropdown_span_2_ng_template_4_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵtemplate(0, Dropdown_span_2_ng_template_4_span_0_Template, 2, 1, "span", 17);
+    ɵɵtemplate(0, Dropdown_span_2_ng_template_4_span_0_Template, 2, 1, "span", 18);
   }
   if (rf & 2) {
     const ctx_r2 = ɵɵnextContext(2);
-    ɵɵproperty("ngIf", !ctx_r2.modelValue() && (ctx_r2.label() === ctx_r2.placeholder || ctx_r2.label() && !ctx_r2.placeholder));
+    ɵɵproperty("ngIf", ctx_r2.isSelectedOptionEmpty());
   }
 }
 function Dropdown_span_2_Template(rf, ctx) {
   if (rf & 1) {
     const _r2 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "span", 22, 2);
+    ɵɵelementStart(0, "span", 23, 3);
     ɵɵlistener("focus", function Dropdown_span_2_Template_span_focus_0_listener($event) {
       ɵɵrestoreView(_r2);
       const ctx_r2 = ɵɵnextContext();
@@ -11600,24 +12416,25 @@ function Dropdown_span_2_Template(rf, ctx) {
       const ctx_r2 = ɵɵnextContext();
       return ɵɵresetView(ctx_r2.onKeyDown($event));
     });
-    ɵɵtemplate(2, Dropdown_span_2_ng_container_2_Template, 2, 1, "ng-container", 23)(3, Dropdown_span_2_ng_container_3_Template, 1, 0, "ng-container", 24)(4, Dropdown_span_2_ng_template_4_Template, 1, 1, "ng-template", null, 3, ɵɵtemplateRefExtractor);
+    ɵɵtemplate(2, Dropdown_span_2_ng_container_2_Template, 2, 1, "ng-container", 20)(3, Dropdown_span_2_ng_container_3_Template, 1, 4, "ng-container", 24)(4, Dropdown_span_2_ng_template_4_Template, 1, 1, "ng-template", null, 4, ɵɵtemplateRefExtractor);
     ɵɵelementEnd();
   }
   if (rf & 2) {
+    let tmp_17_0;
     const defaultPlaceholder_r4 = ɵɵreference(5);
     const ctx_r2 = ɵɵnextContext();
     ɵɵproperty("ngClass", ctx_r2.inputClass)("pTooltip", ctx_r2.tooltip)("tooltipPosition", ctx_r2.tooltipPosition)("positionStyle", ctx_r2.tooltipPositionStyle)("tooltipStyleClass", ctx_r2.tooltipStyleClass)("autofocus", ctx_r2.autofocus);
-    ɵɵattribute("aria-disabled", ctx_r2.disabled)("id", ctx_r2.inputId)("aria-label", ctx_r2.ariaLabel || (ctx_r2.label() === "p-emptylabel" ? void 0 : ctx_r2.label()))("aria-labelledby", ctx_r2.ariaLabelledBy)("aria-haspopup", "listbox")("aria-expanded", ctx_r2.overlayVisible)("aria-controls", ctx_r2.id + "_list")("tabindex", !ctx_r2.disabled ? ctx_r2.tabindex : -1)("aria-activedescendant", ctx_r2.focused ? ctx_r2.focusedOptionId : void 0);
+    ɵɵattribute("aria-disabled", ctx_r2.disabled)("id", ctx_r2.inputId)("aria-label", ctx_r2.ariaLabel || (ctx_r2.label() === "p-emptylabel" ? void 0 : ctx_r2.label()))("aria-labelledby", ctx_r2.ariaLabelledBy)("aria-haspopup", "listbox")("aria-expanded", (tmp_17_0 = ctx_r2.overlayVisible) !== null && tmp_17_0 !== void 0 ? tmp_17_0 : false)("aria-controls", ctx_r2.overlayVisible ? ctx_r2.id + "_list" : null)("tabindex", !ctx_r2.disabled ? ctx_r2.tabindex : -1)("aria-activedescendant", ctx_r2.focused ? ctx_r2.focusedOptionId : void 0)("aria-required", ctx_r2.required)("required", ctx_r2.required);
     ɵɵadvance(2);
     ɵɵproperty("ngIf", !ctx_r2.selectedItemTemplate)("ngIfElse", defaultPlaceholder_r4);
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", ctx_r2.selectedItemTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(19, _c24, ctx_r2.selectedOption));
+    ɵɵproperty("ngIf", ctx_r2.selectedItemTemplate && !ctx_r2.isSelectedOptionEmpty());
   }
 }
 function Dropdown_input_3_Template(rf, ctx) {
   if (rf & 1) {
     const _r5 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "input", 25, 4);
+    ɵɵelementStart(0, "input", 26, 5);
     ɵɵlistener("input", function Dropdown_input_3_Template_input_input_0_listener($event) {
       ɵɵrestoreView(_r5);
       const ctx_r2 = ɵɵnextContext();
@@ -11639,14 +12456,14 @@ function Dropdown_input_3_Template(rf, ctx) {
   }
   if (rf & 2) {
     const ctx_r2 = ɵɵnextContext();
-    ɵɵproperty("ngClass", ctx_r2.inputClass)("disabled", ctx_r2.disabled);
-    ɵɵattribute("maxlength", ctx_r2.maxlength)("placeholder", ctx_r2.placeholder)("aria-expanded", ctx_r2.overlayVisible);
+    ɵɵproperty("ngClass", ctx_r2.inputClass)("disabled", ctx_r2.disabled)("autofocus", ctx_r2.autofocus);
+    ɵɵattribute("id", ctx_r2.inputId)("maxlength", ctx_r2.maxlength)("placeholder", ctx_r2.modelValue() === void 0 || ctx_r2.modelValue() === null ? ctx_r2.placeholder() : void 0)("aria-label", ctx_r2.ariaLabel || (ctx_r2.label() === "p-emptylabel" ? void 0 : ctx_r2.label()))("aria-activedescendant", ctx_r2.focused ? ctx_r2.focusedOptionId : void 0);
   }
 }
 function Dropdown_ng_container_4_TimesIcon_1_Template(rf, ctx) {
   if (rf & 1) {
     const _r6 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "TimesIcon", 28);
+    ɵɵelementStart(0, "TimesIcon", 29);
     ɵɵlistener("click", function Dropdown_ng_container_4_TimesIcon_1_Template_TimesIcon_click_0_listener($event) {
       ɵɵrestoreView(_r6);
       const ctx_r2 = ɵɵnextContext(2);
@@ -11669,13 +12486,13 @@ function Dropdown_ng_container_4_span_2_1_Template(rf, ctx) {
 function Dropdown_ng_container_4_span_2_Template(rf, ctx) {
   if (rf & 1) {
     const _r7 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "span", 29);
+    ɵɵelementStart(0, "span", 30);
     ɵɵlistener("click", function Dropdown_ng_container_4_span_2_Template_span_click_0_listener($event) {
       ɵɵrestoreView(_r7);
       const ctx_r2 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r2.clear($event));
     });
-    ɵɵtemplate(1, Dropdown_ng_container_4_span_2_1_Template, 1, 0, null, 30);
+    ɵɵtemplate(1, Dropdown_ng_container_4_span_2_1_Template, 1, 0, null, 31);
     ɵɵelementEnd();
   }
   if (rf & 2) {
@@ -11688,7 +12505,7 @@ function Dropdown_ng_container_4_span_2_Template(rf, ctx) {
 function Dropdown_ng_container_4_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainerStart(0);
-    ɵɵtemplate(1, Dropdown_ng_container_4_TimesIcon_1_Template, 1, 2, "TimesIcon", 26)(2, Dropdown_ng_container_4_span_2_Template, 2, 2, "span", 27);
+    ɵɵtemplate(1, Dropdown_ng_container_4_TimesIcon_1_Template, 1, 2, "TimesIcon", 27)(2, Dropdown_ng_container_4_span_2_Template, 2, 2, "span", 28);
     ɵɵelementContainerEnd();
   }
   if (rf & 2) {
@@ -11699,97 +12516,170 @@ function Dropdown_ng_container_4_Template(rf, ctx) {
     ɵɵproperty("ngIf", ctx_r2.clearIconTemplate);
   }
 }
-function Dropdown_ng_container_6_span_1_Template(rf, ctx) {
+function Dropdown_ng_container_6_ng_container_1_ng_container_1_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelement(0, "span", 33);
+    ɵɵelementContainer(0);
+  }
+}
+function Dropdown_ng_container_6_ng_container_1_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵelementContainerStart(0);
+    ɵɵtemplate(1, Dropdown_ng_container_6_ng_container_1_ng_container_1_Template, 1, 0, "ng-container", 31);
+    ɵɵelementContainerEnd();
   }
   if (rf & 2) {
     const ctx_r2 = ɵɵnextContext(2);
-    ɵɵproperty("ngClass", ctx_r2.dropdownIcon);
+    ɵɵadvance();
+    ɵɵproperty("ngTemplateOutlet", ctx_r2.loadingIconTemplate);
   }
 }
-function Dropdown_ng_container_6_ChevronDownIcon_2_Template(rf, ctx) {
+function Dropdown_ng_container_6_ng_container_2_span_1_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelement(0, "ChevronDownIcon", 34);
+    ɵɵelement(0, "span", 34);
   }
   if (rf & 2) {
-    ɵɵproperty("styleClass", "p-dropdown-trigger-icon");
+    const ctx_r2 = ɵɵnextContext(3);
+    ɵɵproperty("ngClass", "p-dropdown-trigger-icon pi-spin " + ctx_r2.loadingIcon);
+  }
+}
+function Dropdown_ng_container_6_ng_container_2_span_2_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵelement(0, "span", 35);
+  }
+  if (rf & 2) {
+    ɵɵclassMap("p-dropdown-trigger-icon pi pi-spinner pi-spin");
+  }
+}
+function Dropdown_ng_container_6_ng_container_2_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵelementContainerStart(0);
+    ɵɵtemplate(1, Dropdown_ng_container_6_ng_container_2_span_1_Template, 1, 1, "span", 32)(2, Dropdown_ng_container_6_ng_container_2_span_2_Template, 1, 2, "span", 33);
+    ɵɵelementContainerEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = ɵɵnextContext(2);
+    ɵɵadvance();
+    ɵɵproperty("ngIf", ctx_r2.loadingIcon);
+    ɵɵadvance();
+    ɵɵproperty("ngIf", !ctx_r2.loadingIcon);
   }
 }
 function Dropdown_ng_container_6_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainerStart(0);
-    ɵɵtemplate(1, Dropdown_ng_container_6_span_1_Template, 1, 1, "span", 31)(2, Dropdown_ng_container_6_ChevronDownIcon_2_Template, 1, 1, "ChevronDownIcon", 32);
+    ɵɵtemplate(1, Dropdown_ng_container_6_ng_container_1_Template, 2, 1, "ng-container", 18)(2, Dropdown_ng_container_6_ng_container_2_Template, 3, 2, "ng-container", 18);
     ɵɵelementContainerEnd();
   }
   if (rf & 2) {
     const ctx_r2 = ɵɵnextContext();
+    ɵɵadvance();
+    ɵɵproperty("ngIf", ctx_r2.loadingIconTemplate);
+    ɵɵadvance();
+    ɵɵproperty("ngIf", !ctx_r2.loadingIconTemplate);
+  }
+}
+function Dropdown_ng_template_7_ng_container_0_span_1_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵelement(0, "span", 39);
+  }
+  if (rf & 2) {
+    const ctx_r2 = ɵɵnextContext(3);
+    ɵɵproperty("ngClass", ctx_r2.dropdownIcon);
+  }
+}
+function Dropdown_ng_template_7_ng_container_0_ChevronDownIcon_2_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵelement(0, "ChevronDownIcon", 40);
+  }
+  if (rf & 2) {
+    ɵɵproperty("styleClass", "p-dropdown-trigger-icon");
+  }
+}
+function Dropdown_ng_template_7_ng_container_0_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵelementContainerStart(0);
+    ɵɵtemplate(1, Dropdown_ng_template_7_ng_container_0_span_1_Template, 1, 1, "span", 37)(2, Dropdown_ng_template_7_ng_container_0_ChevronDownIcon_2_Template, 1, 1, "ChevronDownIcon", 38);
+    ɵɵelementContainerEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = ɵɵnextContext(2);
     ɵɵadvance();
     ɵɵproperty("ngIf", ctx_r2.dropdownIcon);
     ɵɵadvance();
     ɵɵproperty("ngIf", !ctx_r2.dropdownIcon);
   }
 }
-function Dropdown_span_7_1_ng_template_0_Template(rf, ctx) {
+function Dropdown_ng_template_7_span_1_1_ng_template_0_Template(rf, ctx) {
 }
-function Dropdown_span_7_1_Template(rf, ctx) {
+function Dropdown_ng_template_7_span_1_1_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵtemplate(0, Dropdown_span_7_1_ng_template_0_Template, 0, 0, "ng-template");
+    ɵɵtemplate(0, Dropdown_ng_template_7_span_1_1_ng_template_0_Template, 0, 0, "ng-template");
   }
 }
-function Dropdown_span_7_Template(rf, ctx) {
+function Dropdown_ng_template_7_span_1_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "span", 35);
-    ɵɵtemplate(1, Dropdown_span_7_1_Template, 1, 0, null, 30);
+    ɵɵelementStart(0, "span", 41);
+    ɵɵtemplate(1, Dropdown_ng_template_7_span_1_1_Template, 1, 0, null, 31);
     ɵɵelementEnd();
   }
   if (rf & 2) {
-    const ctx_r2 = ɵɵnextContext();
+    const ctx_r2 = ɵɵnextContext(2);
     ɵɵadvance();
     ɵɵproperty("ngTemplateOutlet", ctx_r2.dropdownIconTemplate);
   }
 }
-function Dropdown_ng_template_10_ng_container_3_Template(rf, ctx) {
+function Dropdown_ng_template_7_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵtemplate(0, Dropdown_ng_template_7_ng_container_0_Template, 3, 2, "ng-container", 18)(1, Dropdown_ng_template_7_span_1_Template, 2, 1, "span", 36);
+  }
+  if (rf & 2) {
+    const ctx_r2 = ɵɵnextContext();
+    ɵɵproperty("ngIf", !ctx_r2.dropdownIconTemplate);
+    ɵɵadvance();
+    ɵɵproperty("ngIf", ctx_r2.dropdownIconTemplate);
+  }
+}
+function Dropdown_ng_template_11_ng_container_3_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainer(0);
   }
 }
-function Dropdown_ng_template_10_div_4_ng_container_1_ng_container_1_Template(rf, ctx) {
+function Dropdown_ng_template_11_div_4_ng_container_1_ng_container_1_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainer(0);
   }
 }
-function Dropdown_ng_template_10_div_4_ng_container_1_Template(rf, ctx) {
+function Dropdown_ng_template_11_div_4_ng_container_1_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainerStart(0);
-    ɵɵtemplate(1, Dropdown_ng_template_10_div_4_ng_container_1_ng_container_1_Template, 1, 0, "ng-container", 24);
+    ɵɵtemplate(1, Dropdown_ng_template_11_div_4_ng_container_1_ng_container_1_Template, 1, 0, "ng-container", 48);
     ɵɵelementContainerEnd();
   }
   if (rf & 2) {
     const ctx_r2 = ɵɵnextContext(3);
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", ctx_r2.filterTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(2, _c122, ctx_r2.filterOptions));
+    ɵɵproperty("ngTemplateOutlet", ctx_r2.filterTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(2, _c132, ctx_r2.filterOptions));
   }
 }
-function Dropdown_ng_template_10_div_4_ng_template_2_SearchIcon_3_Template(rf, ctx) {
+function Dropdown_ng_template_11_div_4_ng_template_2_SearchIcon_3_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelement(0, "SearchIcon", 34);
+    ɵɵelement(0, "SearchIcon", 40);
   }
   if (rf & 2) {
     ɵɵproperty("styleClass", "p-dropdown-filter-icon");
   }
 }
-function Dropdown_ng_template_10_div_4_ng_template_2_span_4_1_ng_template_0_Template(rf, ctx) {
+function Dropdown_ng_template_11_div_4_ng_template_2_span_4_1_ng_template_0_Template(rf, ctx) {
 }
-function Dropdown_ng_template_10_div_4_ng_template_2_span_4_1_Template(rf, ctx) {
+function Dropdown_ng_template_11_div_4_ng_template_2_span_4_1_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵtemplate(0, Dropdown_ng_template_10_div_4_ng_template_2_span_4_1_ng_template_0_Template, 0, 0, "ng-template");
+    ɵɵtemplate(0, Dropdown_ng_template_11_div_4_ng_template_2_span_4_1_ng_template_0_Template, 0, 0, "ng-template");
   }
 }
-function Dropdown_ng_template_10_div_4_ng_template_2_span_4_Template(rf, ctx) {
+function Dropdown_ng_template_11_div_4_ng_template_2_span_4_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "span", 45);
-    ɵɵtemplate(1, Dropdown_ng_template_10_div_4_ng_template_2_span_4_1_Template, 1, 0, null, 30);
+    ɵɵelementStart(0, "span", 52);
+    ɵɵtemplate(1, Dropdown_ng_template_11_div_4_ng_template_2_span_4_1_Template, 1, 0, null, 31);
     ɵɵelementEnd();
   }
   if (rf & 2) {
@@ -11798,31 +12688,31 @@ function Dropdown_ng_template_10_div_4_ng_template_2_span_4_Template(rf, ctx) {
     ɵɵproperty("ngTemplateOutlet", ctx_r2.filterIconTemplate);
   }
 }
-function Dropdown_ng_template_10_div_4_ng_template_2_Template(rf, ctx) {
+function Dropdown_ng_template_11_div_4_ng_template_2_Template(rf, ctx) {
   if (rf & 1) {
     const _r10 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "div", 42)(1, "input", 43, 9);
-    ɵɵlistener("input", function Dropdown_ng_template_10_div_4_ng_template_2_Template_input_input_1_listener($event) {
+    ɵɵelementStart(0, "div", 49)(1, "input", 50, 10);
+    ɵɵlistener("input", function Dropdown_ng_template_11_div_4_ng_template_2_Template_input_input_1_listener($event) {
       ɵɵrestoreView(_r10);
       const ctx_r2 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r2.onFilterInputChange($event));
-    })("keydown", function Dropdown_ng_template_10_div_4_ng_template_2_Template_input_keydown_1_listener($event) {
+    })("keydown", function Dropdown_ng_template_11_div_4_ng_template_2_Template_input_keydown_1_listener($event) {
       ɵɵrestoreView(_r10);
       const ctx_r2 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r2.onFilterKeyDown($event));
-    })("blur", function Dropdown_ng_template_10_div_4_ng_template_2_Template_input_blur_1_listener($event) {
+    })("blur", function Dropdown_ng_template_11_div_4_ng_template_2_Template_input_blur_1_listener($event) {
       ɵɵrestoreView(_r10);
       const ctx_r2 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r2.onFilterBlur($event));
     });
     ɵɵelementEnd();
-    ɵɵtemplate(3, Dropdown_ng_template_10_div_4_ng_template_2_SearchIcon_3_Template, 1, 1, "SearchIcon", 32)(4, Dropdown_ng_template_10_div_4_ng_template_2_span_4_Template, 2, 1, "span", 44);
+    ɵɵtemplate(3, Dropdown_ng_template_11_div_4_ng_template_2_SearchIcon_3_Template, 1, 1, "SearchIcon", 38)(4, Dropdown_ng_template_11_div_4_ng_template_2_span_4_Template, 2, 1, "span", 51);
     ɵɵelementEnd();
   }
   if (rf & 2) {
     const ctx_r2 = ɵɵnextContext(3);
     ɵɵadvance();
-    ɵɵproperty("value", ctx_r2._filterValue() || "");
+    ɵɵproperty("value", ctx_r2._filterValue() || "")("ngClass", ɵɵpureFunction1(8, _c142, ctx_r2.variant === "filled" || ctx_r2.config.inputStyle() === "filled"));
     ɵɵattribute("placeholder", ctx_r2.filterPlaceholder)("aria-owns", ctx_r2.id + "_list")("aria-label", ctx_r2.ariaFilterLabel)("aria-activedescendant", ctx_r2.focusedOptionId);
     ɵɵadvance(2);
     ɵɵproperty("ngIf", !ctx_r2.filterIconTemplate);
@@ -11830,15 +12720,15 @@ function Dropdown_ng_template_10_div_4_ng_template_2_Template(rf, ctx) {
     ɵɵproperty("ngIf", ctx_r2.filterIconTemplate);
   }
 }
-function Dropdown_ng_template_10_div_4_Template(rf, ctx) {
+function Dropdown_ng_template_11_div_4_Template(rf, ctx) {
   if (rf & 1) {
     const _r9 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "div", 41);
-    ɵɵlistener("click", function Dropdown_ng_template_10_div_4_Template_div_click_0_listener($event) {
+    ɵɵelementStart(0, "div", 47);
+    ɵɵlistener("click", function Dropdown_ng_template_11_div_4_Template_div_click_0_listener($event) {
       ɵɵrestoreView(_r9);
       return ɵɵresetView($event.stopPropagation());
     });
-    ɵɵtemplate(1, Dropdown_ng_template_10_div_4_ng_container_1_Template, 2, 4, "ng-container", 23)(2, Dropdown_ng_template_10_div_4_ng_template_2_Template, 5, 7, "ng-template", null, 8, ɵɵtemplateRefExtractor);
+    ɵɵtemplate(1, Dropdown_ng_template_11_div_4_ng_container_1_Template, 2, 4, "ng-container", 20)(2, Dropdown_ng_template_11_div_4_ng_template_2_Template, 5, 10, "ng-template", null, 9, ɵɵtemplateRefExtractor);
     ɵɵelementEnd();
   }
   if (rf & 2) {
@@ -11848,55 +12738,55 @@ function Dropdown_ng_template_10_div_4_Template(rf, ctx) {
     ɵɵproperty("ngIf", ctx_r2.filterTemplate)("ngIfElse", builtInFilterElement_r11);
   }
 }
-function Dropdown_ng_template_10_p_scroller_6_ng_template_2_ng_container_0_Template(rf, ctx) {
+function Dropdown_ng_template_11_p_scroller_6_ng_template_2_ng_container_0_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainer(0);
   }
 }
-function Dropdown_ng_template_10_p_scroller_6_ng_template_2_Template(rf, ctx) {
+function Dropdown_ng_template_11_p_scroller_6_ng_template_2_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵtemplate(0, Dropdown_ng_template_10_p_scroller_6_ng_template_2_ng_container_0_Template, 1, 0, "ng-container", 24);
+    ɵɵtemplate(0, Dropdown_ng_template_11_p_scroller_6_ng_template_2_ng_container_0_Template, 1, 0, "ng-container", 48);
   }
   if (rf & 2) {
     const items_r13 = ctx.$implicit;
     const scrollerOptions_r14 = ctx.options;
     ɵɵnextContext(2);
     const buildInItems_r15 = ɵɵreference(9);
-    ɵɵproperty("ngTemplateOutlet", buildInItems_r15)("ngTemplateOutletContext", ɵɵpureFunction2(2, _c132, items_r13, scrollerOptions_r14));
+    ɵɵproperty("ngTemplateOutlet", buildInItems_r15)("ngTemplateOutletContext", ɵɵpureFunction2(2, _c152, items_r13, scrollerOptions_r14));
   }
 }
-function Dropdown_ng_template_10_p_scroller_6_ng_container_3_ng_template_1_ng_container_0_Template(rf, ctx) {
+function Dropdown_ng_template_11_p_scroller_6_ng_container_3_ng_template_1_ng_container_0_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainer(0);
   }
 }
-function Dropdown_ng_template_10_p_scroller_6_ng_container_3_ng_template_1_Template(rf, ctx) {
+function Dropdown_ng_template_11_p_scroller_6_ng_container_3_ng_template_1_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵtemplate(0, Dropdown_ng_template_10_p_scroller_6_ng_container_3_ng_template_1_ng_container_0_Template, 1, 0, "ng-container", 24);
+    ɵɵtemplate(0, Dropdown_ng_template_11_p_scroller_6_ng_container_3_ng_template_1_ng_container_0_Template, 1, 0, "ng-container", 48);
   }
   if (rf & 2) {
     const scrollerOptions_r16 = ctx.options;
     const ctx_r2 = ɵɵnextContext(4);
-    ɵɵproperty("ngTemplateOutlet", ctx_r2.loaderTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(2, _c122, scrollerOptions_r16));
+    ɵɵproperty("ngTemplateOutlet", ctx_r2.loaderTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(2, _c132, scrollerOptions_r16));
   }
 }
-function Dropdown_ng_template_10_p_scroller_6_ng_container_3_Template(rf, ctx) {
+function Dropdown_ng_template_11_p_scroller_6_ng_container_3_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainerStart(0);
-    ɵɵtemplate(1, Dropdown_ng_template_10_p_scroller_6_ng_container_3_ng_template_1_Template, 1, 4, "ng-template", 47);
+    ɵɵtemplate(1, Dropdown_ng_template_11_p_scroller_6_ng_container_3_ng_template_1_Template, 1, 4, "ng-template", 54);
     ɵɵelementContainerEnd();
   }
 }
-function Dropdown_ng_template_10_p_scroller_6_Template(rf, ctx) {
+function Dropdown_ng_template_11_p_scroller_6_Template(rf, ctx) {
   if (rf & 1) {
     const _r12 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "p-scroller", 46, 10);
-    ɵɵlistener("onLazyLoad", function Dropdown_ng_template_10_p_scroller_6_Template_p_scroller_onLazyLoad_0_listener($event) {
+    ɵɵelementStart(0, "p-scroller", 53, 11);
+    ɵɵlistener("onLazyLoad", function Dropdown_ng_template_11_p_scroller_6_Template_p_scroller_onLazyLoad_0_listener($event) {
       ɵɵrestoreView(_r12);
       const ctx_r2 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r2.onLazyLoad.emit($event));
     });
-    ɵɵtemplate(2, Dropdown_ng_template_10_p_scroller_6_ng_template_2_Template, 1, 5, "ng-template", 21)(3, Dropdown_ng_template_10_p_scroller_6_ng_container_3_Template, 2, 0, "ng-container", 17);
+    ɵɵtemplate(2, Dropdown_ng_template_11_p_scroller_6_ng_template_2_Template, 1, 5, "ng-template", 22)(3, Dropdown_ng_template_11_p_scroller_6_ng_container_3_Template, 2, 0, "ng-container", 18);
     ɵɵelementEnd();
   }
   if (rf & 2) {
@@ -11907,15 +12797,15 @@ function Dropdown_ng_template_10_p_scroller_6_Template(rf, ctx) {
     ɵɵproperty("ngIf", ctx_r2.loaderTemplate);
   }
 }
-function Dropdown_ng_template_10_ng_container_7_ng_container_1_Template(rf, ctx) {
+function Dropdown_ng_template_11_ng_container_7_ng_container_1_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainer(0);
   }
 }
-function Dropdown_ng_template_10_ng_container_7_Template(rf, ctx) {
+function Dropdown_ng_template_11_ng_container_7_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainerStart(0);
-    ɵɵtemplate(1, Dropdown_ng_template_10_ng_container_7_ng_container_1_Template, 1, 0, "ng-container", 24);
+    ɵɵtemplate(1, Dropdown_ng_template_11_ng_container_7_ng_container_1_Template, 1, 0, "ng-container", 48);
     ɵɵelementContainerEnd();
   }
   if (rf & 2) {
@@ -11923,10 +12813,10 @@ function Dropdown_ng_template_10_ng_container_7_Template(rf, ctx) {
     const buildInItems_r15 = ɵɵreference(9);
     const ctx_r2 = ɵɵnextContext();
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", buildInItems_r15)("ngTemplateOutletContext", ɵɵpureFunction2(3, _c132, ctx_r2.visibleOptions(), ɵɵpureFunction0(2, _c142)));
+    ɵɵproperty("ngTemplateOutlet", buildInItems_r15)("ngTemplateOutletContext", ɵɵpureFunction2(3, _c152, ctx_r2.visibleOptions(), ɵɵpureFunction0(2, _c162)));
   }
 }
-function Dropdown_ng_template_10_ng_template_8_ng_template_2_ng_container_0_span_2_Template(rf, ctx) {
+function Dropdown_ng_template_11_ng_template_8_ng_template_2_ng_container_0_span_2_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementStart(0, "span");
     ɵɵtext(1);
@@ -11939,16 +12829,16 @@ function Dropdown_ng_template_10_ng_template_8_ng_template_2_ng_container_0_span
     ɵɵtextInterpolate(ctx_r2.getOptionGroupLabel(option_r17.optionGroup));
   }
 }
-function Dropdown_ng_template_10_ng_template_8_ng_template_2_ng_container_0_ng_container_3_Template(rf, ctx) {
+function Dropdown_ng_template_11_ng_template_8_ng_template_2_ng_container_0_ng_container_3_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainer(0);
   }
 }
-function Dropdown_ng_template_10_ng_template_8_ng_template_2_ng_container_0_Template(rf, ctx) {
+function Dropdown_ng_template_11_ng_template_8_ng_template_2_ng_container_0_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainerStart(0);
-    ɵɵelementStart(1, "li", 51);
-    ɵɵtemplate(2, Dropdown_ng_template_10_ng_template_8_ng_template_2_ng_container_0_span_2_Template, 2, 1, "span", 17)(3, Dropdown_ng_template_10_ng_template_8_ng_template_2_ng_container_0_ng_container_3_Template, 1, 0, "ng-container", 24);
+    ɵɵelementStart(1, "li", 58);
+    ɵɵtemplate(2, Dropdown_ng_template_11_ng_template_8_ng_template_2_ng_container_0_span_2_Template, 2, 1, "span", 18)(3, Dropdown_ng_template_11_ng_template_8_ng_template_2_ng_container_0_ng_container_3_Template, 1, 0, "ng-container", 48);
     ɵɵelementEnd();
     ɵɵelementContainerEnd();
   }
@@ -11967,17 +12857,17 @@ function Dropdown_ng_template_10_ng_template_8_ng_template_2_ng_container_0_Temp
     ɵɵproperty("ngTemplateOutlet", ctx_r2.groupTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(7, _c24, option_r17.optionGroup));
   }
 }
-function Dropdown_ng_template_10_ng_template_8_ng_template_2_ng_container_1_Template(rf, ctx) {
+function Dropdown_ng_template_11_ng_template_8_ng_template_2_ng_container_1_Template(rf, ctx) {
   if (rf & 1) {
     const _r21 = ɵɵgetCurrentView();
     ɵɵelementContainerStart(0);
-    ɵɵelementStart(1, "p-dropdownItem", 52);
-    ɵɵlistener("onClick", function Dropdown_ng_template_10_ng_template_8_ng_template_2_ng_container_1_Template_p_dropdownItem_onClick_1_listener($event) {
+    ɵɵelementStart(1, "p-dropdownItem", 59);
+    ɵɵlistener("onClick", function Dropdown_ng_template_11_ng_template_8_ng_template_2_ng_container_1_Template_p_dropdownItem_onClick_1_listener($event) {
       ɵɵrestoreView(_r21);
       const option_r17 = ɵɵnextContext().$implicit;
       const ctx_r2 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r2.onOptionSelect($event, option_r17));
-    })("onMouseEnter", function Dropdown_ng_template_10_ng_template_8_ng_template_2_ng_container_1_Template_p_dropdownItem_onMouseEnter_1_listener($event) {
+    })("onMouseEnter", function Dropdown_ng_template_11_ng_template_8_ng_template_2_ng_container_1_Template_p_dropdownItem_onMouseEnter_1_listener($event) {
       ɵɵrestoreView(_r21);
       const i_r19 = ɵɵnextContext().index;
       const scrollerOptions_r20 = ɵɵnextContext().options;
@@ -11994,21 +12884,22 @@ function Dropdown_ng_template_10_ng_template_8_ng_template_2_ng_container_1_Temp
     const scrollerOptions_r20 = ɵɵnextContext().options;
     const ctx_r2 = ɵɵnextContext(2);
     ɵɵadvance();
-    ɵɵproperty("id", ctx_r2.id + "_" + ctx_r2.getOptionIndex(i_r19, scrollerOptions_r20))("option", option_r17)("selected", ctx_r2.isSelected(option_r17))("label", ctx_r2.getOptionLabel(option_r17))("disabled", ctx_r2.isOptionDisabled(option_r17))("template", ctx_r2.itemTemplate)("focused", ctx_r2.focusedOptionIndex() === ctx_r2.getOptionIndex(i_r19, scrollerOptions_r20))("ariaPosInset", ctx_r2.getAriaPosInset(ctx_r2.getOptionIndex(i_r19, scrollerOptions_r20)))("ariaSetSize", ctx_r2.ariaSetSize);
+    ɵɵproperty("id", ctx_r2.id + "_" + ctx_r2.getOptionIndex(i_r19, scrollerOptions_r20))("option", option_r17)("checkmark", ctx_r2.checkmark)("selected", ctx_r2.isSelected(option_r17))("label", ctx_r2.getOptionLabel(option_r17))("disabled", ctx_r2.isOptionDisabled(option_r17))("template", ctx_r2.itemTemplate)("focused", ctx_r2.focusedOptionIndex() === ctx_r2.getOptionIndex(i_r19, scrollerOptions_r20))("ariaPosInset", ctx_r2.getAriaPosInset(ctx_r2.getOptionIndex(i_r19, scrollerOptions_r20)))("ariaSetSize", ctx_r2.ariaSetSize);
   }
 }
-function Dropdown_ng_template_10_ng_template_8_ng_template_2_Template(rf, ctx) {
+function Dropdown_ng_template_11_ng_template_8_ng_template_2_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵtemplate(0, Dropdown_ng_template_10_ng_template_8_ng_template_2_ng_container_0_Template, 4, 9, "ng-container", 17)(1, Dropdown_ng_template_10_ng_template_8_ng_template_2_ng_container_1_Template, 2, 9, "ng-container", 17);
+    ɵɵtemplate(0, Dropdown_ng_template_11_ng_template_8_ng_template_2_ng_container_0_Template, 4, 9, "ng-container", 18)(1, Dropdown_ng_template_11_ng_template_8_ng_template_2_ng_container_1_Template, 2, 10, "ng-container", 18);
   }
   if (rf & 2) {
     const option_r17 = ctx.$implicit;
-    ɵɵproperty("ngIf", option_r17.group);
+    const ctx_r2 = ɵɵnextContext(3);
+    ɵɵproperty("ngIf", ctx_r2.isOptionGroup(option_r17));
     ɵɵadvance();
-    ɵɵproperty("ngIf", !option_r17.group);
+    ɵɵproperty("ngIf", !ctx_r2.isOptionGroup(option_r17));
   }
 }
-function Dropdown_ng_template_10_ng_template_8_li_3_ng_container_1_Template(rf, ctx) {
+function Dropdown_ng_template_11_ng_template_8_li_3_ng_container_1_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainerStart(0);
     ɵɵtext(1);
@@ -12020,15 +12911,15 @@ function Dropdown_ng_template_10_ng_template_8_li_3_ng_container_1_Template(rf, 
     ɵɵtextInterpolate1(" ", ctx_r2.emptyFilterMessageLabel, " ");
   }
 }
-function Dropdown_ng_template_10_ng_template_8_li_3_ng_container_2_Template(rf, ctx) {
+function Dropdown_ng_template_11_ng_template_8_li_3_ng_container_2_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementContainer(0, null, 12);
+    ɵɵelementContainer(0, null, 13);
   }
 }
-function Dropdown_ng_template_10_ng_template_8_li_3_Template(rf, ctx) {
+function Dropdown_ng_template_11_ng_template_8_li_3_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "li", 53);
-    ɵɵtemplate(1, Dropdown_ng_template_10_ng_template_8_li_3_ng_container_1_Template, 2, 1, "ng-container", 23)(2, Dropdown_ng_template_10_ng_template_8_li_3_ng_container_2_Template, 2, 0, "ng-container", 30);
+    ɵɵelementStart(0, "li", 60);
+    ɵɵtemplate(1, Dropdown_ng_template_11_ng_template_8_li_3_ng_container_1_Template, 2, 1, "ng-container", 20)(2, Dropdown_ng_template_11_ng_template_8_li_3_ng_container_2_Template, 2, 0, "ng-container", 31);
     ɵɵelementEnd();
   }
   if (rf & 2) {
@@ -12041,7 +12932,7 @@ function Dropdown_ng_template_10_ng_template_8_li_3_Template(rf, ctx) {
     ɵɵproperty("ngTemplateOutlet", ctx_r2.emptyFilterTemplate || ctx_r2.emptyTemplate);
   }
 }
-function Dropdown_ng_template_10_ng_template_8_li_4_ng_container_1_Template(rf, ctx) {
+function Dropdown_ng_template_11_ng_template_8_li_4_ng_container_1_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainerStart(0);
     ɵɵtext(1);
@@ -12053,15 +12944,15 @@ function Dropdown_ng_template_10_ng_template_8_li_4_ng_container_1_Template(rf, 
     ɵɵtextInterpolate1(" ", ctx_r2.emptyMessageLabel, " ");
   }
 }
-function Dropdown_ng_template_10_ng_template_8_li_4_ng_container_2_Template(rf, ctx) {
+function Dropdown_ng_template_11_ng_template_8_li_4_ng_container_2_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementContainer(0, null, 13);
+    ɵɵelementContainer(0, null, 14);
   }
 }
-function Dropdown_ng_template_10_ng_template_8_li_4_Template(rf, ctx) {
+function Dropdown_ng_template_11_ng_template_8_li_4_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "li", 53);
-    ɵɵtemplate(1, Dropdown_ng_template_10_ng_template_8_li_4_ng_container_1_Template, 2, 1, "ng-container", 23)(2, Dropdown_ng_template_10_ng_template_8_li_4_ng_container_2_Template, 2, 0, "ng-container", 30);
+    ɵɵelementStart(0, "li", 60);
+    ɵɵtemplate(1, Dropdown_ng_template_11_ng_template_8_li_4_ng_container_1_Template, 2, 1, "ng-container", 20)(2, Dropdown_ng_template_11_ng_template_8_li_4_ng_container_2_Template, 2, 0, "ng-container", 31);
     ɵɵelementEnd();
   }
   if (rf & 2) {
@@ -12074,19 +12965,18 @@ function Dropdown_ng_template_10_ng_template_8_li_4_Template(rf, ctx) {
     ɵɵproperty("ngTemplateOutlet", ctx_r2.emptyTemplate);
   }
 }
-function Dropdown_ng_template_10_ng_template_8_Template(rf, ctx) {
+function Dropdown_ng_template_11_ng_template_8_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "ul", 48, 11);
-    ɵɵtemplate(2, Dropdown_ng_template_10_ng_template_8_ng_template_2_Template, 2, 2, "ng-template", 49)(3, Dropdown_ng_template_10_ng_template_8_li_3_Template, 3, 6, "li", 50)(4, Dropdown_ng_template_10_ng_template_8_li_4_Template, 3, 6, "li", 50);
+    ɵɵelementStart(0, "ul", 55, 12);
+    ɵɵtemplate(2, Dropdown_ng_template_11_ng_template_8_ng_template_2_Template, 2, 2, "ng-template", 56)(3, Dropdown_ng_template_11_ng_template_8_li_3_Template, 3, 6, "li", 57)(4, Dropdown_ng_template_11_ng_template_8_li_4_Template, 3, 6, "li", 57);
     ɵɵelementEnd();
   }
   if (rf & 2) {
     const items_r22 = ctx.$implicit;
     const scrollerOptions_r20 = ctx.options;
     const ctx_r2 = ɵɵnextContext(2);
-    ɵɵstyleMap(scrollerOptions_r20.contentStyle);
-    ɵɵproperty("ngClass", scrollerOptions_r20.contentStyleClass);
-    ɵɵattribute("id", ctx_r2.id + "_list");
+    ɵɵproperty("ngClass", scrollerOptions_r20.contentStyleClass)("ngStyle", scrollerOptions_r20.contentStyle);
+    ɵɵattribute("id", ctx_r2.id + "_list")("aria-label", ctx_r2.listLabel);
     ɵɵadvance(2);
     ɵɵproperty("ngForOf", items_r22);
     ɵɵadvance();
@@ -12095,28 +12985,28 @@ function Dropdown_ng_template_10_ng_template_8_Template(rf, ctx) {
     ɵɵproperty("ngIf", !ctx_r2.filterValue && ctx_r2.isEmpty());
   }
 }
-function Dropdown_ng_template_10_ng_container_10_Template(rf, ctx) {
+function Dropdown_ng_template_11_ng_container_10_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainer(0);
   }
 }
-function Dropdown_ng_template_10_Template(rf, ctx) {
+function Dropdown_ng_template_11_Template(rf, ctx) {
   if (rf & 1) {
     const _r8 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "div", 36)(1, "span", 37, 5);
-    ɵɵlistener("focus", function Dropdown_ng_template_10_Template_span_focus_1_listener($event) {
+    ɵɵelementStart(0, "div", 42)(1, "span", 43, 6);
+    ɵɵlistener("focus", function Dropdown_ng_template_11_Template_span_focus_1_listener($event) {
       ɵɵrestoreView(_r8);
       const ctx_r2 = ɵɵnextContext();
       return ɵɵresetView(ctx_r2.onFirstHiddenFocus($event));
     });
     ɵɵelementEnd();
-    ɵɵtemplate(3, Dropdown_ng_template_10_ng_container_3_Template, 1, 0, "ng-container", 30)(4, Dropdown_ng_template_10_div_4_Template, 4, 2, "div", 38);
-    ɵɵelementStart(5, "div", 39);
-    ɵɵtemplate(6, Dropdown_ng_template_10_p_scroller_6_Template, 4, 10, "p-scroller", 40)(7, Dropdown_ng_template_10_ng_container_7_Template, 2, 6, "ng-container", 17)(8, Dropdown_ng_template_10_ng_template_8_Template, 5, 7, "ng-template", null, 6, ɵɵtemplateRefExtractor);
+    ɵɵtemplate(3, Dropdown_ng_template_11_ng_container_3_Template, 1, 0, "ng-container", 31)(4, Dropdown_ng_template_11_div_4_Template, 4, 2, "div", 44);
+    ɵɵelementStart(5, "div", 45);
+    ɵɵtemplate(6, Dropdown_ng_template_11_p_scroller_6_Template, 4, 10, "p-scroller", 46)(7, Dropdown_ng_template_11_ng_container_7_Template, 2, 6, "ng-container", 18)(8, Dropdown_ng_template_11_ng_template_8_Template, 5, 7, "ng-template", null, 7, ɵɵtemplateRefExtractor);
     ɵɵelementEnd();
-    ɵɵtemplate(10, Dropdown_ng_template_10_ng_container_10_Template, 1, 0, "ng-container", 30);
-    ɵɵelementStart(11, "span", 37, 7);
-    ɵɵlistener("focus", function Dropdown_ng_template_10_Template_span_focus_11_listener($event) {
+    ɵɵtemplate(10, Dropdown_ng_template_11_ng_container_10_Template, 1, 0, "ng-container", 31);
+    ɵɵelementStart(11, "span", 43, 8);
+    ɵɵlistener("focus", function Dropdown_ng_template_11_Template_span_focus_11_listener($event) {
       ɵɵrestoreView(_r8);
       const ctx_r2 = ɵɵnextContext();
       return ɵɵresetView(ctx_r2.onLastHiddenFocus($event));
@@ -12128,13 +13018,13 @@ function Dropdown_ng_template_10_Template(rf, ctx) {
     ɵɵclassMap(ctx_r2.panelStyleClass);
     ɵɵproperty("ngClass", "p-dropdown-panel p-component")("ngStyle", ctx_r2.panelStyle);
     ɵɵadvance();
-    ɵɵattribute("aria-hidden", true)("tabindex", 0)("data-p-hidden-accessible", true)("data-p-hidden-focusable", true);
+    ɵɵattribute("tabindex", 0)("data-p-hidden-accessible", true)("data-p-hidden-focusable", true);
     ɵɵadvance(2);
     ɵɵproperty("ngTemplateOutlet", ctx_r2.headerTemplate);
     ɵɵadvance();
     ɵɵproperty("ngIf", ctx_r2.filter);
     ɵɵadvance();
-    ɵɵstyleProp("max-height", ctx_r2.virtualScroll ? "auto" : ctx_r2.scrollHeight || "auto");
+    ɵɵproperty("ngStyle", ɵɵpureFunction1(16, _c123, ctx_r2.virtualScroll ? "auto" : ctx_r2.scrollHeight || "auto"));
     ɵɵadvance();
     ɵɵproperty("ngIf", ctx_r2.virtualScroll);
     ɵɵadvance();
@@ -12142,7 +13032,7 @@ function Dropdown_ng_template_10_Template(rf, ctx) {
     ɵɵadvance(3);
     ɵɵproperty("ngTemplateOutlet", ctx_r2.footerTemplate);
     ɵɵadvance();
-    ɵɵattribute("aria-hidden", true)("tabindex", 0)("data-p-hidden-accessible", true)("data-p-hidden-focusable", true);
+    ɵɵattribute("tabindex", 0)("data-p-hidden-accessible", true)("data-p-hidden-focusable", true);
   }
 }
 var DROPDOWN_VALUE_ACCESSOR = {
@@ -12162,6 +13052,7 @@ var DropdownItem = class _DropdownItem {
   ariaPosInset;
   ariaSetSize;
   template;
+  checkmark;
   onClick = new EventEmitter();
   onMouseEnter = new EventEmitter();
   ngOnInit() {
@@ -12182,23 +13073,25 @@ var DropdownItem = class _DropdownItem {
     inputs: {
       id: "id",
       option: "option",
-      selected: "selected",
-      focused: "focused",
+      selected: [InputFlags.HasDecoratorInputTransform, "selected", "selected", booleanAttribute],
+      focused: [InputFlags.HasDecoratorInputTransform, "focused", "focused", booleanAttribute],
       label: "label",
-      disabled: "disabled",
-      visible: "visible",
-      itemSize: "itemSize",
+      disabled: [InputFlags.HasDecoratorInputTransform, "disabled", "disabled", booleanAttribute],
+      visible: [InputFlags.HasDecoratorInputTransform, "visible", "visible", booleanAttribute],
+      itemSize: [InputFlags.HasDecoratorInputTransform, "itemSize", "itemSize", numberAttribute],
       ariaPosInset: "ariaPosInset",
       ariaSetSize: "ariaSetSize",
-      template: "template"
+      template: "template",
+      checkmark: [InputFlags.HasDecoratorInputTransform, "checkmark", "checkmark", booleanAttribute]
     },
     outputs: {
       onClick: "onClick",
       onMouseEnter: "onMouseEnter"
     },
-    decls: 3,
-    vars: 21,
-    consts: [["role", "option", "pRipple", "", 3, "click", "mouseenter", "id", "ngStyle", "ngClass"], [4, "ngIf"], [4, "ngTemplateOutlet", "ngTemplateOutletContext"]],
+    features: [ɵɵInputTransformsFeature],
+    decls: 4,
+    vars: 22,
+    consts: [["role", "option", "pRipple", "", 3, "click", "mouseenter", "id", "ngStyle", "ngClass"], [4, "ngIf"], [4, "ngTemplateOutlet", "ngTemplateOutletContext"], [3, "styleClass", 4, "ngIf"], [3, "styleClass"]],
     template: function DropdownItem_Template(rf, ctx) {
       if (rf & 1) {
         ɵɵelementStart(0, "li", 0);
@@ -12207,19 +13100,21 @@ var DropdownItem = class _DropdownItem {
         })("mouseenter", function DropdownItem_Template_li_mouseenter_0_listener($event) {
           return ctx.onOptionMouseEnter($event);
         });
-        ɵɵtemplate(1, DropdownItem_span_1_Template, 2, 1, "span", 1)(2, DropdownItem_ng_container_2_Template, 1, 0, "ng-container", 2);
+        ɵɵtemplate(1, DropdownItem_ng_container_1_Template, 3, 2, "ng-container", 1)(2, DropdownItem_span_2_Template, 2, 1, "span", 1)(3, DropdownItem_ng_container_3_Template, 1, 0, "ng-container", 2);
         ɵɵelementEnd();
       }
       if (rf & 2) {
-        ɵɵproperty("id", ctx.id)("ngStyle", ɵɵpureFunction1(13, _c07, ctx.itemSize + "px"))("ngClass", ɵɵpureFunction3(15, _c16, ctx.selected, ctx.disabled, ctx.focused));
+        ɵɵproperty("id", ctx.id)("ngStyle", ɵɵpureFunction1(14, _c07, ctx.itemSize + "px"))("ngClass", ɵɵpureFunction3(16, _c19, ctx.selected, ctx.disabled, ctx.focused));
         ɵɵattribute("aria-label", ctx.label)("aria-setsize", ctx.ariaSetSize)("aria-posinset", ctx.ariaPosInset)("aria-selected", ctx.selected)("data-p-focused", ctx.focused)("data-p-highlight", ctx.selected)("data-p-disabled", ctx.disabled);
+        ɵɵadvance();
+        ɵɵproperty("ngIf", ctx.checkmark);
         ɵɵadvance();
         ɵɵproperty("ngIf", !ctx.template);
         ɵɵadvance();
-        ɵɵproperty("ngTemplateOutlet", ctx.template)("ngTemplateOutletContext", ɵɵpureFunction1(19, _c24, ctx.option));
+        ɵɵproperty("ngTemplateOutlet", ctx.template)("ngTemplateOutletContext", ɵɵpureFunction1(20, _c24, ctx.option));
       }
     },
-    dependencies: [NgClass, NgIf, NgTemplateOutlet, NgStyle, Ripple],
+    dependencies: () => [NgClass, NgIf, NgTemplateOutlet, NgStyle, Ripple, BlankIcon, CheckIcon],
     encapsulation: 2
   });
 };
@@ -12245,6 +13140,10 @@ var DropdownItem = class _DropdownItem {
             [ngStyle]="{ height: itemSize + 'px' }"
             [ngClass]="{ 'p-dropdown-item': true, 'p-highlight': selected, 'p-disabled': disabled, 'p-focus': focused }"
         >
+            <ng-container *ngIf="checkmark">
+                <CheckIcon *ngIf="selected" [styleClass]="'p-dropdown-check-icon'" />
+                <BlankIcon *ngIf="!selected" [styleClass]="'p-dropdown-blank-icon'" />
+            </ng-container>
             <span *ngIf="!template">{{ label ?? 'empty' }}</span>
             <ng-container *ngTemplateOutlet="template; context: { $implicit: option }"></ng-container>
         </li>
@@ -12261,22 +13160,37 @@ var DropdownItem = class _DropdownItem {
       type: Input
     }],
     selected: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     focused: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     label: [{
       type: Input
     }],
     disabled: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     visible: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     itemSize: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     ariaPosInset: [{
       type: Input
@@ -12286,6 +13200,12 @@ var DropdownItem = class _DropdownItem {
     }],
     template: [{
       type: Input
+    }],
+    checkmark: [{
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     onClick: [{
       type: Output
@@ -12371,7 +13291,17 @@ var Dropdown = class _Dropdown {
    * Default text to display when no option is selected.
    * @group Props
    */
-  placeholder;
+  set placeholder(val) {
+    this._placeholder.set(val);
+  }
+  get placeholder() {
+    return this._placeholder.asReadonly();
+  }
+  /**
+   * Icon to display in loading state.
+   * @group Props
+   */
+  loadingIcon;
   /**
    * Placeholder text to show when filter input is empty.
    * @group Props
@@ -12382,6 +13312,11 @@ var Dropdown = class _Dropdown {
    * @group Props
    */
   filterLocale;
+  /**
+   * Specifies the input variant of the component.
+   * @group Props
+   */
+  variant = "outlined";
   /**
    * Identifier of the accessible input element.
    * @group Props
@@ -12413,10 +13348,20 @@ var Dropdown = class _Dropdown {
    */
   resetFilterOnHide = false;
   /**
+   * Whether the selected option will be shown with a check mark.
+   * @group Props
+   */
+  checkmark = false;
+  /**
    * Icon class of the dropdown icon.
    * @group Props
    */
   dropdownIcon;
+  /**
+   * Whether the dropdown is in loading state.
+   * @group Props
+   */
+  loading = false;
   /**
    * Name of the label field of an option.
    * @group Props
@@ -12444,6 +13389,7 @@ var Dropdown = class _Dropdown {
   optionGroupChildren = "items";
   /**
    * Whether to display the first item as the label if no placeholder is defined and value is null.
+   * @deprecated since v17.3.0, set initial value by model instead.
    * @group Props
    */
   autoDisplayFirst = true;
@@ -12558,6 +13504,11 @@ var Dropdown = class _Dropdown {
    */
   autofocusFilter = true;
   /**
+   * Determines if the panel will be shown when the input is focused and receives a character key down event.
+   * @group Props
+   */
+  autoShowPanelOnPrintableCharacterKeyDown = true;
+  /**
    * When present, it specifies that the component should be disabled.
    * @group Props
    */
@@ -12647,7 +13598,9 @@ var Dropdown = class _Dropdown {
     return this._filterValue();
   }
   set filterValue(val) {
-    this._filterValue.set(val);
+    setTimeout(() => {
+      this._filterValue.set(val);
+    });
   }
   /**
    * An array of objects to display as the available options.
@@ -12658,7 +13611,9 @@ var Dropdown = class _Dropdown {
     return options;
   }
   set options(val) {
-    this._options.set(val);
+    if (!ObjectUtils.deepEquals(val, this._options())) {
+      this._options.set(val);
+    }
   }
   /**
    * Callback to invoke when value of dropdown changes.
@@ -12736,10 +13691,12 @@ var Dropdown = class _Dropdown {
   emptyFilterTemplate;
   emptyTemplate;
   dropdownIconTemplate;
+  loadingIconTemplate;
   clearIconTemplate;
   filterIconTemplate;
   filterOptions;
   _options = signal(null);
+  _placeholder = signal(void 0);
   modelValue = signal(null);
   value;
   onModelChange = () => {
@@ -12764,18 +13721,18 @@ var Dropdown = class _Dropdown {
   focusedOptionIndex = signal(-1);
   labelId;
   listId;
+  clicked = signal(false);
   get emptyMessageLabel() {
     return this.emptyMessage || this.config.getTranslation(TranslationKeys.EMPTY_MESSAGE);
   }
   get emptyFilterMessageLabel() {
     return this.emptyFilterMessage || this.config.getTranslation(TranslationKeys.EMPTY_FILTER_MESSAGE);
   }
-  get filled() {
-    if (typeof this.modelValue() === "string") return !!this.modelValue();
-    return this.modelValue() || this.modelValue() != null || this.modelValue() != void 0;
-  }
   get isVisibleClearIcon() {
     return this.modelValue() != null && this.hasSelectedOption() && this.showClear && !this.disabled;
+  }
+  get listLabel() {
+    return this.config.getTranslation(TranslationKeys.ARIA)["listLabel"];
   }
   get containerClass() {
     return {
@@ -12783,29 +13740,40 @@ var Dropdown = class _Dropdown {
       "p-disabled": this.disabled,
       "p-dropdown-clearable": this.showClear && !this.disabled,
       "p-focus": this.focused,
-      "p-inputwrapper-filled": this.modelValue(),
-      "p-inputwrapper-focus": this.focused || this.overlayVisible
+      "p-inputwrapper-filled": this.modelValue() !== void 0 && this.modelValue() !== null && !this.modelValue().length,
+      "p-inputwrapper-focus": this.focused || this.overlayVisible,
+      "p-variant-filled": this.variant === "filled" || this.config.inputStyle() === "filled",
+      "p-dropdown-open": this.overlayVisible
     };
   }
   get inputClass() {
     const label = this.label();
     return {
       "p-dropdown-label p-inputtext": true,
-      "p-placeholder": this.placeholder && label === this.placeholder,
-      "p-dropdown-label-empty": !this.editable && !this.selectedItemTemplate && (!label || label === "p-emptylabel" || label.length === 0)
+      "p-placeholder": this.placeholder() && label === this.placeholder(),
+      "p-dropdown-label-empty": !this.editable && !this.selectedItemTemplate && (label === void 0 || label === null || label === "p-emptylabel" || label.length === 0)
     };
   }
   get panelClass() {
     return {
       "p-dropdown-panel p-component": true,
-      "p-input-filled": this.config.inputStyle === "filled",
+      "p-input-filled": this.config.inputStyle() === "filled",
       "p-ripple-disabled": this.config.ripple === false
     };
   }
+  get focusedOptionId() {
+    return this.focusedOptionIndex() !== -1 ? `${this.id}_${this.focusedOptionIndex()}` : null;
+  }
   visibleOptions = computed(() => {
-    const options = this.group ? this.flatOptions(this.options) : this.options || [];
+    const options = this.getAllVisibleAndNonVisibleOptions();
     if (this._filterValue()) {
-      const filteredOptions = !this.filterBy && !this.filterFields && !this.optionValue ? this.options.filter((option) => option.toLowerCase().indexOf(this._filterValue().toLowerCase()) !== -1) : this.filterService.filter(options, this.searchFields(), this._filterValue(), this.filterMatchMode, this.filterLocale);
+      const _filterBy = this.filterBy || this.optionLabel;
+      const filteredOptions = !_filterBy && !this.filterFields && !this.optionValue ? this.options.filter((option) => {
+        if (option.label) {
+          return option.label.toString().toLowerCase().indexOf(this._filterValue().toLowerCase().trim()) !== -1;
+        }
+        return option.toString().toLowerCase().indexOf(this._filterValue().toLowerCase().trim()) !== -1;
+      }) : this.filterService.filter(options, this.searchFields(), this._filterValue().trim(), this.filterMatchMode, this.filterLocale);
       if (this.group) {
         const optionGroups = this.options || [];
         const filtered = [];
@@ -12823,10 +13791,18 @@ var Dropdown = class _Dropdown {
     return options;
   });
   label = computed(() => {
-    const selectedOptionIndex = this.findSelectedOptionIndex();
-    return selectedOptionIndex !== -1 ? this.getOptionLabel(this.visibleOptions()[selectedOptionIndex]) : this.placeholder || "p-emptylabel";
+    const options = this.getAllVisibleAndNonVisibleOptions();
+    const selectedOptionIndex = options.findIndex((option) => this.isOptionValueEqualsModelValue(option));
+    return selectedOptionIndex !== -1 ? this.getOptionLabel(options[selectedOptionIndex]) : this.placeholder() || "p-emptylabel";
+  });
+  filled = computed(() => {
+    if (typeof this.modelValue() === "string") return !!this.modelValue();
+    const options = this.getAllVisibleAndNonVisibleOptions();
+    const isOptionSelected = options.findIndex((option) => this.isOptionValueEqualsModelValue(option)) !== -1;
+    return this.label() !== "p-emptylabel" && isOptionSelected;
   });
   selectedOption;
+  editableInputValue = computed(() => this.getOptionLabel(this.selectedOption) || this.modelValue() || "");
   constructor(el, renderer, cd, zone, filterService, config) {
     this.el = el;
     this.renderer = renderer;
@@ -12837,13 +13813,26 @@ var Dropdown = class _Dropdown {
     effect(() => {
       const modelValue = this.modelValue();
       const visibleOptions = this.visibleOptions();
-      if (modelValue && this.editable) {
+      if (visibleOptions && ObjectUtils.isNotEmpty(visibleOptions)) {
+        const selectedOptionIndex = this.findSelectedOptionIndex();
+        if (selectedOptionIndex !== -1 || modelValue === void 0 || typeof modelValue === "string" && modelValue.length === 0 || this.isModelValueNotSet() || this.editable) {
+          this.selectedOption = visibleOptions[selectedOptionIndex];
+        }
+      }
+      if (ObjectUtils.isEmpty(visibleOptions) && (modelValue === void 0 || this.isModelValueNotSet()) && ObjectUtils.isNotEmpty(this.selectedOption)) {
+        this.selectedOption = null;
+      }
+      if (modelValue !== void 0 && this.editable) {
         this.updateEditableLabel();
       }
-      if (visibleOptions && ObjectUtils.isNotEmpty(visibleOptions)) {
-        this.selectedOption = visibleOptions[this.findSelectedOptionIndex()];
-      }
+      this.cd.markForCheck();
     });
+  }
+  isModelValueNotSet() {
+    return this.modelValue() === null && !this.isOptionValueEqualsModelValue(this.selectedOption);
+  }
+  getAllVisibleAndNonVisibleOptions() {
+    return this.group ? this.flatOptions(this.options) : this.options || [];
   }
   ngOnInit() {
     this.id = this.id || UniqueComponentId();
@@ -12907,6 +13896,9 @@ var Dropdown = class _Dropdown {
         case "dropdownicon":
           this.dropdownIconTemplate = item.template;
           break;
+        case "loadingicon":
+          this.loadingIconTemplate = item.template;
+          break;
         case "clearicon":
           this.clearIconTemplate = item.template;
           break;
@@ -12936,20 +13928,26 @@ var Dropdown = class _Dropdown {
       this.focusedOptionIndex.set(this.findFirstFocusedOptionIndex());
       this.onOptionSelect(null, this.visibleOptions()[this.focusedOptionIndex()], false);
     }
-    if (this.autoDisplayFirst && !this.modelValue()) {
-      const ind = this.findFirstOptionIndex();
-      this.onOptionSelect(null, this.visibleOptions()[ind], false, true);
+    if (this.autoDisplayFirst && (this.modelValue() === null || this.modelValue() === void 0)) {
+      if (!this.placeholder()) {
+        const ind = this.findFirstOptionIndex();
+        this.onOptionSelect(null, this.visibleOptions()[ind], false, true);
+      }
     }
   }
   onOptionSelect(event2, option, isHide = true, preventChange = false) {
-    const value = this.getOptionValue(option);
-    this.updateModel(value, event2);
-    this.focusedOptionIndex.set(this.findSelectedOptionIndex());
-    isHide && this.hide(true);
-    preventChange === false && this.onChange.emit({
-      originalEvent: event2,
-      value
-    });
+    if (!this.isSelected(option)) {
+      const value = this.getOptionValue(option);
+      this.updateModel(value, event2);
+      this.focusedOptionIndex.set(this.findSelectedOptionIndex());
+      preventChange === false && this.onChange.emit({
+        originalEvent: event2,
+        value
+      });
+    }
+    if (isHide) {
+      this.hide(true);
+    }
   }
   onOptionMouseEnter(event2, index) {
     if (this.focusOnHover) {
@@ -12962,49 +13960,80 @@ var Dropdown = class _Dropdown {
     this.modelValue.set(value);
     this.selectedOptionUpdated = true;
   }
-  writeValue(value) {
+  writeValue(value, emitEvent = true) {
     if (this.filter) {
       this.resetFilter();
     }
     this.value = value;
-    this.allowModelChange() && this.onModelChange(value);
+    if (emitEvent && this.allowModelChange()) {
+      this.onModelChange(value);
+    }
     this.modelValue.set(this.value);
     this.updateEditableLabel();
     this.cd.markForCheck();
   }
   allowModelChange() {
-    return this.autoDisplayFirst && !this.placeholder && !this.modelValue() && !this.editable && this.options && this.options.length;
+    return this.autoDisplayFirst && !this.placeholder() && (this.modelValue() === void 0 || this.modelValue() === null) && !this.editable && this.options && this.options.length;
+  }
+  isSelectedOptionEmpty() {
+    return ObjectUtils.isEmpty(this.selectedOption);
   }
   isSelected(option) {
-    return this.isValidOption(option) && ObjectUtils.equals(this.modelValue(), this.getOptionValue(option), this.equalityKey());
+    return this.isValidOption(option) && this.isOptionValueEqualsModelValue(option);
+  }
+  isOptionValueEqualsModelValue(option) {
+    return ObjectUtils.equals(this.modelValue(), this.getOptionValue(option), this.equalityKey());
   }
   ngAfterViewInit() {
     if (this.editable) {
       this.updateEditableLabel();
     }
+    this.updatePlaceHolderForFloatingLabel();
+  }
+  updatePlaceHolderForFloatingLabel() {
+    if (this._placeholder() !== null && this._placeholder() !== void 0) {
+      return;
+    }
+    const parentElement = this.el.nativeElement.parentElement;
+    const isInFloatingLabel = parentElement?.classList.contains("p-float-label");
+    if (parentElement && isInFloatingLabel && !this.selectedOption) {
+      const label = parentElement.querySelector("label");
+      if (label) {
+        this._placeholder.set(label.textContent);
+      }
+    }
   }
   updateEditableLabel() {
     if (this.editableInputViewChild) {
-      this.editableInputViewChild.nativeElement.value = this.getOptionLabel(this.modelValue()) === void 0 ? this.editableInputViewChild.nativeElement.value : this.getOptionLabel(this.modelValue());
+      this.editableInputViewChild.nativeElement.value = this.getOptionLabel(this.selectedOption) || this.modelValue() || "";
+    }
+  }
+  clearEditableLabel() {
+    if (this.editableInputViewChild) {
+      this.editableInputViewChild.nativeElement.value = "";
     }
   }
   getOptionIndex(index, scrollerOptions) {
     return this.virtualScrollerDisabled ? index : scrollerOptions && scrollerOptions.getItemOptions(index)["index"];
   }
   getOptionLabel(option) {
-    return this.optionLabel ? ObjectUtils.resolveFieldData(option, this.optionLabel) : option && option.label !== void 0 ? option.label : option;
+    return this.optionLabel !== void 0 && this.optionLabel !== null ? ObjectUtils.resolveFieldData(option, this.optionLabel) : option && option.label !== void 0 ? option.label : option;
   }
   getOptionValue(option) {
-    return this.optionValue ? ObjectUtils.resolveFieldData(option, this.optionValue) : !this.optionLabel && option && option.value !== void 0 ? option.value : option;
+    return this.optionValue && this.optionValue !== null ? ObjectUtils.resolveFieldData(option, this.optionValue) : !this.optionLabel && option && option.value !== void 0 ? option.value : option;
   }
   isOptionDisabled(option) {
-    return this.optionDisabled ? ObjectUtils.resolveFieldData(option, this.optionDisabled) : option && option.disabled !== void 0 ? option.disabled : false;
+    if (this.getOptionValue(this.modelValue()) === this.getOptionValue(option) || this.getOptionLabel(this.modelValue() === this.getOptionLabel(option)) && option.disabled === false) {
+      return false;
+    } else {
+      return this.optionDisabled ? ObjectUtils.resolveFieldData(option, this.optionDisabled) : option && option.disabled !== void 0 ? option.disabled : false;
+    }
   }
   getOptionGroupLabel(optionGroup) {
-    return this.optionGroupLabel ? ObjectUtils.resolveFieldData(optionGroup, this.optionGroupLabel) : optionGroup && optionGroup.label !== void 0 ? optionGroup.label : optionGroup;
+    return this.optionGroupLabel !== void 0 && this.optionGroupLabel !== null ? ObjectUtils.resolveFieldData(optionGroup, this.optionGroupLabel) : optionGroup && optionGroup.label !== void 0 ? optionGroup.label : optionGroup;
   }
   getOptionGroupChildren(optionGroup) {
-    return this.optionGroupChildren ? ObjectUtils.resolveFieldData(optionGroup, this.optionGroupChildren) : optionGroup.items;
+    return this.optionGroupChildren !== void 0 && this.optionGroupChildren !== null ? ObjectUtils.resolveFieldData(optionGroup, this.optionGroupChildren) : optionGroup.items;
   }
   getAriaPosInset(index) {
     return (this.optionGroupLabel ? index - this.visibleOptions().slice(0, index).filter((option) => this.isOptionGroup(option)).length : index) + 1;
@@ -13033,7 +14062,7 @@ var Dropdown = class _Dropdown {
     this.cd.markForCheck();
   }
   onContainerClick(event2) {
-    if (this.disabled || this.readonly) {
+    if (this.disabled || this.readonly || this.loading) {
       return;
     }
     this.focusInputViewChild?.nativeElement.focus({
@@ -13045,10 +14074,11 @@ var Dropdown = class _Dropdown {
       this.overlayVisible ? this.hide(true) : this.show(true);
     }
     this.onClick.emit(event2);
+    this.clicked.set(true);
     this.cd.detectChanges();
   }
   isEmpty() {
-    return !this._options() || this._options() && this._options().length === 0;
+    return !this._options() || this.visibleOptions() && this.visibleOptions().length === 0;
   }
   onEditableInput(event2) {
     const value = event2.target.value;
@@ -13057,10 +14087,13 @@ var Dropdown = class _Dropdown {
     !matched && this.focusedOptionIndex.set(-1);
     this.onModelChange(value);
     this.updateModel(value, event2);
-    this.onChange.emit({
-      originalEvent: event2,
-      value
-    });
+    setTimeout(() => {
+      this.onChange.emit({
+        originalEvent: event2,
+        value
+      });
+    }, 1);
+    !this.overlayVisible && ObjectUtils.isNotEmpty(value) && this.show();
   }
   /**
    * Displays the panel.
@@ -13068,7 +14101,7 @@ var Dropdown = class _Dropdown {
    */
   show(isFocus) {
     this.overlayVisible = true;
-    const focusedOptionIndex = this.focusedOptionIndex() !== -1 ? this.focusedOptionIndex() : this.autoOptionFocus ? this.findFirstFocusedOptionIndex() : -1;
+    const focusedOptionIndex = this.focusedOptionIndex() !== -1 ? this.focusedOptionIndex() : this.autoOptionFocus ? this.findFirstFocusedOptionIndex() : this.editable ? -1 : this.findSelectedOptionIndex();
     this.focusedOptionIndex.set(focusedOptionIndex);
     if (isFocus) {
       DomHandler.focus(this.focusInputViewChild?.nativeElement);
@@ -13097,7 +14130,7 @@ var Dropdown = class _Dropdown {
       }
       if (this.filterViewChild && this.filterViewChild.nativeElement) {
         this.preventModelTouched = true;
-        if (this.autofocusFilter) {
+        if (this.autofocusFilter && !this.editable) {
           this.filterViewChild.nativeElement.focus();
         }
       }
@@ -13116,10 +14149,26 @@ var Dropdown = class _Dropdown {
   hide(isFocus) {
     this.overlayVisible = false;
     this.focusedOptionIndex.set(-1);
+    this.clicked.set(false);
+    this.searchValue = "";
+    if (this.overlayOptions?.mode === "modal") {
+      DomHandler.unblockBodyScroll();
+    }
     if (this.filter && this.resetFilterOnHide) {
       this.resetFilter();
     }
-    isFocus && DomHandler.focus(this.focusInputViewChild?.nativeElement);
+    if (isFocus) {
+      if (this.focusInputViewChild) {
+        setTimeout(() => {
+          DomHandler.focus(this.focusInputViewChild?.nativeElement);
+        });
+      }
+      if (this.editable && this.editableInputViewChild) {
+        setTimeout(() => {
+          DomHandler.focus(this.editableInputViewChild?.nativeElement);
+        });
+      }
+    }
     this.cd.markForCheck();
   }
   onInputFocus(event2) {
@@ -13134,14 +14183,17 @@ var Dropdown = class _Dropdown {
   }
   onInputBlur(event2) {
     this.focused = false;
-    this.overlayVisible === false && this.onBlur.emit(event2);
+    this.onBlur.emit(event2);
     if (!this.preventModelTouched) {
       this.onModelTouched();
     }
     this.preventModelTouched = false;
   }
+  onMouseDown(event2) {
+    event2.preventDefault();
+  }
   onKeyDown(event2, search) {
-    if (this.disabled || this.readonly) {
+    if (this.disabled || this.readonly || this.loading) {
       return;
     }
     switch (event2.code) {
@@ -13191,11 +14243,12 @@ var Dropdown = class _Dropdown {
         break;
       default:
         if (!event2.metaKey && ObjectUtils.isPrintableCharacter(event2.key)) {
-          !this.overlayVisible && this.show();
+          !this.overlayVisible && this.autoShowPanelOnPrintableCharacterKeyDown && this.show();
           !this.editable && this.searchOptions(event2, event2.key);
         }
         break;
     }
+    this.clicked.set(false);
   }
   onFilterKeyDown(event2) {
     switch (event2.code) {
@@ -13216,7 +14269,8 @@ var Dropdown = class _Dropdown {
         this.onEndKey(event2, true);
         break;
       case "Enter":
-        this.onEnterKey(event2);
+      case "NumpadEnter":
+        this.onEnterKey(event2, true);
         break;
       case "Escape":
         this.onEscapeKey(event2);
@@ -13232,10 +14286,15 @@ var Dropdown = class _Dropdown {
     this.focusedOptionIndex.set(-1);
   }
   onArrowDownKey(event2) {
-    const optionIndex = this.focusedOptionIndex() !== -1 ? this.findNextOptionIndex(this.focusedOptionIndex()) : this.findFirstFocusedOptionIndex();
-    this.changeFocusedOptionIndex(event2, optionIndex);
-    !this.overlayVisible && this.show();
+    if (!this.overlayVisible) {
+      this.show();
+      this.editable && this.changeFocusedOptionIndex(event2, this.findSelectedOptionIndex());
+    } else {
+      const optionIndex = this.focusedOptionIndex() !== -1 ? this.findNextOptionIndex(this.focusedOptionIndex()) : this.clicked() ? this.findFirstOptionIndex() : this.findFirstFocusedOptionIndex();
+      this.changeFocusedOptionIndex(event2, optionIndex);
+    }
     event2.preventDefault();
+    event2.stopPropagation();
   }
   changeFocusedOptionIndex(event2, index) {
     if (this.focusedOptionIndex() !== index) {
@@ -13265,9 +14324,6 @@ var Dropdown = class _Dropdown {
         }, 0);
       }
     }
-  }
-  get focusedOptionId() {
-    return this.focusedOptionIndex() !== -1 ? `${this.id}_${this.focusedOptionIndex()}` : null;
   }
   hasSelectedOption() {
     return this.modelValue() !== void 0;
@@ -13304,10 +14360,10 @@ var Dropdown = class _Dropdown {
     return selectedIndex < 0 ? this.findLastOptionIndex() : selectedIndex;
   }
   isValidOption(option) {
-    return option && !(this.isOptionDisabled(option) || this.isOptionGroup(option));
+    return option !== void 0 && option !== null && !(this.isOptionDisabled(option) || this.isOptionGroup(option));
   }
   isOptionGroup(option) {
-    return this.optionGroupLabel && option.optionGroup && option.group;
+    return this.optionGroupLabel !== void 0 && this.optionGroupLabel !== null && option.optionGroup !== void 0 && option.optionGroup !== null && option.group;
   }
   onArrowUpKey(event2, pressedInInputText = false) {
     if (event2.altKey && !pressedInInputText) {
@@ -13316,13 +14372,13 @@ var Dropdown = class _Dropdown {
         this.onOptionSelect(event2, option);
       }
       this.overlayVisible && this.hide();
-      event2.preventDefault();
     } else {
-      const optionIndex = this.focusedOptionIndex() !== -1 ? this.findPrevOptionIndex(this.focusedOptionIndex()) : this.findLastFocusedOptionIndex();
+      const optionIndex = this.focusedOptionIndex() !== -1 ? this.findPrevOptionIndex(this.focusedOptionIndex()) : this.clicked() ? this.findLastOptionIndex() : this.findLastFocusedOptionIndex();
       this.changeFocusedOptionIndex(event2, optionIndex);
       !this.overlayVisible && this.show();
-      event2.preventDefault();
     }
+    event2.preventDefault();
+    event2.stopPropagation();
   }
   onArrowLeftKey(event2, pressedInInputText = false) {
     pressedInInputText && this.focusedOptionIndex.set(-1);
@@ -13335,8 +14391,13 @@ var Dropdown = class _Dropdown {
   }
   onHomeKey(event2, pressedInInputText = false) {
     if (pressedInInputText) {
-      event2.currentTarget.setSelectionRange(0, 0);
-      this.focusedOptionIndex.set(-1);
+      const target = event2.currentTarget;
+      if (event2.shiftKey) {
+        target.setSelectionRange(0, target.value.length);
+      } else {
+        target.setSelectionRange(0, 0);
+        this.focusedOptionIndex.set(-1);
+      }
     } else {
       this.changeFocusedOptionIndex(event2, this.findFirstOptionIndex());
       !this.overlayVisible && this.show();
@@ -13346,9 +14407,13 @@ var Dropdown = class _Dropdown {
   onEndKey(event2, pressedInInputText = false) {
     if (pressedInInputText) {
       const target = event2.currentTarget;
-      const len = target.value.length;
-      target.setSelectionRange(len, len);
-      this.focusedOptionIndex.set(-1);
+      if (event2.shiftKey) {
+        target.setSelectionRange(0, target.value.length);
+      } else {
+        const len = target.value.length;
+        target.setSelectionRange(len, len);
+        this.focusedOptionIndex.set(-1);
+      }
     } else {
       this.changeFocusedOptionIndex(event2, this.findLastOptionIndex());
       !this.overlayVisible && this.show();
@@ -13364,17 +14429,18 @@ var Dropdown = class _Dropdown {
     event2.preventDefault();
   }
   onSpaceKey(event2, pressedInInputText = false) {
-    !pressedInInputText && this.onEnterKey(event2);
+    !this.editable && !pressedInInputText && this.onEnterKey(event2);
   }
-  onEnterKey(event2) {
+  onEnterKey(event2, pressedInInput = false) {
     if (!this.overlayVisible) {
+      this.focusedOptionIndex.set(-1);
       this.onArrowDownKey(event2);
     } else {
       if (this.focusedOptionIndex() !== -1) {
         const option = this.visibleOptions()[this.focusedOptionIndex()];
         this.onOptionSelect(event2, option);
       }
-      this.hide();
+      !pressedInInput && this.hide();
     }
     event2.preventDefault();
   }
@@ -13388,16 +14454,17 @@ var Dropdown = class _Dropdown {
         DomHandler.focus(event2.shiftKey ? this.lastHiddenFocusableElementOnOverlay.nativeElement : this.firstHiddenFocusableElementOnOverlay.nativeElement);
         event2.preventDefault();
       } else {
-        if (this.focusedOptionIndex() !== -1) {
+        if (this.focusedOptionIndex() !== -1 && this.overlayVisible) {
           const option = this.visibleOptions()[this.focusedOptionIndex()];
           this.onOptionSelect(event2, option);
         }
         this.overlayVisible && this.hide(this.filter);
       }
     }
+    event2.stopPropagation();
   }
   onFirstHiddenFocus(event2) {
-    const focusableEl = event2.relatedTarget === this.focusInputViewChild?.nativeElement ? DomHandler.getFirstFocusableElement(this.overlayViewChild.el.nativeElement, ":not(.p-hidden-focusable)") : this.focusInputViewChild.nativeElement;
+    const focusableEl = event2.relatedTarget === this.focusInputViewChild?.nativeElement ? DomHandler.getFirstFocusableElement(this.overlayViewChild.el?.nativeElement, ":not(.p-hidden-focusable)") : this.focusInputViewChild?.nativeElement;
     DomHandler.focus(focusableEl);
   }
   onLastHiddenFocus(event2) {
@@ -13405,7 +14472,7 @@ var Dropdown = class _Dropdown {
     DomHandler.focus(focusableEl);
   }
   hasFocusableElements() {
-    return DomHandler.getFocusableElements(this.overlayViewChild.overlayViewChild.nativeElement, ':not([data-p-hidden-focusable="true"])').length > 0;
+    return DomHandler.getFocusableElements(this.overlayViewChild.overlayViewChild.nativeElement, ':not([data-p-hidden-focusable="true"]):not([class="p-dropdown-items-wrapper"])').length > 0;
   }
   onBackspaceKey(event2, pressedInInputText = false) {
     if (pressedInInputText) {
@@ -13413,7 +14480,7 @@ var Dropdown = class _Dropdown {
     }
   }
   searchFields() {
-    return this.filterFields || [this.optionLabel];
+    return this.filterBy?.split(",") || this.filterFields || [this.optionLabel];
   }
   searchOptions(event2, char) {
     this.searchValue = (this.searchValue || "") + char;
@@ -13444,10 +14511,10 @@ var Dropdown = class _Dropdown {
     return matched;
   }
   isOptionMatched(option) {
-    return this.isValidOption(option) && this.getOptionLabel(option).toLocaleLowerCase(this.filterLocale).startsWith(this.searchValue.toLocaleLowerCase(this.filterLocale));
+    return this.isValidOption(option) && this.getOptionLabel(option).toString().toLocaleLowerCase(this.filterLocale).startsWith(this.searchValue.toLocaleLowerCase(this.filterLocale));
   }
   onFilterInputChange(event2) {
-    let value = event2.target.value?.trim();
+    let value = event2.target.value;
     this._filterValue.set(value);
     this.focusedOptionIndex.set(-1);
     this.onFilter.emit({
@@ -13455,11 +14522,14 @@ var Dropdown = class _Dropdown {
       filter: this._filterValue()
     });
     !this.virtualScrollerDisabled && this.scroller.scrollToIndex(0);
+    setTimeout(() => {
+      this.overlayViewChild.alignOverlay();
+    });
     this.cd.markForCheck();
   }
   applyFocus() {
     if (this.editable) DomHandler.findSingle(this.el.nativeElement, ".p-dropdown-label.p-inputtext").focus();
-    else DomHandler.findSingle(this.el.nativeElement, "input[readonly]").focus();
+    else DomHandler.focus(this.focusInputViewChild?.nativeElement);
   }
   /**
    * Applies focus.
@@ -13468,14 +14538,20 @@ var Dropdown = class _Dropdown {
   focus() {
     this.applyFocus();
   }
+  /**
+   * Clears the model.
+   * @group Method
+   */
   clear(event2) {
     this.updateModel(null, event2);
-    this.updateEditableLabel();
+    this.clearEditableLabel();
+    this.onModelTouched();
     this.onChange.emit({
       originalEvent: event2,
       value: this.value
     });
     this.onClear.emit(event2);
+    this.resetFilter();
   }
   static ɵfac = function Dropdown_Factory(t) {
     return new (t || _Dropdown)(ɵɵdirectiveInject(ElementRef), ɵɵdirectiveInject(Renderer2), ɵɵdirectiveInject(ChangeDetectorRef), ɵɵdirectiveInject(NgZone), ɵɵdirectiveInject(FilterService), ɵɵdirectiveInject(PrimeNGConfig));
@@ -13521,61 +14597,66 @@ var Dropdown = class _Dropdown {
     hostVars: 4,
     hostBindings: function Dropdown_HostBindings(rf, ctx) {
       if (rf & 2) {
-        ɵɵclassProp("p-inputwrapper-filled", ctx.filled)("p-inputwrapper-focus", ctx.focused || ctx.overlayVisible);
+        ɵɵclassProp("p-inputwrapper-filled", ctx.filled())("p-inputwrapper-focus", ctx.focused || ctx.overlayVisible);
       }
     },
     inputs: {
       id: "id",
       scrollHeight: "scrollHeight",
-      filter: "filter",
+      filter: [InputFlags.HasDecoratorInputTransform, "filter", "filter", booleanAttribute],
       name: "name",
       style: "style",
       panelStyle: "panelStyle",
       styleClass: "styleClass",
       panelStyleClass: "panelStyleClass",
-      readonly: "readonly",
-      required: "required",
-      editable: "editable",
+      readonly: [InputFlags.HasDecoratorInputTransform, "readonly", "readonly", booleanAttribute],
+      required: [InputFlags.HasDecoratorInputTransform, "required", "required", booleanAttribute],
+      editable: [InputFlags.HasDecoratorInputTransform, "editable", "editable", booleanAttribute],
       appendTo: "appendTo",
-      tabindex: "tabindex",
+      tabindex: [InputFlags.HasDecoratorInputTransform, "tabindex", "tabindex", numberAttribute],
       placeholder: "placeholder",
+      loadingIcon: "loadingIcon",
       filterPlaceholder: "filterPlaceholder",
       filterLocale: "filterLocale",
+      variant: "variant",
       inputId: "inputId",
       dataKey: "dataKey",
       filterBy: "filterBy",
       filterFields: "filterFields",
-      autofocus: "autofocus",
-      resetFilterOnHide: "resetFilterOnHide",
+      autofocus: [InputFlags.HasDecoratorInputTransform, "autofocus", "autofocus", booleanAttribute],
+      resetFilterOnHide: [InputFlags.HasDecoratorInputTransform, "resetFilterOnHide", "resetFilterOnHide", booleanAttribute],
+      checkmark: [InputFlags.HasDecoratorInputTransform, "checkmark", "checkmark", booleanAttribute],
       dropdownIcon: "dropdownIcon",
+      loading: [InputFlags.HasDecoratorInputTransform, "loading", "loading", booleanAttribute],
       optionLabel: "optionLabel",
       optionValue: "optionValue",
       optionDisabled: "optionDisabled",
       optionGroupLabel: "optionGroupLabel",
       optionGroupChildren: "optionGroupChildren",
-      autoDisplayFirst: "autoDisplayFirst",
-      group: "group",
-      showClear: "showClear",
+      autoDisplayFirst: [InputFlags.HasDecoratorInputTransform, "autoDisplayFirst", "autoDisplayFirst", booleanAttribute],
+      group: [InputFlags.HasDecoratorInputTransform, "group", "group", booleanAttribute],
+      showClear: [InputFlags.HasDecoratorInputTransform, "showClear", "showClear", booleanAttribute],
       emptyFilterMessage: "emptyFilterMessage",
       emptyMessage: "emptyMessage",
-      lazy: "lazy",
-      virtualScroll: "virtualScroll",
-      virtualScrollItemSize: "virtualScrollItemSize",
+      lazy: [InputFlags.HasDecoratorInputTransform, "lazy", "lazy", booleanAttribute],
+      virtualScroll: [InputFlags.HasDecoratorInputTransform, "virtualScroll", "virtualScroll", booleanAttribute],
+      virtualScrollItemSize: [InputFlags.HasDecoratorInputTransform, "virtualScrollItemSize", "virtualScrollItemSize", numberAttribute],
       virtualScrollOptions: "virtualScrollOptions",
       overlayOptions: "overlayOptions",
       ariaFilterLabel: "ariaFilterLabel",
       ariaLabel: "ariaLabel",
       ariaLabelledBy: "ariaLabelledBy",
       filterMatchMode: "filterMatchMode",
-      maxlength: "maxlength",
+      maxlength: [InputFlags.HasDecoratorInputTransform, "maxlength", "maxlength", numberAttribute],
       tooltip: "tooltip",
       tooltipPosition: "tooltipPosition",
       tooltipPositionStyle: "tooltipPositionStyle",
       tooltipStyleClass: "tooltipStyleClass",
-      focusOnHover: "focusOnHover",
-      selectOnFocus: "selectOnFocus",
-      autoOptionFocus: "autoOptionFocus",
-      autofocusFilter: "autofocusFilter",
+      focusOnHover: [InputFlags.HasDecoratorInputTransform, "focusOnHover", "focusOnHover", booleanAttribute],
+      selectOnFocus: [InputFlags.HasDecoratorInputTransform, "selectOnFocus", "selectOnFocus", booleanAttribute],
+      autoOptionFocus: [InputFlags.HasDecoratorInputTransform, "autoOptionFocus", "autoOptionFocus", booleanAttribute],
+      autofocusFilter: [InputFlags.HasDecoratorInputTransform, "autofocusFilter", "autofocusFilter", booleanAttribute],
+      autoShowPanelOnPrintableCharacterKeyDown: [InputFlags.HasDecoratorInputTransform, "autoShowPanelOnPrintableCharacterKeyDown", "autoShowPanelOnPrintableCharacterKeyDown", booleanAttribute],
       disabled: "disabled",
       itemSize: "itemSize",
       autoZIndex: "autoZIndex",
@@ -13596,39 +14677,45 @@ var Dropdown = class _Dropdown {
       onClear: "onClear",
       onLazyLoad: "onLazyLoad"
     },
-    features: [ɵɵProvidersFeature([DROPDOWN_VALUE_ACCESSOR])],
-    decls: 11,
+    features: [ɵɵProvidersFeature([DROPDOWN_VALUE_ACCESSOR]), ɵɵInputTransformsFeature],
+    decls: 12,
     vars: 20,
-    consts: [["container", ""], ["overlay", ""], ["focusInput", ""], ["defaultPlaceholder", ""], ["editableInput", ""], ["firstHiddenFocusableEl", ""], ["buildInItems", ""], ["lastHiddenFocusableEl", ""], ["builtInFilterElement", ""], ["filter", ""], ["scroller", ""], ["items", ""], ["emptyFilter", ""], ["empty", ""], [3, "click", "ngClass", "ngStyle"], ["role", "combobox", "pAutoFocus", "", 3, "ngClass", "pTooltip", "tooltipPosition", "positionStyle", "tooltipStyleClass", "autofocus", "focus", "blur", "keydown", 4, "ngIf"], ["type", "text", "aria-haspopup", "listbox", 3, "ngClass", "disabled", "input", "keydown", "focus", "blur", 4, "ngIf"], [4, "ngIf"], ["role", "button", "aria-label", "dropdown trigger", "aria-haspopup", "listbox", 1, "p-dropdown-trigger"], ["class", "p-dropdown-trigger-icon", 4, "ngIf"], [3, "visibleChange", "onAnimationStart", "onHide", "visible", "options", "target", "appendTo", "autoZIndex", "baseZIndex", "showTransitionOptions", "hideTransitionOptions"], ["pTemplate", "content"], ["role", "combobox", "pAutoFocus", "", 3, "focus", "blur", "keydown", "ngClass", "pTooltip", "tooltipPosition", "positionStyle", "tooltipStyleClass", "autofocus"], [4, "ngIf", "ngIfElse"], [4, "ngTemplateOutlet", "ngTemplateOutletContext"], ["type", "text", "aria-haspopup", "listbox", 3, "input", "keydown", "focus", "blur", "ngClass", "disabled"], [3, "styleClass", "click", 4, "ngIf"], ["class", "p-dropdown-clear-icon", 3, "click", 4, "ngIf"], [3, "click", "styleClass"], [1, "p-dropdown-clear-icon", 3, "click"], [4, "ngTemplateOutlet"], ["class", "p-dropdown-trigger-icon", 3, "ngClass", 4, "ngIf"], [3, "styleClass", 4, "ngIf"], [1, "p-dropdown-trigger-icon", 3, "ngClass"], [3, "styleClass"], [1, "p-dropdown-trigger-icon"], [3, "ngClass", "ngStyle"], ["role", "presentation", 1, "p-hidden-accessible", "p-hidden-focusable", 3, "focus"], ["class", "p-dropdown-header", 3, "click", 4, "ngIf"], [1, "p-dropdown-items-wrapper"], [3, "items", "style", "itemSize", "autoSize", "lazy", "options", "onLazyLoad", 4, "ngIf"], [1, "p-dropdown-header", 3, "click"], [1, "p-dropdown-filter-container"], ["type", "text", "autocomplete", "off", 1, "p-dropdown-filter", "p-inputtext", "p-component", 3, "input", "keydown", "blur", "value"], ["class", "p-dropdown-filter-icon", 4, "ngIf"], [1, "p-dropdown-filter-icon"], [3, "onLazyLoad", "items", "itemSize", "autoSize", "lazy", "options"], ["pTemplate", "loader"], ["role", "listbox", 1, "p-dropdown-items", 3, "ngClass"], ["ngFor", "", 3, "ngForOf"], ["class", "p-dropdown-empty-message", 3, "ngStyle", 4, "ngIf"], ["role", "option", 1, "p-dropdown-item-group", 3, "ngStyle"], [3, "onClick", "onMouseEnter", "id", "option", "selected", "label", "disabled", "template", "focused", "ariaPosInset", "ariaSetSize"], [1, "p-dropdown-empty-message", 3, "ngStyle"]],
+    consts: [["container", ""], ["elseBlock", ""], ["overlay", ""], ["focusInput", ""], ["defaultPlaceholder", ""], ["editableInput", ""], ["firstHiddenFocusableEl", ""], ["buildInItems", ""], ["lastHiddenFocusableEl", ""], ["builtInFilterElement", ""], ["filter", ""], ["scroller", ""], ["items", ""], ["emptyFilter", ""], ["empty", ""], [3, "click", "ngClass", "ngStyle"], ["role", "combobox", "pAutoFocus", "", 3, "ngClass", "pTooltip", "tooltipPosition", "positionStyle", "tooltipStyleClass", "autofocus", "focus", "blur", "keydown", 4, "ngIf"], ["type", "text", "aria-haspopup", "listbox", "pAutoFocus", "", 3, "ngClass", "disabled", "autofocus", "input", "keydown", "focus", "blur", 4, "ngIf"], [4, "ngIf"], ["role", "button", "aria-label", "dropdown trigger", "aria-haspopup", "listbox", 1, "p-dropdown-trigger", 3, "mousedown"], [4, "ngIf", "ngIfElse"], [3, "visibleChange", "onAnimationStart", "onHide", "visible", "options", "target", "appendTo", "autoZIndex", "baseZIndex", "showTransitionOptions", "hideTransitionOptions"], ["pTemplate", "content"], ["role", "combobox", "pAutoFocus", "", 3, "focus", "blur", "keydown", "ngClass", "pTooltip", "tooltipPosition", "positionStyle", "tooltipStyleClass", "autofocus"], [3, "ngTemplateOutlet", "ngTemplateOutletContext", 4, "ngIf"], [3, "ngTemplateOutlet", "ngTemplateOutletContext"], ["type", "text", "aria-haspopup", "listbox", "pAutoFocus", "", 3, "input", "keydown", "focus", "blur", "ngClass", "disabled", "autofocus"], [3, "styleClass", "click", 4, "ngIf"], ["class", "p-dropdown-clear-icon", 3, "click", 4, "ngIf"], [3, "click", "styleClass"], [1, "p-dropdown-clear-icon", 3, "click"], [4, "ngTemplateOutlet"], ["aria-hidden", "true", 3, "ngClass", 4, "ngIf"], ["aria-hidden", "true", 3, "class", 4, "ngIf"], ["aria-hidden", "true", 3, "ngClass"], ["aria-hidden", "true"], ["class", "p-dropdown-trigger-icon", 4, "ngIf"], ["class", "p-dropdown-trigger-icon", 3, "ngClass", 4, "ngIf"], [3, "styleClass", 4, "ngIf"], [1, "p-dropdown-trigger-icon", 3, "ngClass"], [3, "styleClass"], [1, "p-dropdown-trigger-icon"], [3, "ngClass", "ngStyle"], ["role", "presentation", 1, "p-hidden-accessible", "p-hidden-focusable", 3, "focus"], ["class", "p-dropdown-header", 3, "click", 4, "ngIf"], ["tabindex", "0", 1, "p-dropdown-items-wrapper", 3, "ngStyle"], [3, "items", "style", "itemSize", "autoSize", "lazy", "options", "onLazyLoad", 4, "ngIf"], [1, "p-dropdown-header", 3, "click"], [4, "ngTemplateOutlet", "ngTemplateOutletContext"], [1, "p-dropdown-filter-container"], ["type", "text", "role", "searchbox", "autocomplete", "off", 1, "p-dropdown-filter", "p-inputtext", "p-component", 3, "input", "keydown", "blur", "value", "ngClass"], ["class", "p-dropdown-filter-icon", 4, "ngIf"], [1, "p-dropdown-filter-icon"], [3, "onLazyLoad", "items", "itemSize", "autoSize", "lazy", "options"], ["pTemplate", "loader"], ["role", "listbox", 1, "p-dropdown-items", 3, "ngClass", "ngStyle"], ["ngFor", "", 3, "ngForOf"], ["class", "p-dropdown-empty-message", "role", "option", 3, "ngStyle", 4, "ngIf"], ["role", "option", 1, "p-dropdown-item-group", 3, "ngStyle"], [3, "onClick", "onMouseEnter", "id", "option", "checkmark", "selected", "label", "disabled", "template", "focused", "ariaPosInset", "ariaSetSize"], ["role", "option", 1, "p-dropdown-empty-message", 3, "ngStyle"]],
     template: function Dropdown_Template(rf, ctx) {
       if (rf & 1) {
         const _r1 = ɵɵgetCurrentView();
-        ɵɵelementStart(0, "div", 14, 0);
+        ɵɵelementStart(0, "div", 15, 0);
         ɵɵlistener("click", function Dropdown_Template_div_click_0_listener($event) {
           ɵɵrestoreView(_r1);
           return ɵɵresetView(ctx.onContainerClick($event));
         });
-        ɵɵtemplate(2, Dropdown_span_2_Template, 6, 21, "span", 15)(3, Dropdown_input_3_Template, 2, 5, "input", 16)(4, Dropdown_ng_container_4_Template, 3, 2, "ng-container", 17);
-        ɵɵelementStart(5, "div", 18);
-        ɵɵtemplate(6, Dropdown_ng_container_6_Template, 3, 2, "ng-container", 17)(7, Dropdown_span_7_Template, 2, 1, "span", 19);
+        ɵɵtemplate(2, Dropdown_span_2_Template, 6, 20, "span", 16)(3, Dropdown_input_3_Template, 2, 8, "input", 17)(4, Dropdown_ng_container_4_Template, 3, 2, "ng-container", 18);
+        ɵɵelementStart(5, "div", 19);
+        ɵɵlistener("mousedown", function Dropdown_Template_div_mousedown_5_listener($event) {
+          ɵɵrestoreView(_r1);
+          return ɵɵresetView(ctx.onMouseDown($event));
+        });
+        ɵɵtemplate(6, Dropdown_ng_container_6_Template, 3, 2, "ng-container", 20)(7, Dropdown_ng_template_7_Template, 2, 2, "ng-template", null, 1, ɵɵtemplateRefExtractor);
         ɵɵelementEnd();
-        ɵɵelementStart(8, "p-overlay", 20, 1);
-        ɵɵtwoWayListener("visibleChange", function Dropdown_Template_p_overlay_visibleChange_8_listener($event) {
+        ɵɵelementStart(9, "p-overlay", 21, 2);
+        ɵɵtwoWayListener("visibleChange", function Dropdown_Template_p_overlay_visibleChange_9_listener($event) {
           ɵɵrestoreView(_r1);
           ɵɵtwoWayBindingSet(ctx.overlayVisible, $event) || (ctx.overlayVisible = $event);
           return ɵɵresetView($event);
         });
-        ɵɵlistener("onAnimationStart", function Dropdown_Template_p_overlay_onAnimationStart_8_listener($event) {
+        ɵɵlistener("onAnimationStart", function Dropdown_Template_p_overlay_onAnimationStart_9_listener($event) {
           ɵɵrestoreView(_r1);
           return ɵɵresetView(ctx.onOverlayAnimationStart($event));
-        })("onHide", function Dropdown_Template_p_overlay_onHide_8_listener() {
+        })("onHide", function Dropdown_Template_p_overlay_onHide_9_listener() {
           ɵɵrestoreView(_r1);
           return ɵɵresetView(ctx.hide());
         });
-        ɵɵtemplate(10, Dropdown_ng_template_10_Template, 13, 19, "ng-template", 21);
+        ɵɵtemplate(11, Dropdown_ng_template_11_Template, 13, 18, "ng-template", 22);
         ɵɵelementEnd()();
       }
       if (rf & 2) {
+        let tmp_10_0;
+        const elseBlock_r23 = ɵɵreference(8);
         ɵɵclassMap(ctx.styleClass);
         ɵɵproperty("ngClass", ctx.containerClass)("ngStyle", ctx.style);
         ɵɵattribute("id", ctx.id);
@@ -13639,18 +14726,16 @@ var Dropdown = class _Dropdown {
         ɵɵadvance();
         ɵɵproperty("ngIf", ctx.isVisibleClearIcon);
         ɵɵadvance();
-        ɵɵattribute("aria-expanded", ctx.overlayVisible)("data-pc-section", "trigger");
+        ɵɵattribute("aria-expanded", (tmp_10_0 = ctx.overlayVisible) !== null && tmp_10_0 !== void 0 ? tmp_10_0 : false)("data-pc-section", "trigger");
         ɵɵadvance();
-        ɵɵproperty("ngIf", !ctx.dropdownIconTemplate);
-        ɵɵadvance();
-        ɵɵproperty("ngIf", ctx.dropdownIconTemplate);
-        ɵɵadvance();
+        ɵɵproperty("ngIf", ctx.loading)("ngIfElse", elseBlock_r23);
+        ɵɵadvance(3);
         ɵɵtwoWayProperty("visible", ctx.overlayVisible);
         ɵɵproperty("options", ctx.overlayOptions)("target", "@parent")("appendTo", ctx.appendTo)("autoZIndex", ctx.autoZIndex)("baseZIndex", ctx.baseZIndex)("showTransitionOptions", ctx.showTransitionOptions)("hideTransitionOptions", ctx.hideTransitionOptions);
       }
     },
     dependencies: () => [NgClass, NgForOf, NgIf, NgTemplateOutlet, NgStyle, Overlay, PrimeTemplate, Tooltip, Scroller, AutoFocus, TimesIcon, ChevronDownIcon, SearchIcon, DropdownItem],
-    styles: ["@layer primeng{.p-dropdown{display:inline-flex;cursor:pointer;position:relative;-webkit-user-select:none;user-select:none}.p-dropdown-clear-icon{position:absolute;top:50%;margin-top:-.5rem}.p-dropdown-trigger{display:flex;align-items:center;justify-content:center;flex-shrink:0}.p-dropdown-label{display:block;white-space:nowrap;overflow:hidden;flex:1 1 auto;width:1%;text-overflow:ellipsis;cursor:pointer}.p-dropdown-label-empty{overflow:hidden;opacity:0}input.p-dropdown-label{cursor:default}.p-dropdown .p-dropdown-panel{min-width:100%}.p-dropdown-items-wrapper{overflow:auto}.p-dropdown-item{cursor:pointer;font-weight:400;white-space:nowrap;position:relative;overflow:hidden}.p-dropdown-item-group{cursor:auto}.p-dropdown-items{margin:0;padding:0;list-style-type:none}.p-dropdown-filter{width:100%}.p-dropdown-filter-container{position:relative}.p-dropdown-filter-icon{position:absolute;top:50%;margin-top:-.5rem}.p-fluid .p-dropdown{display:flex}.p-fluid .p-dropdown .p-dropdown-label{width:1%}}\n"],
+    styles: ["@layer primeng{.p-dropdown{display:inline-flex;cursor:pointer;position:relative;-webkit-user-select:none;user-select:none}.p-dropdown-clear-icon{position:absolute;top:50%;margin-top:-.5rem}.p-dropdown-trigger{display:flex;align-items:center;justify-content:center;flex-shrink:0}.p-dropdown-label{display:block;white-space:nowrap;overflow:hidden;flex:1 1 auto;width:1%;text-overflow:ellipsis;cursor:pointer}.p-dropdown-label-empty{overflow:hidden;opacity:0}input.p-dropdown-label{cursor:default}.p-dropdown .p-dropdown-panel{min-width:100%}.p-dropdown-items-wrapper{overflow:auto}.p-dropdown-item{cursor:pointer;font-weight:400;white-space:nowrap;position:relative;overflow:hidden}.p-dropdown-item-group{cursor:auto}.p-dropdown-items{margin:0;padding:0;list-style-type:none}.p-dropdown-filter{width:100%}.p-dropdown-filter-container{position:relative}.p-dropdown-filter-icon{position:absolute;top:50%;margin-top:-.5rem}.p-fluid .p-dropdown{display:flex}.p-fluid .p-dropdown .p-dropdown-label{width:1%}.p-float-label .p-dropdown .p-placeholder{opacity:0}}\n"],
     encapsulation: 2,
     changeDetection: 0
   });
@@ -13676,8 +14761,8 @@ var Dropdown = class _Dropdown {
                 [attr.aria-label]="ariaLabel || (label() === 'p-emptylabel' ? undefined : label())"
                 [attr.aria-labelledby]="ariaLabelledBy"
                 [attr.aria-haspopup]="'listbox'"
-                [attr.aria-expanded]="overlayVisible"
-                [attr.aria-controls]="id + '_list'"
+                [attr.aria-expanded]="overlayVisible ?? false"
+                [attr.aria-controls]="overlayVisible ? id + '_list' : null"
                 [attr.tabindex]="!disabled ? tabindex : -1"
                 pAutoFocus
                 [autofocus]="autofocus"
@@ -13685,25 +14770,31 @@ var Dropdown = class _Dropdown {
                 (focus)="onInputFocus($event)"
                 (blur)="onInputBlur($event)"
                 (keydown)="onKeyDown($event)"
+                [attr.aria-required]="required"
+                [attr.required]="required"
             >
                 <ng-container *ngIf="!selectedItemTemplate; else defaultPlaceholder">{{ label() === 'p-emptylabel' ? '&nbsp;' : label() }}</ng-container>
-                <ng-container *ngTemplateOutlet="selectedItemTemplate; context: { $implicit: selectedOption }"></ng-container>
+                <ng-container *ngIf="selectedItemTemplate && !isSelectedOptionEmpty()" [ngTemplateOutlet]="selectedItemTemplate" [ngTemplateOutletContext]="{ $implicit: selectedOption }"></ng-container>
                 <ng-template #defaultPlaceholder>
-                    <span *ngIf="!modelValue() && (label() === placeholder || (label() && !placeholder))">{{ label() === 'p-emptylabel' ? '&nbsp;' : placeholder }}</span>
+                    <span *ngIf="isSelectedOptionEmpty()">{{ label() === 'p-emptylabel' ? '&nbsp;' : label() }}</span>
                 </ng-template>
             </span>
             <input
                 *ngIf="editable"
                 #editableInput
                 type="text"
+                [attr.id]="inputId"
                 [attr.maxlength]="maxlength"
                 [ngClass]="inputClass"
                 [disabled]="disabled"
                 aria-haspopup="listbox"
-                [attr.placeholder]="placeholder"
-                [attr.aria-expanded]="overlayVisible"
+                [attr.placeholder]="modelValue() === undefined || modelValue() === null ? placeholder() : undefined"
+                [attr.aria-label]="ariaLabel || (label() === 'p-emptylabel' ? undefined : label())"
                 (input)="onEditableInput($event)"
                 (keydown)="onKeyDown($event)"
+                pAutoFocus
+                [autofocus]="autofocus"
+                [attr.aria-activedescendant]="focused ? focusedOptionId : undefined"
                 (focus)="onInputFocus($event)"
                 (blur)="onInputBlur($event)"
             />
@@ -13714,14 +14805,26 @@ var Dropdown = class _Dropdown {
                 </span>
             </ng-container>
 
-            <div class="p-dropdown-trigger" role="button" aria-label="dropdown trigger" aria-haspopup="listbox" [attr.aria-expanded]="overlayVisible" [attr.data-pc-section]="'trigger'">
-                <ng-container *ngIf="!dropdownIconTemplate">
-                    <span class="p-dropdown-trigger-icon" *ngIf="dropdownIcon" [ngClass]="dropdownIcon"></span>
-                    <ChevronDownIcon *ngIf="!dropdownIcon" [styleClass]="'p-dropdown-trigger-icon'" />
+            <div class="p-dropdown-trigger" role="button" aria-label="dropdown trigger" (mousedown)="onMouseDown($event)" aria-haspopup="listbox" [attr.aria-expanded]="overlayVisible ?? false" [attr.data-pc-section]="'trigger'">
+                <ng-container *ngIf="loading; else elseBlock">
+                    <ng-container *ngIf="loadingIconTemplate">
+                        <ng-container *ngTemplateOutlet="loadingIconTemplate"></ng-container>
+                    </ng-container>
+                    <ng-container *ngIf="!loadingIconTemplate">
+                        <span *ngIf="loadingIcon" [ngClass]="'p-dropdown-trigger-icon pi-spin ' + loadingIcon" aria-hidden="true"></span>
+                        <span *ngIf="!loadingIcon" [class]="'p-dropdown-trigger-icon pi pi-spinner pi-spin'" aria-hidden="true"></span>
+                    </ng-container>
                 </ng-container>
-                <span *ngIf="dropdownIconTemplate" class="p-dropdown-trigger-icon">
-                    <ng-template *ngTemplateOutlet="dropdownIconTemplate"></ng-template>
-                </span>
+
+                <ng-template #elseBlock>
+                    <ng-container *ngIf="!dropdownIconTemplate">
+                        <span class="p-dropdown-trigger-icon" *ngIf="dropdownIcon" [ngClass]="dropdownIcon"></span>
+                        <ChevronDownIcon *ngIf="!dropdownIcon" [styleClass]="'p-dropdown-trigger-icon'" />
+                    </ng-container>
+                    <span *ngIf="dropdownIconTemplate" class="p-dropdown-trigger-icon">
+                        <ng-template *ngTemplateOutlet="dropdownIconTemplate"></ng-template>
+                    </span>
+                </ng-template>
             </div>
 
             <p-overlay
@@ -13742,7 +14845,6 @@ var Dropdown = class _Dropdown {
                         <span
                             #firstHiddenFocusableEl
                             role="presentation"
-                            [attr.aria-hidden]="true"
                             class="p-hidden-accessible p-hidden-focusable"
                             [attr.tabindex]="0"
                             (focus)="onFirstHiddenFocus($event)"
@@ -13760,9 +14862,11 @@ var Dropdown = class _Dropdown {
                                     <input
                                         #filter
                                         type="text"
+                                        role="searchbox"
                                         autocomplete="off"
                                         [value]="_filterValue() || ''"
                                         class="p-dropdown-filter p-inputtext p-component"
+                                        [ngClass]="{ 'p-variant-filled': variant === 'filled' || config.inputStyle() === 'filled' }"
                                         [attr.placeholder]="filterPlaceholder"
                                         [attr.aria-owns]="id + '_list'"
                                         (input)="onFilterInputChange($event)"
@@ -13778,7 +14882,13 @@ var Dropdown = class _Dropdown {
                                 </div>
                             </ng-template>
                         </div>
-                        <div class="p-dropdown-items-wrapper" [style.max-height]="virtualScroll ? 'auto' : scrollHeight || 'auto'">
+                        <div
+                            class="p-dropdown-items-wrapper"
+                            [ngStyle]="{
+                                'max-height': virtualScroll ? 'auto' : scrollHeight || 'auto'
+                            }"
+                            tabindex="0"
+                        >
                             <p-scroller
                                 *ngIf="virtualScroll"
                                 #scroller
@@ -13804,18 +14914,19 @@ var Dropdown = class _Dropdown {
                             </ng-container>
 
                             <ng-template #buildInItems let-items let-scrollerOptions="options">
-                                <ul #items [attr.id]="id + '_list'" class="p-dropdown-items" [ngClass]="scrollerOptions.contentStyleClass" [style]="scrollerOptions.contentStyle" role="listbox">
+                                <ul #items [attr.id]="id + '_list'" [attr.aria-label]="listLabel" class="p-dropdown-items" [ngClass]="scrollerOptions.contentStyleClass" [ngStyle]="scrollerOptions.contentStyle" role="listbox">
                                     <ng-template ngFor let-option [ngForOf]="items" let-i="index">
-                                        <ng-container *ngIf="option.group">
+                                        <ng-container *ngIf="isOptionGroup(option)">
                                             <li class="p-dropdown-item-group" [attr.id]="id + '_' + getOptionIndex(i, scrollerOptions)" [ngStyle]="{ height: scrollerOptions.itemSize + 'px' }" role="option">
                                                 <span *ngIf="!groupTemplate">{{ getOptionGroupLabel(option.optionGroup) }}</span>
                                                 <ng-container *ngTemplateOutlet="groupTemplate; context: { $implicit: option.optionGroup }"></ng-container>
                                             </li>
                                         </ng-container>
-                                        <ng-container *ngIf="!option.group">
+                                        <ng-container *ngIf="!isOptionGroup(option)">
                                             <p-dropdownItem
                                                 [id]="id + '_' + getOptionIndex(i, scrollerOptions)"
                                                 [option]="option"
+                                                [checkmark]="checkmark"
                                                 [selected]="isSelected(option)"
                                                 [label]="getOptionLabel(option)"
                                                 [disabled]="isOptionDisabled(option)"
@@ -13828,14 +14939,13 @@ var Dropdown = class _Dropdown {
                                             ></p-dropdownItem>
                                         </ng-container>
                                     </ng-template>
-
-                                    <li *ngIf="filterValue && isEmpty()" class="p-dropdown-empty-message" [ngStyle]="{ height: scrollerOptions.itemSize + 'px' }">
+                                    <li *ngIf="filterValue && isEmpty()" class="p-dropdown-empty-message" [ngStyle]="{ height: scrollerOptions.itemSize + 'px' }" role="option">
                                         <ng-container *ngIf="!emptyFilterTemplate && !emptyTemplate; else emptyFilter">
                                             {{ emptyFilterMessageLabel }}
                                         </ng-container>
                                         <ng-container #emptyFilter *ngTemplateOutlet="emptyFilterTemplate || emptyTemplate"></ng-container>
                                     </li>
-                                    <li *ngIf="!filterValue && isEmpty()" class="p-dropdown-empty-message" [ngStyle]="{ height: scrollerOptions.itemSize + 'px' }">
+                                    <li *ngIf="!filterValue && isEmpty()" class="p-dropdown-empty-message" [ngStyle]="{ height: scrollerOptions.itemSize + 'px' }" role="option">
                                         <ng-container *ngIf="!emptyTemplate; else empty">
                                             {{ emptyMessageLabel }}
                                         </ng-container>
@@ -13848,7 +14958,6 @@ var Dropdown = class _Dropdown {
                         <span
                             #lastHiddenFocusableEl
                             role="presentation"
-                            [attr.aria-hidden]="true"
                             class="p-hidden-accessible p-hidden-focusable"
                             [attr.tabindex]="0"
                             (focus)="onLastHiddenFocus($event)"
@@ -13862,13 +14971,13 @@ var Dropdown = class _Dropdown {
     `,
       host: {
         class: "p-element p-inputwrapper",
-        "[class.p-inputwrapper-filled]": "filled",
+        "[class.p-inputwrapper-filled]": "filled()",
         "[class.p-inputwrapper-focus]": "focused || overlayVisible"
       },
       providers: [DROPDOWN_VALUE_ACCESSOR],
       changeDetection: ChangeDetectionStrategy.OnPush,
       encapsulation: ViewEncapsulation$1.None,
-      styles: ["@layer primeng{.p-dropdown{display:inline-flex;cursor:pointer;position:relative;-webkit-user-select:none;user-select:none}.p-dropdown-clear-icon{position:absolute;top:50%;margin-top:-.5rem}.p-dropdown-trigger{display:flex;align-items:center;justify-content:center;flex-shrink:0}.p-dropdown-label{display:block;white-space:nowrap;overflow:hidden;flex:1 1 auto;width:1%;text-overflow:ellipsis;cursor:pointer}.p-dropdown-label-empty{overflow:hidden;opacity:0}input.p-dropdown-label{cursor:default}.p-dropdown .p-dropdown-panel{min-width:100%}.p-dropdown-items-wrapper{overflow:auto}.p-dropdown-item{cursor:pointer;font-weight:400;white-space:nowrap;position:relative;overflow:hidden}.p-dropdown-item-group{cursor:auto}.p-dropdown-items{margin:0;padding:0;list-style-type:none}.p-dropdown-filter{width:100%}.p-dropdown-filter-container{position:relative}.p-dropdown-filter-icon{position:absolute;top:50%;margin-top:-.5rem}.p-fluid .p-dropdown{display:flex}.p-fluid .p-dropdown .p-dropdown-label{width:1%}}\n"]
+      styles: ["@layer primeng{.p-dropdown{display:inline-flex;cursor:pointer;position:relative;-webkit-user-select:none;user-select:none}.p-dropdown-clear-icon{position:absolute;top:50%;margin-top:-.5rem}.p-dropdown-trigger{display:flex;align-items:center;justify-content:center;flex-shrink:0}.p-dropdown-label{display:block;white-space:nowrap;overflow:hidden;flex:1 1 auto;width:1%;text-overflow:ellipsis;cursor:pointer}.p-dropdown-label-empty{overflow:hidden;opacity:0}input.p-dropdown-label{cursor:default}.p-dropdown .p-dropdown-panel{min-width:100%}.p-dropdown-items-wrapper{overflow:auto}.p-dropdown-item{cursor:pointer;font-weight:400;white-space:nowrap;position:relative;overflow:hidden}.p-dropdown-item-group{cursor:auto}.p-dropdown-items{margin:0;padding:0;list-style-type:none}.p-dropdown-filter{width:100%}.p-dropdown-filter-container{position:relative}.p-dropdown-filter-icon{position:absolute;top:50%;margin-top:-.5rem}.p-fluid .p-dropdown{display:flex}.p-fluid .p-dropdown .p-dropdown-label{width:1%}.p-float-label .p-dropdown .p-placeholder{opacity:0}}\n"]
     }]
   }], () => [{
     type: ElementRef
@@ -13890,7 +14999,10 @@ var Dropdown = class _Dropdown {
       type: Input
     }],
     filter: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     name: [{
       type: Input
@@ -13908,27 +15020,45 @@ var Dropdown = class _Dropdown {
       type: Input
     }],
     readonly: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     required: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     editable: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     appendTo: [{
       type: Input
     }],
     tabindex: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     placeholder: [{
+      type: Input
+    }],
+    loadingIcon: [{
       type: Input
     }],
     filterPlaceholder: [{
       type: Input
     }],
     filterLocale: [{
+      type: Input
+    }],
+    variant: [{
       type: Input
     }],
     inputId: [{
@@ -13944,13 +15074,31 @@ var Dropdown = class _Dropdown {
       type: Input
     }],
     autofocus: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     resetFilterOnHide: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
+    }],
+    checkmark: [{
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     dropdownIcon: [{
       type: Input
+    }],
+    loading: [{
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     optionLabel: [{
       type: Input
@@ -13968,13 +15116,22 @@ var Dropdown = class _Dropdown {
       type: Input
     }],
     autoDisplayFirst: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     group: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     showClear: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     emptyFilterMessage: [{
       type: Input
@@ -13983,13 +15140,22 @@ var Dropdown = class _Dropdown {
       type: Input
     }],
     lazy: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     virtualScroll: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     virtualScrollItemSize: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     virtualScrollOptions: [{
       type: Input
@@ -14010,7 +15176,10 @@ var Dropdown = class _Dropdown {
       type: Input
     }],
     maxlength: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     tooltip: [{
       type: Input
@@ -14025,16 +15194,34 @@ var Dropdown = class _Dropdown {
       type: Input
     }],
     focusOnHover: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     selectOnFocus: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     autoOptionFocus: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     autofocusFilter: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
+    }],
+    autoShowPanelOnPrintableCharacterKeyDown: [{
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     disabled: [{
       type: Input
@@ -14136,20 +15323,646 @@ var DropdownModule = class _DropdownModule {
   static ɵmod = ɵɵdefineNgModule({
     type: _DropdownModule,
     declarations: [Dropdown, DropdownItem],
-    imports: [CommonModule, OverlayModule, SharedModule, TooltipModule, RippleModule, ScrollerModule, AutoFocusModule, TimesIcon, ChevronDownIcon, SearchIcon],
+    imports: [CommonModule, OverlayModule, SharedModule, TooltipModule, RippleModule, ScrollerModule, AutoFocusModule, TimesIcon, ChevronDownIcon, SearchIcon, BlankIcon, CheckIcon],
     exports: [Dropdown, OverlayModule, SharedModule, ScrollerModule]
   });
   static ɵinj = ɵɵdefineInjector({
-    imports: [CommonModule, OverlayModule, SharedModule, TooltipModule, RippleModule, ScrollerModule, AutoFocusModule, TimesIcon, ChevronDownIcon, SearchIcon, OverlayModule, SharedModule, ScrollerModule]
+    imports: [CommonModule, OverlayModule, SharedModule, TooltipModule, RippleModule, ScrollerModule, AutoFocusModule, TimesIcon, ChevronDownIcon, SearchIcon, BlankIcon, CheckIcon, OverlayModule, SharedModule, ScrollerModule]
   });
 };
 (() => {
   (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(DropdownModule, [{
     type: NgModule,
     args: [{
-      imports: [CommonModule, OverlayModule, SharedModule, TooltipModule, RippleModule, ScrollerModule, AutoFocusModule, TimesIcon, ChevronDownIcon, SearchIcon],
+      imports: [CommonModule, OverlayModule, SharedModule, TooltipModule, RippleModule, ScrollerModule, AutoFocusModule, TimesIcon, ChevronDownIcon, SearchIcon, BlankIcon, CheckIcon],
       exports: [Dropdown, OverlayModule, SharedModule, ScrollerModule],
       declarations: [Dropdown, DropdownItem]
+    }]
+  }], null, null);
+})();
+
+// node_modules/primeng/fesm2022/primeng-icons-arrowdown.mjs
+var ArrowDownIcon = class _ArrowDownIcon extends BaseIcon {
+  pathId;
+  ngOnInit() {
+    this.pathId = "url(#" + UniqueComponentId() + ")";
+  }
+  static ɵfac = /* @__PURE__ */ (() => {
+    let ɵArrowDownIcon_BaseFactory;
+    return function ArrowDownIcon_Factory(t) {
+      return (ɵArrowDownIcon_BaseFactory || (ɵArrowDownIcon_BaseFactory = ɵɵgetInheritedFactory(_ArrowDownIcon)))(t || _ArrowDownIcon);
+    };
+  })();
+  static ɵcmp = ɵɵdefineComponent({
+    type: _ArrowDownIcon,
+    selectors: [["ArrowDownIcon"]],
+    standalone: true,
+    features: [ɵɵInheritDefinitionFeature, ɵɵStandaloneFeature],
+    decls: 6,
+    vars: 7,
+    consts: [["width", "14", "height", "14", "viewBox", "0 0 14 14", "fill", "none", "xmlns", "http://www.w3.org/2000/svg"], ["fill-rule", "evenodd", "clip-rule", "evenodd", "d", "M6.99994 14C6.91097 14.0004 6.82281 13.983 6.74064 13.9489C6.65843 13.9148 6.58387 13.8646 6.52133 13.8013L1.10198 8.38193C0.982318 8.25351 0.917175 8.08367 0.920272 7.90817C0.923368 7.73267 0.994462 7.56523 1.11858 7.44111C1.24269 7.317 1.41014 7.2459 1.58563 7.2428C1.76113 7.23971 1.93098 7.30485 2.0594 7.42451L6.32263 11.6877V0.677419C6.32263 0.497756 6.394 0.325452 6.52104 0.198411C6.64808 0.0713706 6.82039 0 7.00005 0C7.17971 0 7.35202 0.0713706 7.47906 0.198411C7.6061 0.325452 7.67747 0.497756 7.67747 0.677419V11.6877L11.9407 7.42451C12.0691 7.30485 12.2389 7.23971 12.4144 7.2428C12.5899 7.2459 12.7574 7.317 12.8815 7.44111C13.0056 7.56523 13.0767 7.73267 13.0798 7.90817C13.0829 8.08367 13.0178 8.25351 12.8981 8.38193L7.47875 13.8013C7.41621 13.8646 7.34164 13.9148 7.25944 13.9489C7.17727 13.983 7.08912 14.0004 7.00015 14C7.00012 14 7.00009 14 7.00005 14C7.00001 14 6.99998 14 6.99994 14Z", "fill", "currentColor"], [3, "id"], ["width", "14", "height", "14", "fill", "white"]],
+    template: function ArrowDownIcon_Template(rf, ctx) {
+      if (rf & 1) {
+        ɵɵnamespaceSVG();
+        ɵɵelementStart(0, "svg", 0)(1, "g");
+        ɵɵelement(2, "path", 1);
+        ɵɵelementEnd();
+        ɵɵelementStart(3, "defs")(4, "clipPath", 2);
+        ɵɵelement(5, "rect", 3);
+        ɵɵelementEnd()()();
+      }
+      if (rf & 2) {
+        ɵɵclassMap(ctx.getClassNames());
+        ɵɵattribute("aria-label", ctx.ariaLabel)("aria-hidden", ctx.ariaHidden)("role", ctx.role);
+        ɵɵadvance();
+        ɵɵattribute("clip-path", ctx.pathId);
+        ɵɵadvance(3);
+        ɵɵproperty("id", ctx.pathId);
+      }
+    },
+    encapsulation: 2
+  });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ArrowDownIcon, [{
+    type: Component,
+    args: [{
+      selector: "ArrowDownIcon",
+      standalone: true,
+      imports: [BaseIcon],
+      template: `
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" [attr.aria-label]="ariaLabel" [attr.aria-hidden]="ariaHidden" [attr.role]="role" [class]="getClassNames()">
+            <g [attr.clip-path]="pathId">
+                <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M6.99994 14C6.91097 14.0004 6.82281 13.983 6.74064 13.9489C6.65843 13.9148 6.58387 13.8646 6.52133 13.8013L1.10198 8.38193C0.982318 8.25351 0.917175 8.08367 0.920272 7.90817C0.923368 7.73267 0.994462 7.56523 1.11858 7.44111C1.24269 7.317 1.41014 7.2459 1.58563 7.2428C1.76113 7.23971 1.93098 7.30485 2.0594 7.42451L6.32263 11.6877V0.677419C6.32263 0.497756 6.394 0.325452 6.52104 0.198411C6.64808 0.0713706 6.82039 0 7.00005 0C7.17971 0 7.35202 0.0713706 7.47906 0.198411C7.6061 0.325452 7.67747 0.497756 7.67747 0.677419V11.6877L11.9407 7.42451C12.0691 7.30485 12.2389 7.23971 12.4144 7.2428C12.5899 7.2459 12.7574 7.317 12.8815 7.44111C13.0056 7.56523 13.0767 7.73267 13.0798 7.90817C13.0829 8.08367 13.0178 8.25351 12.8981 8.38193L7.47875 13.8013C7.41621 13.8646 7.34164 13.9148 7.25944 13.9489C7.17727 13.983 7.08912 14.0004 7.00015 14C7.00012 14 7.00009 14 7.00005 14C7.00001 14 6.99998 14 6.99994 14Z"
+                    fill="currentColor"
+                />
+            </g>
+            <defs>
+                <clipPath [id]="pathId">
+                    <rect width="14" height="14" fill="white" />
+                </clipPath>
+            </defs>
+        </svg>
+    `
+    }]
+  }], null, null);
+})();
+
+// node_modules/primeng/fesm2022/primeng-icons-arrowup.mjs
+var ArrowUpIcon = class _ArrowUpIcon extends BaseIcon {
+  pathId;
+  ngOnInit() {
+    this.pathId = "url(#" + UniqueComponentId() + ")";
+  }
+  static ɵfac = /* @__PURE__ */ (() => {
+    let ɵArrowUpIcon_BaseFactory;
+    return function ArrowUpIcon_Factory(t) {
+      return (ɵArrowUpIcon_BaseFactory || (ɵArrowUpIcon_BaseFactory = ɵɵgetInheritedFactory(_ArrowUpIcon)))(t || _ArrowUpIcon);
+    };
+  })();
+  static ɵcmp = ɵɵdefineComponent({
+    type: _ArrowUpIcon,
+    selectors: [["ArrowUpIcon"]],
+    standalone: true,
+    features: [ɵɵInheritDefinitionFeature, ɵɵStandaloneFeature],
+    decls: 6,
+    vars: 7,
+    consts: [["width", "14", "height", "14", "viewBox", "0 0 14 14", "fill", "none", "xmlns", "http://www.w3.org/2000/svg"], ["fill-rule", "evenodd", "clip-rule", "evenodd", "d", "M6.51551 13.799C6.64205 13.9255 6.813 13.9977 6.99193 14C7.17087 13.9977 7.34182 13.9255 7.46835 13.799C7.59489 13.6725 7.66701 13.5015 7.66935 13.3226V2.31233L11.9326 6.57554C11.9951 6.63887 12.0697 6.68907 12.1519 6.72319C12.2341 6.75731 12.3223 6.77467 12.4113 6.77425C12.5003 6.77467 12.5885 6.75731 12.6707 6.72319C12.7529 6.68907 12.8274 6.63887 12.89 6.57554C13.0168 6.44853 13.0881 6.27635 13.0881 6.09683C13.0881 5.91732 13.0168 5.74514 12.89 5.61812L7.48846 0.216594C7.48274 0.210436 7.4769 0.204374 7.47094 0.198411C7.3439 0.0713707 7.1716 0 6.99193 0C6.81227 0 6.63997 0.0713707 6.51293 0.198411C6.50704 0.204296 6.50128 0.210278 6.49563 0.216354L1.09386 5.61812C0.974201 5.74654 0.909057 5.91639 0.912154 6.09189C0.91525 6.26738 0.986345 6.43483 1.11046 6.55894C1.23457 6.68306 1.40202 6.75415 1.57752 6.75725C1.75302 6.76035 1.92286 6.6952 2.05128 6.57554L6.31451 2.31231V13.3226C6.31685 13.5015 6.38898 13.6725 6.51551 13.799Z", "fill", "currentColor"], [3, "id"], ["width", "14", "height", "14", "fill", "white"]],
+    template: function ArrowUpIcon_Template(rf, ctx) {
+      if (rf & 1) {
+        ɵɵnamespaceSVG();
+        ɵɵelementStart(0, "svg", 0)(1, "g");
+        ɵɵelement(2, "path", 1);
+        ɵɵelementEnd();
+        ɵɵelementStart(3, "defs")(4, "clipPath", 2);
+        ɵɵelement(5, "rect", 3);
+        ɵɵelementEnd()()();
+      }
+      if (rf & 2) {
+        ɵɵclassMap(ctx.getClassNames());
+        ɵɵattribute("aria-label", ctx.ariaLabel)("aria-hidden", ctx.ariaHidden)("role", ctx.role);
+        ɵɵadvance();
+        ɵɵattribute("clip-path", ctx.pathId);
+        ɵɵadvance(3);
+        ɵɵproperty("id", ctx.pathId);
+      }
+    },
+    encapsulation: 2
+  });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ArrowUpIcon, [{
+    type: Component,
+    args: [{
+      selector: "ArrowUpIcon",
+      standalone: true,
+      imports: [BaseIcon],
+      template: `
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" [attr.aria-label]="ariaLabel" [attr.aria-hidden]="ariaHidden" [attr.role]="role" [class]="getClassNames()">
+            <g [attr.clip-path]="pathId">
+                <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M6.51551 13.799C6.64205 13.9255 6.813 13.9977 6.99193 14C7.17087 13.9977 7.34182 13.9255 7.46835 13.799C7.59489 13.6725 7.66701 13.5015 7.66935 13.3226V2.31233L11.9326 6.57554C11.9951 6.63887 12.0697 6.68907 12.1519 6.72319C12.2341 6.75731 12.3223 6.77467 12.4113 6.77425C12.5003 6.77467 12.5885 6.75731 12.6707 6.72319C12.7529 6.68907 12.8274 6.63887 12.89 6.57554C13.0168 6.44853 13.0881 6.27635 13.0881 6.09683C13.0881 5.91732 13.0168 5.74514 12.89 5.61812L7.48846 0.216594C7.48274 0.210436 7.4769 0.204374 7.47094 0.198411C7.3439 0.0713707 7.1716 0 6.99193 0C6.81227 0 6.63997 0.0713707 6.51293 0.198411C6.50704 0.204296 6.50128 0.210278 6.49563 0.216354L1.09386 5.61812C0.974201 5.74654 0.909057 5.91639 0.912154 6.09189C0.91525 6.26738 0.986345 6.43483 1.11046 6.55894C1.23457 6.68306 1.40202 6.75415 1.57752 6.75725C1.75302 6.76035 1.92286 6.6952 2.05128 6.57554L6.31451 2.31231V13.3226C6.31685 13.5015 6.38898 13.6725 6.51551 13.799Z"
+                    fill="currentColor"
+                />
+            </g>
+            <defs>
+                <clipPath [id]="pathId">
+                    <rect width="14" height="14" fill="white" />
+                </clipPath>
+            </defs>
+        </svg>
+    `
+    }]
+  }], null, null);
+})();
+
+// node_modules/primeng/fesm2022/primeng-icons-filter.mjs
+var FilterIcon = class _FilterIcon extends BaseIcon {
+  pathId;
+  ngOnInit() {
+    this.pathId = "url(#" + UniqueComponentId() + ")";
+  }
+  static ɵfac = /* @__PURE__ */ (() => {
+    let ɵFilterIcon_BaseFactory;
+    return function FilterIcon_Factory(t) {
+      return (ɵFilterIcon_BaseFactory || (ɵFilterIcon_BaseFactory = ɵɵgetInheritedFactory(_FilterIcon)))(t || _FilterIcon);
+    };
+  })();
+  static ɵcmp = ɵɵdefineComponent({
+    type: _FilterIcon,
+    selectors: [["FilterIcon"]],
+    standalone: true,
+    features: [ɵɵInheritDefinitionFeature, ɵɵStandaloneFeature],
+    decls: 6,
+    vars: 7,
+    consts: [["width", "14", "height", "14", "viewBox", "0 0 14 14", "fill", "none", "xmlns", "http://www.w3.org/2000/svg"], ["d", "M8.64708 14H5.35296C5.18981 13.9979 5.03395 13.9321 4.91858 13.8167C4.8032 13.7014 4.73745 13.5455 4.73531 13.3824V7L0.329431 0.98C0.259794 0.889466 0.217389 0.780968 0.20718 0.667208C0.19697 0.553448 0.219379 0.439133 0.271783 0.337647C0.324282 0.236453 0.403423 0.151519 0.500663 0.0920138C0.597903 0.0325088 0.709548 0.000692754 0.823548 0H13.1765C13.2905 0.000692754 13.4021 0.0325088 13.4994 0.0920138C13.5966 0.151519 13.6758 0.236453 13.7283 0.337647C13.7807 0.439133 13.8031 0.553448 13.7929 0.667208C13.7826 0.780968 13.7402 0.889466 13.6706 0.98L9.26472 7V13.3824C9.26259 13.5455 9.19683 13.7014 9.08146 13.8167C8.96609 13.9321 8.81022 13.9979 8.64708 14ZM5.97061 12.7647H8.02943V6.79412C8.02878 6.66289 8.07229 6.53527 8.15296 6.43177L11.9412 1.23529H2.05884L5.86355 6.43177C5.94422 6.53527 5.98773 6.66289 5.98708 6.79412L5.97061 12.7647Z", "fill", "currentColor"], [3, "id"], ["width", "14", "height", "14", "fill", "white"]],
+    template: function FilterIcon_Template(rf, ctx) {
+      if (rf & 1) {
+        ɵɵnamespaceSVG();
+        ɵɵelementStart(0, "svg", 0)(1, "g");
+        ɵɵelement(2, "path", 1);
+        ɵɵelementEnd();
+        ɵɵelementStart(3, "defs")(4, "clipPath", 2);
+        ɵɵelement(5, "rect", 3);
+        ɵɵelementEnd()()();
+      }
+      if (rf & 2) {
+        ɵɵclassMap(ctx.getClassNames());
+        ɵɵattribute("aria-label", ctx.ariaLabel)("aria-hidden", ctx.ariaHidden)("role", ctx.role);
+        ɵɵadvance();
+        ɵɵattribute("clip-path", ctx.pathId);
+        ɵɵadvance(3);
+        ɵɵproperty("id", ctx.pathId);
+      }
+    },
+    encapsulation: 2
+  });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(FilterIcon, [{
+    type: Component,
+    args: [{
+      selector: "FilterIcon",
+      standalone: true,
+      imports: [BaseIcon],
+      template: `
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" [attr.aria-label]="ariaLabel" [attr.aria-hidden]="ariaHidden" [attr.role]="role" [class]="getClassNames()">
+            <g [attr.clip-path]="pathId">
+                <path
+                    d="M8.64708 14H5.35296C5.18981 13.9979 5.03395 13.9321 4.91858 13.8167C4.8032 13.7014 4.73745 13.5455 4.73531 13.3824V7L0.329431 0.98C0.259794 0.889466 0.217389 0.780968 0.20718 0.667208C0.19697 0.553448 0.219379 0.439133 0.271783 0.337647C0.324282 0.236453 0.403423 0.151519 0.500663 0.0920138C0.597903 0.0325088 0.709548 0.000692754 0.823548 0H13.1765C13.2905 0.000692754 13.4021 0.0325088 13.4994 0.0920138C13.5966 0.151519 13.6758 0.236453 13.7283 0.337647C13.7807 0.439133 13.8031 0.553448 13.7929 0.667208C13.7826 0.780968 13.7402 0.889466 13.6706 0.98L9.26472 7V13.3824C9.26259 13.5455 9.19683 13.7014 9.08146 13.8167C8.96609 13.9321 8.81022 13.9979 8.64708 14ZM5.97061 12.7647H8.02943V6.79412C8.02878 6.66289 8.07229 6.53527 8.15296 6.43177L11.9412 1.23529H2.05884L5.86355 6.43177C5.94422 6.53527 5.98773 6.66289 5.98708 6.79412L5.97061 12.7647Z"
+                    fill="currentColor"
+                />
+            </g>
+            <defs>
+                <clipPath [id]="pathId">
+                    <rect width="14" height="14" fill="white" />
+                </clipPath>
+            </defs>
+        </svg>
+    `
+    }]
+  }], null, null);
+})();
+
+// node_modules/primeng/fesm2022/primeng-icons-filterslash.mjs
+var FilterSlashIcon = class _FilterSlashIcon extends BaseIcon {
+  pathId;
+  ngOnInit() {
+    this.pathId = "url(#" + UniqueComponentId() + ")";
+  }
+  static ɵfac = /* @__PURE__ */ (() => {
+    let ɵFilterSlashIcon_BaseFactory;
+    return function FilterSlashIcon_Factory(t) {
+      return (ɵFilterSlashIcon_BaseFactory || (ɵFilterSlashIcon_BaseFactory = ɵɵgetInheritedFactory(_FilterSlashIcon)))(t || _FilterSlashIcon);
+    };
+  })();
+  static ɵcmp = ɵɵdefineComponent({
+    type: _FilterSlashIcon,
+    selectors: [["FilterSlashIcon"]],
+    standalone: true,
+    features: [ɵɵInheritDefinitionFeature, ɵɵStandaloneFeature],
+    decls: 6,
+    vars: 7,
+    consts: [["width", "14", "height", "14", "viewBox", "0 0 14 14", "fill", "none", "xmlns", "http://www.w3.org/2000/svg"], ["fill-rule", "evenodd", "clip-rule", "evenodd", "d", "M13.4994 0.0920138C13.5967 0.151519 13.6758 0.236453 13.7283 0.337647C13.7807 0.439133 13.8031 0.553448 13.7929 0.667208C13.7827 0.780968 13.7403 0.889466 13.6707 0.98L11.406 4.06823C11.3099 4.19928 11.1656 4.28679 11.005 4.3115C10.8444 4.33621 10.6805 4.2961 10.5495 4.2C10.4184 4.1039 10.3309 3.95967 10.3062 3.79905C10.2815 3.63843 10.3216 3.47458 10.4177 3.34353L11.9412 1.23529H7.41184C7.24803 1.23529 7.09093 1.17022 6.97509 1.05439C6.85926 0.938558 6.79419 0.781457 6.79419 0.617647C6.79419 0.453837 6.85926 0.296736 6.97509 0.180905C7.09093 0.0650733 7.24803 0 7.41184 0H13.1765C13.2905 0.000692754 13.4022 0.0325088 13.4994 0.0920138ZM4.20008 0.181168H4.24126L13.2013 9.03411C13.3169 9.14992 13.3819 9.3069 13.3819 9.47058C13.3819 9.63426 13.3169 9.79124 13.2013 9.90705C13.1445 9.96517 13.0766 10.0112 13.0016 10.0423C12.9266 10.0735 12.846 10.0891 12.7648 10.0882C12.6836 10.0886 12.6032 10.0728 12.5283 10.0417C12.4533 10.0106 12.3853 9.96479 12.3283 9.90705L9.3142 6.92587L9.26479 6.99999V13.3823C9.26265 13.5455 9.19689 13.7014 9.08152 13.8167C8.96615 13.9321 8.81029 13.9979 8.64714 14H5.35302C5.18987 13.9979 5.03401 13.9321 4.91864 13.8167C4.80327 13.7014 4.73751 13.5455 4.73537 13.3823V6.99999L0.329492 1.02117C0.259855 0.930634 0.21745 0.822137 0.207241 0.708376C0.197031 0.594616 0.21944 0.480301 0.271844 0.378815C0.324343 0.277621 0.403484 0.192687 0.500724 0.133182C0.597964 0.073677 0.709609 0.041861 0.823609 0.0411682H3.86243C3.92448 0.0461551 3.9855 0.060022 4.04361 0.0823446C4.10037 0.10735 4.15311 0.140655 4.20008 0.181168ZM8.02949 6.79411C8.02884 6.66289 8.07235 6.53526 8.15302 6.43176L8.42478 6.05293L3.55773 1.23529H2.0589L5.84714 6.43176C5.92781 6.53526 5.97132 6.66289 5.97067 6.79411V12.7647H8.02949V6.79411Z", "fill", "currentColor"], [3, "id"], ["width", "14", "height", "14", "fill", "white"]],
+    template: function FilterSlashIcon_Template(rf, ctx) {
+      if (rf & 1) {
+        ɵɵnamespaceSVG();
+        ɵɵelementStart(0, "svg", 0)(1, "g");
+        ɵɵelement(2, "path", 1);
+        ɵɵelementEnd();
+        ɵɵelementStart(3, "defs")(4, "clipPath", 2);
+        ɵɵelement(5, "rect", 3);
+        ɵɵelementEnd()()();
+      }
+      if (rf & 2) {
+        ɵɵclassMap(ctx.getClassNames());
+        ɵɵattribute("aria-label", ctx.ariaLabel)("aria-hidden", ctx.ariaHidden)("role", ctx.role);
+        ɵɵadvance();
+        ɵɵattribute("clip-path", ctx.pathId);
+        ɵɵadvance(3);
+        ɵɵproperty("id", ctx.pathId);
+      }
+    },
+    encapsulation: 2
+  });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(FilterSlashIcon, [{
+    type: Component,
+    args: [{
+      selector: "FilterSlashIcon",
+      standalone: true,
+      imports: [BaseIcon],
+      template: `
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" [attr.aria-label]="ariaLabel" [attr.aria-hidden]="ariaHidden" [attr.role]="role" [class]="getClassNames()">
+            <g [attr.clip-path]="pathId">
+                <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M13.4994 0.0920138C13.5967 0.151519 13.6758 0.236453 13.7283 0.337647C13.7807 0.439133 13.8031 0.553448 13.7929 0.667208C13.7827 0.780968 13.7403 0.889466 13.6707 0.98L11.406 4.06823C11.3099 4.19928 11.1656 4.28679 11.005 4.3115C10.8444 4.33621 10.6805 4.2961 10.5495 4.2C10.4184 4.1039 10.3309 3.95967 10.3062 3.79905C10.2815 3.63843 10.3216 3.47458 10.4177 3.34353L11.9412 1.23529H7.41184C7.24803 1.23529 7.09093 1.17022 6.97509 1.05439C6.85926 0.938558 6.79419 0.781457 6.79419 0.617647C6.79419 0.453837 6.85926 0.296736 6.97509 0.180905C7.09093 0.0650733 7.24803 0 7.41184 0H13.1765C13.2905 0.000692754 13.4022 0.0325088 13.4994 0.0920138ZM4.20008 0.181168H4.24126L13.2013 9.03411C13.3169 9.14992 13.3819 9.3069 13.3819 9.47058C13.3819 9.63426 13.3169 9.79124 13.2013 9.90705C13.1445 9.96517 13.0766 10.0112 13.0016 10.0423C12.9266 10.0735 12.846 10.0891 12.7648 10.0882C12.6836 10.0886 12.6032 10.0728 12.5283 10.0417C12.4533 10.0106 12.3853 9.96479 12.3283 9.90705L9.3142 6.92587L9.26479 6.99999V13.3823C9.26265 13.5455 9.19689 13.7014 9.08152 13.8167C8.96615 13.9321 8.81029 13.9979 8.64714 14H5.35302C5.18987 13.9979 5.03401 13.9321 4.91864 13.8167C4.80327 13.7014 4.73751 13.5455 4.73537 13.3823V6.99999L0.329492 1.02117C0.259855 0.930634 0.21745 0.822137 0.207241 0.708376C0.197031 0.594616 0.21944 0.480301 0.271844 0.378815C0.324343 0.277621 0.403484 0.192687 0.500724 0.133182C0.597964 0.073677 0.709609 0.041861 0.823609 0.0411682H3.86243C3.92448 0.0461551 3.9855 0.060022 4.04361 0.0823446C4.10037 0.10735 4.15311 0.140655 4.20008 0.181168ZM8.02949 6.79411C8.02884 6.66289 8.07235 6.53526 8.15302 6.43176L8.42478 6.05293L3.55773 1.23529H2.0589L5.84714 6.43176C5.92781 6.53526 5.97132 6.66289 5.97067 6.79411V12.7647H8.02949V6.79411Z"
+                    fill="currentColor"
+                />
+            </g>
+            <defs>
+                <clipPath [id]="pathId">
+                    <rect width="14" height="14" fill="white" />
+                </clipPath>
+            </defs>
+        </svg>
+    `
+    }]
+  }], null, null);
+})();
+
+// node_modules/primeng/fesm2022/primeng-icons-plus.mjs
+var PlusIcon = class _PlusIcon extends BaseIcon {
+  pathId;
+  ngOnInit() {
+    this.pathId = "url(#" + UniqueComponentId() + ")";
+  }
+  static ɵfac = /* @__PURE__ */ (() => {
+    let ɵPlusIcon_BaseFactory;
+    return function PlusIcon_Factory(t) {
+      return (ɵPlusIcon_BaseFactory || (ɵPlusIcon_BaseFactory = ɵɵgetInheritedFactory(_PlusIcon)))(t || _PlusIcon);
+    };
+  })();
+  static ɵcmp = ɵɵdefineComponent({
+    type: _PlusIcon,
+    selectors: [["PlusIcon"]],
+    standalone: true,
+    features: [ɵɵInheritDefinitionFeature, ɵɵStandaloneFeature],
+    decls: 6,
+    vars: 7,
+    consts: [["width", "14", "height", "14", "viewBox", "0 0 14 14", "fill", "none", "xmlns", "http://www.w3.org/2000/svg"], ["d", "M7.67742 6.32258V0.677419C7.67742 0.497757 7.60605 0.325452 7.47901 0.198411C7.35197 0.0713707 7.17966 0 7 0C6.82034 0 6.64803 0.0713707 6.52099 0.198411C6.39395 0.325452 6.32258 0.497757 6.32258 0.677419V6.32258H0.677419C0.497757 6.32258 0.325452 6.39395 0.198411 6.52099C0.0713707 6.64803 0 6.82034 0 7C0 7.17966 0.0713707 7.35197 0.198411 7.47901C0.325452 7.60605 0.497757 7.67742 0.677419 7.67742H6.32258V13.3226C6.32492 13.5015 6.39704 13.6725 6.52358 13.799C6.65012 13.9255 6.82106 13.9977 7 14C7.17966 14 7.35197 13.9286 7.47901 13.8016C7.60605 13.6745 7.67742 13.5022 7.67742 13.3226V7.67742H13.3226C13.5022 7.67742 13.6745 7.60605 13.8016 7.47901C13.9286 7.35197 14 7.17966 14 7C13.9977 6.82106 13.9255 6.65012 13.799 6.52358C13.6725 6.39704 13.5015 6.32492 13.3226 6.32258H7.67742Z", "fill", "currentColor"], [3, "id"], ["width", "14", "height", "14", "fill", "white"]],
+    template: function PlusIcon_Template(rf, ctx) {
+      if (rf & 1) {
+        ɵɵnamespaceSVG();
+        ɵɵelementStart(0, "svg", 0)(1, "g");
+        ɵɵelement(2, "path", 1);
+        ɵɵelementEnd();
+        ɵɵelementStart(3, "defs")(4, "clipPath", 2);
+        ɵɵelement(5, "rect", 3);
+        ɵɵelementEnd()()();
+      }
+      if (rf & 2) {
+        ɵɵclassMap(ctx.getClassNames());
+        ɵɵattribute("aria-label", ctx.ariaLabel)("aria-hidden", ctx.ariaHidden)("role", ctx.role);
+        ɵɵadvance();
+        ɵɵattribute("clip-path", ctx.pathId);
+        ɵɵadvance(3);
+        ɵɵproperty("id", ctx.pathId);
+      }
+    },
+    encapsulation: 2
+  });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(PlusIcon, [{
+    type: Component,
+    args: [{
+      selector: "PlusIcon",
+      standalone: true,
+      imports: [BaseIcon],
+      template: `
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" [attr.aria-label]="ariaLabel" [attr.aria-hidden]="ariaHidden" [attr.role]="role" [class]="getClassNames()">
+            <g [attr.clip-path]="pathId">
+                <path
+                    d="M7.67742 6.32258V0.677419C7.67742 0.497757 7.60605 0.325452 7.47901 0.198411C7.35197 0.0713707 7.17966 0 7 0C6.82034 0 6.64803 0.0713707 6.52099 0.198411C6.39395 0.325452 6.32258 0.497757 6.32258 0.677419V6.32258H0.677419C0.497757 6.32258 0.325452 6.39395 0.198411 6.52099C0.0713707 6.64803 0 6.82034 0 7C0 7.17966 0.0713707 7.35197 0.198411 7.47901C0.325452 7.60605 0.497757 7.67742 0.677419 7.67742H6.32258V13.3226C6.32492 13.5015 6.39704 13.6725 6.52358 13.799C6.65012 13.9255 6.82106 13.9977 7 14C7.17966 14 7.35197 13.9286 7.47901 13.8016C7.60605 13.6745 7.67742 13.5022 7.67742 13.3226V7.67742H13.3226C13.5022 7.67742 13.6745 7.60605 13.8016 7.47901C13.9286 7.35197 14 7.17966 14 7C13.9977 6.82106 13.9255 6.65012 13.799 6.52358C13.6725 6.39704 13.5015 6.32492 13.3226 6.32258H7.67742Z"
+                    fill="currentColor"
+                />
+            </g>
+            <defs>
+                <clipPath [id]="pathId">
+                    <rect width="14" height="14" fill="white" />
+                </clipPath>
+            </defs>
+        </svg>
+    `
+    }]
+  }], null, null);
+})();
+
+// node_modules/primeng/fesm2022/primeng-icons-sortalt.mjs
+var SortAltIcon = class _SortAltIcon extends BaseIcon {
+  pathId;
+  ngOnInit() {
+    this.pathId = "url(#" + UniqueComponentId() + ")";
+  }
+  static ɵfac = /* @__PURE__ */ (() => {
+    let ɵSortAltIcon_BaseFactory;
+    return function SortAltIcon_Factory(t) {
+      return (ɵSortAltIcon_BaseFactory || (ɵSortAltIcon_BaseFactory = ɵɵgetInheritedFactory(_SortAltIcon)))(t || _SortAltIcon);
+    };
+  })();
+  static ɵcmp = ɵɵdefineComponent({
+    type: _SortAltIcon,
+    selectors: [["SortAltIcon"]],
+    standalone: true,
+    features: [ɵɵInheritDefinitionFeature, ɵɵStandaloneFeature],
+    decls: 9,
+    vars: 7,
+    consts: [["width", "14", "height", "14", "viewBox", "0 0 14 14", "fill", "none", "xmlns", "http://www.w3.org/2000/svg"], ["d", "M5.64515 3.61291C5.47353 3.61291 5.30192 3.54968 5.16644 3.4142L3.38708 1.63484L1.60773 3.4142C1.34579 3.67613 0.912244 3.67613 0.650309 3.4142C0.388374 3.15226 0.388374 2.71871 0.650309 2.45678L2.90837 0.198712C3.17031 -0.0632236 3.60386 -0.0632236 3.86579 0.198712L6.12386 2.45678C6.38579 2.71871 6.38579 3.15226 6.12386 3.4142C5.98837 3.54968 5.81676 3.61291 5.64515 3.61291Z", "fill", "currentColor"], ["d", "M3.38714 14C3.01681 14 2.70972 13.6929 2.70972 13.3226V0.677419C2.70972 0.307097 3.01681 0 3.38714 0C3.75746 0 4.06456 0.307097 4.06456 0.677419V13.3226C4.06456 13.6929 3.75746 14 3.38714 14Z", "fill", "currentColor"], ["d", "M10.6129 14C10.4413 14 10.2697 13.9368 10.1342 13.8013L7.87611 11.5432C7.61418 11.2813 7.61418 10.8477 7.87611 10.5858C8.13805 10.3239 8.5716 10.3239 8.83353 10.5858L10.6129 12.3652L12.3922 10.5858C12.6542 10.3239 13.0877 10.3239 13.3497 10.5858C13.6116 10.8477 13.6116 11.2813 13.3497 11.5432L11.0916 13.8013C10.9561 13.9368 10.7845 14 10.6129 14Z", "fill", "currentColor"], ["d", "M10.6129 14C10.2426 14 9.93552 13.6929 9.93552 13.3226V0.677419C9.93552 0.307097 10.2426 0 10.6129 0C10.9833 0 11.2904 0.307097 11.2904 0.677419V13.3226C11.2904 13.6929 10.9832 14 10.6129 14Z", "fill", "currentColor"], [3, "id"], ["width", "14", "height", "14", "fill", "white"]],
+    template: function SortAltIcon_Template(rf, ctx) {
+      if (rf & 1) {
+        ɵɵnamespaceSVG();
+        ɵɵelementStart(0, "svg", 0)(1, "g");
+        ɵɵelement(2, "path", 1)(3, "path", 2)(4, "path", 3)(5, "path", 4);
+        ɵɵelementEnd();
+        ɵɵelementStart(6, "defs")(7, "clipPath", 5);
+        ɵɵelement(8, "rect", 6);
+        ɵɵelementEnd()()();
+      }
+      if (rf & 2) {
+        ɵɵclassMap(ctx.getClassNames());
+        ɵɵattribute("aria-label", ctx.ariaLabel)("aria-hidden", ctx.ariaHidden)("role", ctx.role);
+        ɵɵadvance();
+        ɵɵattribute("clip-path", ctx.pathId);
+        ɵɵadvance(6);
+        ɵɵproperty("id", ctx.pathId);
+      }
+    },
+    encapsulation: 2
+  });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(SortAltIcon, [{
+    type: Component,
+    args: [{
+      selector: "SortAltIcon",
+      standalone: true,
+      imports: [BaseIcon],
+      template: `
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" [attr.aria-label]="ariaLabel" [attr.aria-hidden]="ariaHidden" [attr.role]="role" [class]="getClassNames()">
+            <g [attr.clip-path]="pathId">
+                <path
+                    d="M5.64515 3.61291C5.47353 3.61291 5.30192 3.54968 5.16644 3.4142L3.38708 1.63484L1.60773 3.4142C1.34579 3.67613 0.912244 3.67613 0.650309 3.4142C0.388374 3.15226 0.388374 2.71871 0.650309 2.45678L2.90837 0.198712C3.17031 -0.0632236 3.60386 -0.0632236 3.86579 0.198712L6.12386 2.45678C6.38579 2.71871 6.38579 3.15226 6.12386 3.4142C5.98837 3.54968 5.81676 3.61291 5.64515 3.61291Z"
+                    fill="currentColor"
+                />
+                <path d="M3.38714 14C3.01681 14 2.70972 13.6929 2.70972 13.3226V0.677419C2.70972 0.307097 3.01681 0 3.38714 0C3.75746 0 4.06456 0.307097 4.06456 0.677419V13.3226C4.06456 13.6929 3.75746 14 3.38714 14Z" fill="currentColor" />
+                <path
+                    d="M10.6129 14C10.4413 14 10.2697 13.9368 10.1342 13.8013L7.87611 11.5432C7.61418 11.2813 7.61418 10.8477 7.87611 10.5858C8.13805 10.3239 8.5716 10.3239 8.83353 10.5858L10.6129 12.3652L12.3922 10.5858C12.6542 10.3239 13.0877 10.3239 13.3497 10.5858C13.6116 10.8477 13.6116 11.2813 13.3497 11.5432L11.0916 13.8013C10.9561 13.9368 10.7845 14 10.6129 14Z"
+                    fill="currentColor"
+                />
+                <path d="M10.6129 14C10.2426 14 9.93552 13.6929 9.93552 13.3226V0.677419C9.93552 0.307097 10.2426 0 10.6129 0C10.9833 0 11.2904 0.307097 11.2904 0.677419V13.3226C11.2904 13.6929 10.9832 14 10.6129 14Z" fill="currentColor" />
+            </g>
+            <defs>
+                <clipPath [id]="pathId">
+                    <rect width="14" height="14" fill="white" />
+                </clipPath>
+            </defs>
+        </svg>
+    `
+    }]
+  }], null, null);
+})();
+
+// node_modules/primeng/fesm2022/primeng-icons-sortamountdown.mjs
+var SortAmountDownIcon = class _SortAmountDownIcon extends BaseIcon {
+  pathId;
+  ngOnInit() {
+    this.pathId = "url(#" + UniqueComponentId() + ")";
+  }
+  static ɵfac = /* @__PURE__ */ (() => {
+    let ɵSortAmountDownIcon_BaseFactory;
+    return function SortAmountDownIcon_Factory(t) {
+      return (ɵSortAmountDownIcon_BaseFactory || (ɵSortAmountDownIcon_BaseFactory = ɵɵgetInheritedFactory(_SortAmountDownIcon)))(t || _SortAmountDownIcon);
+    };
+  })();
+  static ɵcmp = ɵɵdefineComponent({
+    type: _SortAmountDownIcon,
+    selectors: [["SortAmountDownIcon"]],
+    standalone: true,
+    features: [ɵɵInheritDefinitionFeature, ɵɵStandaloneFeature],
+    decls: 6,
+    vars: 7,
+    consts: [["width", "14", "height", "14", "viewBox", "0 0 14 14", "fill", "none", "xmlns", "http://www.w3.org/2000/svg"], ["d", "M4.93953 10.5858L3.83759 11.6877V0.677419C3.83759 0.307097 3.53049 0 3.16017 0C2.78985 0 2.48275 0.307097 2.48275 0.677419V11.6877L1.38082 10.5858C1.11888 10.3239 0.685331 10.3239 0.423396 10.5858C0.16146 10.8477 0.16146 11.2813 0.423396 11.5432L2.68146 13.8013C2.74469 13.8645 2.81694 13.9097 2.89823 13.9458C2.97952 13.9819 3.06985 14 3.16017 14C3.25049 14 3.33178 13.9819 3.42211 13.9458C3.5034 13.9097 3.57565 13.8645 3.63888 13.8013L5.89694 11.5432C6.15888 11.2813 6.15888 10.8477 5.89694 10.5858C5.63501 10.3239 5.20146 10.3239 4.93953 10.5858ZM13.0957 0H7.22468C6.85436 0 6.54726 0.307097 6.54726 0.677419C6.54726 1.04774 6.85436 1.35484 7.22468 1.35484H13.0957C13.466 1.35484 13.7731 1.04774 13.7731 0.677419C13.7731 0.307097 13.466 0 13.0957 0ZM7.22468 5.41935H9.48275C9.85307 5.41935 10.1602 5.72645 10.1602 6.09677C10.1602 6.4671 9.85307 6.77419 9.48275 6.77419H7.22468C6.85436 6.77419 6.54726 6.4671 6.54726 6.09677C6.54726 5.72645 6.85436 5.41935 7.22468 5.41935ZM7.6763 8.12903H7.22468C6.85436 8.12903 6.54726 8.43613 6.54726 8.80645C6.54726 9.17677 6.85436 9.48387 7.22468 9.48387H7.6763C8.04662 9.48387 8.35372 9.17677 8.35372 8.80645C8.35372 8.43613 8.04662 8.12903 7.6763 8.12903ZM7.22468 2.70968H11.2892C11.6595 2.70968 11.9666 3.01677 11.9666 3.3871C11.9666 3.75742 11.6595 4.06452 11.2892 4.06452H7.22468C6.85436 4.06452 6.54726 3.75742 6.54726 3.3871C6.54726 3.01677 6.85436 2.70968 7.22468 2.70968Z", "fill", "currentColor"], [3, "id"], ["width", "14", "height", "14", "fill", "white"]],
+    template: function SortAmountDownIcon_Template(rf, ctx) {
+      if (rf & 1) {
+        ɵɵnamespaceSVG();
+        ɵɵelementStart(0, "svg", 0)(1, "g");
+        ɵɵelement(2, "path", 1);
+        ɵɵelementEnd();
+        ɵɵelementStart(3, "defs")(4, "clipPath", 2);
+        ɵɵelement(5, "rect", 3);
+        ɵɵelementEnd()()();
+      }
+      if (rf & 2) {
+        ɵɵclassMap(ctx.getClassNames());
+        ɵɵattribute("aria-label", ctx.ariaLabel)("aria-hidden", ctx.ariaHidden)("role", ctx.role);
+        ɵɵadvance();
+        ɵɵattribute("clip-path", ctx.pathId);
+        ɵɵadvance(3);
+        ɵɵproperty("id", ctx.pathId);
+      }
+    },
+    encapsulation: 2
+  });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(SortAmountDownIcon, [{
+    type: Component,
+    args: [{
+      selector: "SortAmountDownIcon",
+      standalone: true,
+      imports: [BaseIcon],
+      template: `
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" [attr.aria-label]="ariaLabel" [attr.aria-hidden]="ariaHidden" [attr.role]="role" [class]="getClassNames()">
+            <g [attr.clip-path]="pathId">
+                <path
+                    d="M4.93953 10.5858L3.83759 11.6877V0.677419C3.83759 0.307097 3.53049 0 3.16017 0C2.78985 0 2.48275 0.307097 2.48275 0.677419V11.6877L1.38082 10.5858C1.11888 10.3239 0.685331 10.3239 0.423396 10.5858C0.16146 10.8477 0.16146 11.2813 0.423396 11.5432L2.68146 13.8013C2.74469 13.8645 2.81694 13.9097 2.89823 13.9458C2.97952 13.9819 3.06985 14 3.16017 14C3.25049 14 3.33178 13.9819 3.42211 13.9458C3.5034 13.9097 3.57565 13.8645 3.63888 13.8013L5.89694 11.5432C6.15888 11.2813 6.15888 10.8477 5.89694 10.5858C5.63501 10.3239 5.20146 10.3239 4.93953 10.5858ZM13.0957 0H7.22468C6.85436 0 6.54726 0.307097 6.54726 0.677419C6.54726 1.04774 6.85436 1.35484 7.22468 1.35484H13.0957C13.466 1.35484 13.7731 1.04774 13.7731 0.677419C13.7731 0.307097 13.466 0 13.0957 0ZM7.22468 5.41935H9.48275C9.85307 5.41935 10.1602 5.72645 10.1602 6.09677C10.1602 6.4671 9.85307 6.77419 9.48275 6.77419H7.22468C6.85436 6.77419 6.54726 6.4671 6.54726 6.09677C6.54726 5.72645 6.85436 5.41935 7.22468 5.41935ZM7.6763 8.12903H7.22468C6.85436 8.12903 6.54726 8.43613 6.54726 8.80645C6.54726 9.17677 6.85436 9.48387 7.22468 9.48387H7.6763C8.04662 9.48387 8.35372 9.17677 8.35372 8.80645C8.35372 8.43613 8.04662 8.12903 7.6763 8.12903ZM7.22468 2.70968H11.2892C11.6595 2.70968 11.9666 3.01677 11.9666 3.3871C11.9666 3.75742 11.6595 4.06452 11.2892 4.06452H7.22468C6.85436 4.06452 6.54726 3.75742 6.54726 3.3871C6.54726 3.01677 6.85436 2.70968 7.22468 2.70968Z"
+                    fill="currentColor"
+                />
+            </g>
+            <defs>
+                <clipPath [id]="pathId">
+                    <rect width="14" height="14" fill="white" />
+                </clipPath>
+            </defs>
+        </svg>
+    `
+    }]
+  }], null, null);
+})();
+
+// node_modules/primeng/fesm2022/primeng-icons-sortamountupalt.mjs
+var SortAmountUpAltIcon = class _SortAmountUpAltIcon extends BaseIcon {
+  pathId;
+  ngOnInit() {
+    this.pathId = "url(#" + UniqueComponentId() + ")";
+  }
+  static ɵfac = /* @__PURE__ */ (() => {
+    let ɵSortAmountUpAltIcon_BaseFactory;
+    return function SortAmountUpAltIcon_Factory(t) {
+      return (ɵSortAmountUpAltIcon_BaseFactory || (ɵSortAmountUpAltIcon_BaseFactory = ɵɵgetInheritedFactory(_SortAmountUpAltIcon)))(t || _SortAmountUpAltIcon);
+    };
+  })();
+  static ɵcmp = ɵɵdefineComponent({
+    type: _SortAmountUpAltIcon,
+    selectors: [["SortAmountUpAltIcon"]],
+    standalone: true,
+    features: [ɵɵInheritDefinitionFeature, ɵɵStandaloneFeature],
+    decls: 6,
+    vars: 7,
+    consts: [["width", "14", "height", "14", "viewBox", "0 0 14 14", "fill", "none", "xmlns", "http://www.w3.org/2000/svg"], ["d", "M3.63435 0.19871C3.57113 0.135484 3.49887 0.0903226 3.41758 0.0541935C3.255 -0.0180645 3.06532 -0.0180645 2.90274 0.0541935C2.82145 0.0903226 2.74919 0.135484 2.68597 0.19871L0.427901 2.45677C0.165965 2.71871 0.165965 3.15226 0.427901 3.41419C0.689836 3.67613 1.12338 3.67613 1.38532 3.41419L2.48726 2.31226V13.3226C2.48726 13.6929 2.79435 14 3.16467 14C3.535 14 3.84209 13.6929 3.84209 13.3226V2.31226L4.94403 3.41419C5.07951 3.54968 5.25113 3.6129 5.42274 3.6129C5.59435 3.6129 5.76597 3.54968 5.90145 3.41419C6.16338 3.15226 6.16338 2.71871 5.90145 2.45677L3.64338 0.19871H3.63435ZM13.7685 13.3226C13.7685 12.9523 13.4615 12.6452 13.0911 12.6452H7.22016C6.84984 12.6452 6.54274 12.9523 6.54274 13.3226C6.54274 13.6929 6.84984 14 7.22016 14H13.0911C13.4615 14 13.7685 13.6929 13.7685 13.3226ZM7.22016 8.58064C6.84984 8.58064 6.54274 8.27355 6.54274 7.90323C6.54274 7.5329 6.84984 7.22581 7.22016 7.22581H9.47823C9.84855 7.22581 10.1556 7.5329 10.1556 7.90323C10.1556 8.27355 9.84855 8.58064 9.47823 8.58064H7.22016ZM7.22016 5.87097H7.67177C8.0421 5.87097 8.34919 5.56387 8.34919 5.19355C8.34919 4.82323 8.0421 4.51613 7.67177 4.51613H7.22016C6.84984 4.51613 6.54274 4.82323 6.54274 5.19355C6.54274 5.56387 6.84984 5.87097 7.22016 5.87097ZM11.2847 11.2903H7.22016C6.84984 11.2903 6.54274 10.9832 6.54274 10.6129C6.54274 10.2426 6.84984 9.93548 7.22016 9.93548H11.2847C11.655 9.93548 11.9621 10.2426 11.9621 10.6129C11.9621 10.9832 11.655 11.2903 11.2847 11.2903Z", "fill", "currentColor"], [3, "id"], ["width", "14", "height", "14", "fill", "white"]],
+    template: function SortAmountUpAltIcon_Template(rf, ctx) {
+      if (rf & 1) {
+        ɵɵnamespaceSVG();
+        ɵɵelementStart(0, "svg", 0)(1, "g");
+        ɵɵelement(2, "path", 1);
+        ɵɵelementEnd();
+        ɵɵelementStart(3, "defs")(4, "clipPath", 2);
+        ɵɵelement(5, "rect", 3);
+        ɵɵelementEnd()()();
+      }
+      if (rf & 2) {
+        ɵɵclassMap(ctx.getClassNames());
+        ɵɵattribute("aria-label", ctx.ariaLabel)("aria-hidden", ctx.ariaHidden)("role", ctx.role);
+        ɵɵadvance();
+        ɵɵattribute("clip-path", ctx.pathId);
+        ɵɵadvance(3);
+        ɵɵproperty("id", ctx.pathId);
+      }
+    },
+    encapsulation: 2
+  });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(SortAmountUpAltIcon, [{
+    type: Component,
+    args: [{
+      selector: "SortAmountUpAltIcon",
+      standalone: true,
+      imports: [BaseIcon],
+      template: `
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" [attr.aria-label]="ariaLabel" [attr.aria-hidden]="ariaHidden" [attr.role]="role" [class]="getClassNames()">
+            <g [attr.clip-path]="pathId">
+                <path
+                    d="M3.63435 0.19871C3.57113 0.135484 3.49887 0.0903226 3.41758 0.0541935C3.255 -0.0180645 3.06532 -0.0180645 2.90274 0.0541935C2.82145 0.0903226 2.74919 0.135484 2.68597 0.19871L0.427901 2.45677C0.165965 2.71871 0.165965 3.15226 0.427901 3.41419C0.689836 3.67613 1.12338 3.67613 1.38532 3.41419L2.48726 2.31226V13.3226C2.48726 13.6929 2.79435 14 3.16467 14C3.535 14 3.84209 13.6929 3.84209 13.3226V2.31226L4.94403 3.41419C5.07951 3.54968 5.25113 3.6129 5.42274 3.6129C5.59435 3.6129 5.76597 3.54968 5.90145 3.41419C6.16338 3.15226 6.16338 2.71871 5.90145 2.45677L3.64338 0.19871H3.63435ZM13.7685 13.3226C13.7685 12.9523 13.4615 12.6452 13.0911 12.6452H7.22016C6.84984 12.6452 6.54274 12.9523 6.54274 13.3226C6.54274 13.6929 6.84984 14 7.22016 14H13.0911C13.4615 14 13.7685 13.6929 13.7685 13.3226ZM7.22016 8.58064C6.84984 8.58064 6.54274 8.27355 6.54274 7.90323C6.54274 7.5329 6.84984 7.22581 7.22016 7.22581H9.47823C9.84855 7.22581 10.1556 7.5329 10.1556 7.90323C10.1556 8.27355 9.84855 8.58064 9.47823 8.58064H7.22016ZM7.22016 5.87097H7.67177C8.0421 5.87097 8.34919 5.56387 8.34919 5.19355C8.34919 4.82323 8.0421 4.51613 7.67177 4.51613H7.22016C6.84984 4.51613 6.54274 4.82323 6.54274 5.19355C6.54274 5.56387 6.84984 5.87097 7.22016 5.87097ZM11.2847 11.2903H7.22016C6.84984 11.2903 6.54274 10.9832 6.54274 10.6129C6.54274 10.2426 6.84984 9.93548 7.22016 9.93548H11.2847C11.655 9.93548 11.9621 10.2426 11.9621 10.6129C11.9621 10.9832 11.655 11.2903 11.2847 11.2903Z"
+                    fill="currentColor"
+                />
+            </g>
+            <defs>
+                <clipPath [id]="pathId">
+                    <rect width="14" height="14" fill="white" />
+                </clipPath>
+            </defs>
+        </svg>
+    `
+    }]
+  }], null, null);
+})();
+
+// node_modules/primeng/fesm2022/primeng-icons-trash.mjs
+var TrashIcon = class _TrashIcon extends BaseIcon {
+  pathId;
+  ngOnInit() {
+    this.pathId = "url(#" + UniqueComponentId() + ")";
+  }
+  static ɵfac = /* @__PURE__ */ (() => {
+    let ɵTrashIcon_BaseFactory;
+    return function TrashIcon_Factory(t) {
+      return (ɵTrashIcon_BaseFactory || (ɵTrashIcon_BaseFactory = ɵɵgetInheritedFactory(_TrashIcon)))(t || _TrashIcon);
+    };
+  })();
+  static ɵcmp = ɵɵdefineComponent({
+    type: _TrashIcon,
+    selectors: [["TrashIcon"]],
+    standalone: true,
+    features: [ɵɵInheritDefinitionFeature, ɵɵStandaloneFeature],
+    decls: 6,
+    vars: 7,
+    consts: [["width", "14", "height", "14", "viewBox", "0 0 14 14", "fill", "none", "xmlns", "http://www.w3.org/2000/svg"], ["fill-rule", "evenodd", "clip-rule", "evenodd", "d", "M3.44802 13.9955H10.552C10.8056 14.0129 11.06 13.9797 11.3006 13.898C11.5412 13.8163 11.7632 13.6877 11.9537 13.5196C12.1442 13.3515 12.2995 13.1473 12.4104 12.9188C12.5213 12.6903 12.5858 12.442 12.6 12.1884V4.36041H13.4C13.5591 4.36041 13.7117 4.29722 13.8243 4.18476C13.9368 4.07229 14 3.91976 14 3.76071C14 3.60166 13.9368 3.44912 13.8243 3.33666C13.7117 3.22419 13.5591 3.16101 13.4 3.16101H12.0537C12.0203 3.1557 11.9863 3.15299 11.952 3.15299C11.9178 3.15299 11.8838 3.1557 11.8503 3.16101H11.2285C11.2421 3.10893 11.2487 3.05513 11.248 3.00106V1.80966C11.2171 1.30262 10.9871 0.828306 10.608 0.48989C10.229 0.151475 9.73159 -0.0236625 9.22402 0.00257442H4.77602C4.27251 -0.0171866 3.78126 0.160868 3.40746 0.498617C3.03365 0.836366 2.807 1.30697 2.77602 1.80966V3.00106C2.77602 3.0556 2.78346 3.10936 2.79776 3.16101H0.6C0.521207 3.16101 0.443185 3.17652 0.37039 3.20666C0.297595 3.2368 0.231451 3.28097 0.175736 3.33666C0.120021 3.39235 0.0758251 3.45846 0.0456722 3.53121C0.0155194 3.60397 0 3.68196 0 3.76071C0 3.83946 0.0155194 3.91744 0.0456722 3.9902C0.0758251 4.06296 0.120021 4.12907 0.175736 4.18476C0.231451 4.24045 0.297595 4.28462 0.37039 4.31476C0.443185 4.3449 0.521207 4.36041 0.6 4.36041H1.40002V12.1884C1.41426 12.442 1.47871 12.6903 1.58965 12.9188C1.7006 13.1473 1.85582 13.3515 2.04633 13.5196C2.23683 13.6877 2.45882 13.8163 2.69944 13.898C2.94005 13.9797 3.1945 14.0129 3.44802 13.9955ZM2.60002 4.36041H11.304V12.1884C11.304 12.5163 10.952 12.7961 10.504 12.7961H3.40002C2.97602 12.7961 2.60002 12.5163 2.60002 12.1884V4.36041ZM3.95429 3.16101C3.96859 3.10936 3.97602 3.0556 3.97602 3.00106V1.80966C3.97602 1.48183 4.33602 1.20197 4.77602 1.20197H9.24802C9.66403 1.20197 10.048 1.48183 10.048 1.80966V3.00106C10.0473 3.05515 10.054 3.10896 10.0678 3.16101H3.95429ZM5.57571 10.997C5.41731 10.995 5.26597 10.9311 5.15395 10.8191C5.04193 10.7071 4.97808 10.5558 4.97601 10.3973V6.77517C4.97601 6.61612 5.0392 6.46359 5.15166 6.35112C5.26413 6.23866 5.41666 6.17548 5.57571 6.17548C5.73476 6.17548 5.8873 6.23866 5.99976 6.35112C6.11223 6.46359 6.17541 6.61612 6.17541 6.77517V10.3894C6.17647 10.4688 6.16174 10.5476 6.13208 10.6213C6.10241 10.695 6.05841 10.762 6.00261 10.8186C5.94682 10.8751 5.88035 10.92 5.80707 10.9506C5.73378 10.9813 5.65514 10.9971 5.57571 10.997ZM7.99968 10.8214C8.11215 10.9339 8.26468 10.997 8.42373 10.997C8.58351 10.9949 8.73604 10.93 8.84828 10.8163C8.96052 10.7025 9.02345 10.5491 9.02343 10.3894V6.77517C9.02343 6.61612 8.96025 6.46359 8.84778 6.35112C8.73532 6.23866 8.58278 6.17548 8.42373 6.17548C8.26468 6.17548 8.11215 6.23866 7.99968 6.35112C7.88722 6.46359 7.82404 6.61612 7.82404 6.77517V10.3973C7.82404 10.5564 7.88722 10.7089 7.99968 10.8214Z", "fill", "currentColor"], [3, "id"], ["width", "14", "height", "14", "fill", "white"]],
+    template: function TrashIcon_Template(rf, ctx) {
+      if (rf & 1) {
+        ɵɵnamespaceSVG();
+        ɵɵelementStart(0, "svg", 0)(1, "g");
+        ɵɵelement(2, "path", 1);
+        ɵɵelementEnd();
+        ɵɵelementStart(3, "defs")(4, "clipPath", 2);
+        ɵɵelement(5, "rect", 3);
+        ɵɵelementEnd()()();
+      }
+      if (rf & 2) {
+        ɵɵclassMap(ctx.getClassNames());
+        ɵɵattribute("aria-label", ctx.ariaLabel)("aria-hidden", ctx.ariaHidden)("role", ctx.role);
+        ɵɵadvance();
+        ɵɵattribute("clip-path", ctx.pathId);
+        ɵɵadvance(3);
+        ɵɵproperty("id", ctx.pathId);
+      }
+    },
+    encapsulation: 2
+  });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(TrashIcon, [{
+    type: Component,
+    args: [{
+      selector: "TrashIcon",
+      standalone: true,
+      imports: [BaseIcon],
+      template: `
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" [attr.aria-label]="ariaLabel" [attr.aria-hidden]="ariaHidden" [attr.role]="role" [class]="getClassNames()">
+            <g [attr.clip-path]="pathId">
+                <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M3.44802 13.9955H10.552C10.8056 14.0129 11.06 13.9797 11.3006 13.898C11.5412 13.8163 11.7632 13.6877 11.9537 13.5196C12.1442 13.3515 12.2995 13.1473 12.4104 12.9188C12.5213 12.6903 12.5858 12.442 12.6 12.1884V4.36041H13.4C13.5591 4.36041 13.7117 4.29722 13.8243 4.18476C13.9368 4.07229 14 3.91976 14 3.76071C14 3.60166 13.9368 3.44912 13.8243 3.33666C13.7117 3.22419 13.5591 3.16101 13.4 3.16101H12.0537C12.0203 3.1557 11.9863 3.15299 11.952 3.15299C11.9178 3.15299 11.8838 3.1557 11.8503 3.16101H11.2285C11.2421 3.10893 11.2487 3.05513 11.248 3.00106V1.80966C11.2171 1.30262 10.9871 0.828306 10.608 0.48989C10.229 0.151475 9.73159 -0.0236625 9.22402 0.00257442H4.77602C4.27251 -0.0171866 3.78126 0.160868 3.40746 0.498617C3.03365 0.836366 2.807 1.30697 2.77602 1.80966V3.00106C2.77602 3.0556 2.78346 3.10936 2.79776 3.16101H0.6C0.521207 3.16101 0.443185 3.17652 0.37039 3.20666C0.297595 3.2368 0.231451 3.28097 0.175736 3.33666C0.120021 3.39235 0.0758251 3.45846 0.0456722 3.53121C0.0155194 3.60397 0 3.68196 0 3.76071C0 3.83946 0.0155194 3.91744 0.0456722 3.9902C0.0758251 4.06296 0.120021 4.12907 0.175736 4.18476C0.231451 4.24045 0.297595 4.28462 0.37039 4.31476C0.443185 4.3449 0.521207 4.36041 0.6 4.36041H1.40002V12.1884C1.41426 12.442 1.47871 12.6903 1.58965 12.9188C1.7006 13.1473 1.85582 13.3515 2.04633 13.5196C2.23683 13.6877 2.45882 13.8163 2.69944 13.898C2.94005 13.9797 3.1945 14.0129 3.44802 13.9955ZM2.60002 4.36041H11.304V12.1884C11.304 12.5163 10.952 12.7961 10.504 12.7961H3.40002C2.97602 12.7961 2.60002 12.5163 2.60002 12.1884V4.36041ZM3.95429 3.16101C3.96859 3.10936 3.97602 3.0556 3.97602 3.00106V1.80966C3.97602 1.48183 4.33602 1.20197 4.77602 1.20197H9.24802C9.66403 1.20197 10.048 1.48183 10.048 1.80966V3.00106C10.0473 3.05515 10.054 3.10896 10.0678 3.16101H3.95429ZM5.57571 10.997C5.41731 10.995 5.26597 10.9311 5.15395 10.8191C5.04193 10.7071 4.97808 10.5558 4.97601 10.3973V6.77517C4.97601 6.61612 5.0392 6.46359 5.15166 6.35112C5.26413 6.23866 5.41666 6.17548 5.57571 6.17548C5.73476 6.17548 5.8873 6.23866 5.99976 6.35112C6.11223 6.46359 6.17541 6.61612 6.17541 6.77517V10.3894C6.17647 10.4688 6.16174 10.5476 6.13208 10.6213C6.10241 10.695 6.05841 10.762 6.00261 10.8186C5.94682 10.8751 5.88035 10.92 5.80707 10.9506C5.73378 10.9813 5.65514 10.9971 5.57571 10.997ZM7.99968 10.8214C8.11215 10.9339 8.26468 10.997 8.42373 10.997C8.58351 10.9949 8.73604 10.93 8.84828 10.8163C8.96052 10.7025 9.02345 10.5491 9.02343 10.3894V6.77517C9.02343 6.61612 8.96025 6.46359 8.84778 6.35112C8.73532 6.23866 8.58278 6.17548 8.42373 6.17548C8.26468 6.17548 8.11215 6.23866 7.99968 6.35112C7.88722 6.46359 7.82404 6.61612 7.82404 6.77517V10.3973C7.82404 10.5564 7.88722 10.7089 7.99968 10.8214Z"
+                    fill="currentColor"
+                />
+            </g>
+            <defs>
+                <clipPath [id]="pathId">
+                    <rect width="14" height="14" fill="white" />
+                </clipPath>
+            </defs>
+        </svg>
+    `
     }]
   }], null, null);
 })();
@@ -14259,11 +16072,18 @@ var InputText = class _InputText {
   el;
   ngModel;
   cd;
+  config;
+  /**
+   * Specifies the input variant of the component.
+   * @group Props
+   */
+  variant = "outlined";
   filled;
-  constructor(el, ngModel, cd) {
+  constructor(el, ngModel, cd, config) {
     this.el = el;
     this.ngModel = ngModel;
     this.cd = cd;
+    this.config = config;
   }
   ngAfterViewInit() {
     this.updateFilledState();
@@ -14279,13 +16099,13 @@ var InputText = class _InputText {
     this.filled = this.el.nativeElement.value && this.el.nativeElement.value.length || this.ngModel && this.ngModel.model;
   }
   static ɵfac = function InputText_Factory(t) {
-    return new (t || _InputText)(ɵɵdirectiveInject(ElementRef), ɵɵdirectiveInject(NgModel, 8), ɵɵdirectiveInject(ChangeDetectorRef));
+    return new (t || _InputText)(ɵɵdirectiveInject(ElementRef), ɵɵdirectiveInject(NgModel, 8), ɵɵdirectiveInject(ChangeDetectorRef), ɵɵdirectiveInject(PrimeNGConfig));
   };
   static ɵdir = ɵɵdefineDirective({
     type: _InputText,
     selectors: [["", "pInputText", ""]],
     hostAttrs: [1, "p-inputtext", "p-component", "p-element"],
-    hostVars: 2,
+    hostVars: 4,
     hostBindings: function InputText_HostBindings(rf, ctx) {
       if (rf & 1) {
         ɵɵlistener("input", function InputText_input_HostBindingHandler($event) {
@@ -14293,8 +16113,11 @@ var InputText = class _InputText {
         });
       }
       if (rf & 2) {
-        ɵɵclassProp("p-filled", ctx.filled);
+        ɵɵclassProp("p-filled", ctx.filled)("p-variant-filled", ctx.variant === "filled" || ctx.config.inputStyle() === "filled");
       }
+    },
+    inputs: {
+      variant: "variant"
     }
   });
 };
@@ -14305,7 +16128,8 @@ var InputText = class _InputText {
       selector: "[pInputText]",
       host: {
         class: "p-inputtext p-component p-element",
-        "[class.p-filled]": "filled"
+        "[class.p-filled]": "filled",
+        "[class.p-variant-filled]": 'variant === "filled" || config.inputStyle() === "filled"'
       }
     }]
   }], () => [{
@@ -14317,7 +16141,12 @@ var InputText = class _InputText {
     }]
   }, {
     type: ChangeDetectorRef
+  }, {
+    type: PrimeNGConfig
   }], {
+    variant: [{
+      type: Input
+    }],
     onInput: [{
       type: HostListener,
       args: ["input", ["$event"]]
@@ -14351,7 +16180,7 @@ var InputTextModule = class _InputTextModule {
 
 // node_modules/primeng/fesm2022/primeng-inputnumber.mjs
 var _c08 = ["input"];
-var _c17 = (a0, a1, a2) => ({
+var _c110 = (a0, a1, a2) => ({
   "p-inputnumber p-component": true,
   "p-inputnumber-buttons-stacked": a0,
   "p-inputnumber-buttons-horizontal": a1,
@@ -14736,6 +16565,7 @@ var InputNumber = class _InputNumber {
   el;
   cd;
   injector;
+  config;
   /**
    * Displays spinner buttons.
    * @group Props
@@ -14897,6 +16727,11 @@ var InputNumber = class _InputNumber {
    */
   useGrouping = true;
   /**
+   * Specifies the input variant of the component.
+   * @group Props
+   */
+  variant = "outlined";
+  /**
    * The minimum number of fraction digits to use. Possible values are from 0 to 20; the default for plain number and percent formatting is 0; the default for currency formatting is the number of minor unit digits provided by the ISO 4217 currency code list (2 if the list doesn't provide that information).
    * @group Props
    */
@@ -14931,6 +16766,11 @@ var InputNumber = class _InputNumber {
    * @group Props
    */
   showClear = false;
+  /**
+   * When present, it specifies that the component should automatically get focus on load.
+   * @group Props
+   */
+  autofocus;
   /**
    * When present, it specifies that the element should be disabled.
    * @group Props
@@ -14993,6 +16833,7 @@ var InputNumber = class _InputNumber {
   _numeral;
   numberFormat;
   _decimal;
+  _decimalChar;
   _group;
   _minusSign;
   _currency;
@@ -15001,11 +16842,12 @@ var InputNumber = class _InputNumber {
   _index;
   _disabled;
   ngControl = null;
-  constructor(document2, el, cd, injector) {
+  constructor(document2, el, cd, injector, config) {
     this.document = document2;
     this.el = el;
     this.cd = cd;
     this.injector = injector;
+    this.config = config;
   }
   ngOnChanges(simpleChange) {
     const props = ["locale", "localeMatcher", "mode", "currency", "currencyDisplay", "useGrouping", "minFractionDigits", "maxFractionDigits", "prefix", "suffix"];
@@ -15042,8 +16884,8 @@ var InputNumber = class _InputNumber {
       currency: this.currency,
       currencyDisplay: this.currencyDisplay,
       useGrouping: this.useGrouping,
-      minimumFractionDigits: this.minFractionDigits,
-      maximumFractionDigits: this.maxFractionDigits
+      minimumFractionDigits: this.minFractionDigits ?? void 0,
+      maximumFractionDigits: this.maxFractionDigits ?? void 0
     };
   }
   constructParser() {
@@ -15057,6 +16899,7 @@ var InputNumber = class _InputNumber {
     this._minusSign = this.getMinusSignExpression();
     this._currency = this.getCurrencyExpression();
     this._decimal = this.getDecimalExpression();
+    this._decimalChar = this.getDecimalChar();
     this._suffix = this.getSuffixExpression();
     this._prefix = this.getPrefixExpression();
     this._index = (d) => index.get(d);
@@ -15070,10 +16913,14 @@ var InputNumber = class _InputNumber {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
   }
   getDecimalExpression() {
+    const decimalChar = this.getDecimalChar();
+    return new RegExp(`[${decimalChar}]`, "g");
+  }
+  getDecimalChar() {
     const formatter = new Intl.NumberFormat(this.locale, __spreadProps(__spreadValues({}, this.getOptions()), {
       useGrouping: false
     }));
-    return new RegExp(`[${formatter.format(1.1).replace(this._currency, "").trim().replace(this._numeral, "")}]`, "g");
+    return formatter.format(1.1).replace(this._currency, "").trim().replace(this._numeral, "");
   }
   getGroupingExpression() {
     const formatter = new Intl.NumberFormat(this.locale, {
@@ -15129,6 +16976,9 @@ var InputNumber = class _InputNumber {
     }
     return new RegExp(`${this.escapeRegExp(this.suffixChar || "")}`, "g");
   }
+  get isBlurUpdateOnMode() {
+    return this.ngControl?.control?.updateOn === "blur";
+  }
   formatValue(value) {
     if (value != null) {
       if (value === "-") {
@@ -15137,10 +16987,10 @@ var InputNumber = class _InputNumber {
       if (this.format) {
         let formatter = new Intl.NumberFormat(this.locale, this.getOptions());
         let formattedValue = formatter.format(value);
-        if (this.prefix) {
+        if (this.prefix && value != this.prefix) {
           formattedValue = this.prefix + formattedValue;
         }
-        if (this.suffix) {
+        if (this.suffix && value != this.suffix) {
           formattedValue = formattedValue + this.suffix;
         }
         return formattedValue;
@@ -15150,7 +17000,10 @@ var InputNumber = class _InputNumber {
     return "";
   }
   parseValue(text) {
-    let filteredText = text.replace(this._suffix, "").replace(this._prefix, "").trim().replace(/\s/g, "").replace(this._currency, "").replace(this._group, "").replace(this._minusSign, "-").replace(this._decimal, ".").replace(this._numeral, this._index);
+    const suffixRegex = new RegExp(this._suffix, "");
+    const prefixRegex = new RegExp(this._prefix, "");
+    const currencyRegex = new RegExp(this._currency, "");
+    let filteredText = text.replace(suffixRegex, "").replace(prefixRegex, "").trim().replace(/\s/g, "").replace(currencyRegex, "").replace(this._group, "").replace(this._minusSign, "-").replace(this._decimal, ".").replace(this._numeral, this._index);
     if (filteredText) {
       if (filteredText === "-")
         return filteredText;
@@ -15262,7 +17115,7 @@ var InputNumber = class _InputNumber {
       return;
     }
     this.lastValue = event2.target.value;
-    if (event2.shiftKey || event2.altKey) {
+    if (event2.shiftKey || event2.altKey || event2.key === "Dead") {
       this.isSpecialChar = true;
       return;
     }
@@ -15273,7 +17126,7 @@ var InputNumber = class _InputNumber {
     if (event2.altKey) {
       event2.preventDefault();
     }
-    switch (event2.code) {
+    switch (event2.key) {
       case "ArrowUp":
         this.spin(event2, 1);
         event2.preventDefault();
@@ -15283,13 +17136,20 @@ var InputNumber = class _InputNumber {
         event2.preventDefault();
         break;
       case "ArrowLeft":
-        if (!this.isNumeralChar(inputValue.charAt(selectionStart - 1))) {
-          event2.preventDefault();
+        for (let index = selectionStart; index <= inputValue.length; index++) {
+          const previousCharIndex = index === 0 ? 0 : index - 1;
+          if (this.isNumeralChar(inputValue.charAt(previousCharIndex))) {
+            this.input.nativeElement.setSelectionRange(index, index);
+            break;
+          }
         }
         break;
       case "ArrowRight":
-        if (!this.isNumeralChar(inputValue.charAt(selectionStart))) {
-          event2.preventDefault();
+        for (let index = selectionEnd; index >= 0; index--) {
+          if (this.isNumeralChar(inputValue.charAt(index))) {
+            this.input.nativeElement.setSelectionRange(index, index);
+            break;
+          }
         }
         break;
       case "Tab":
@@ -15302,6 +17162,9 @@ var InputNumber = class _InputNumber {
       case "Backspace": {
         event2.preventDefault();
         if (selectionStart === selectionEnd) {
+          if (selectionStart == 1 && this.prefix || selectionStart == inputValue.length && this.suffix) {
+            break;
+          }
           const deleteChar = inputValue.charAt(selectionStart - 1);
           const {
             decimalCharIndex,
@@ -15328,6 +17191,8 @@ var InputNumber = class _InputNumber {
             } else {
               newValueStr = inputValue.slice(0, selectionStart - 1) + inputValue.slice(selectionStart);
             }
+          } else if (this.mode === "currency" && deleteChar.search(this._currency) != -1) {
+            newValueStr = inputValue.slice(1);
           }
           this.updateValue(event2, newValueStr, null, "delete-single");
         } else {
@@ -15339,6 +17204,9 @@ var InputNumber = class _InputNumber {
       case "Delete":
         event2.preventDefault();
         if (selectionStart === selectionEnd) {
+          if (selectionStart == 0 && this.prefix || selectionStart == inputValue.length - 1 && this.suffix) {
+            break;
+          }
           const deleteChar = inputValue.charAt(selectionStart);
           const {
             decimalCharIndex,
@@ -15395,13 +17263,33 @@ var InputNumber = class _InputNumber {
     }
     let code = event2.which || event2.keyCode;
     let char = String.fromCharCode(code);
-    const isDecimalSign = this.isDecimalSign(char);
+    let isDecimalSign = this.isDecimalSign(char);
     const isMinusSign = this.isMinusSign(char);
     if (code != 13) {
       event2.preventDefault();
     }
-    const newValue = this.parseValue(this.input.nativeElement.value + char);
+    if (!isDecimalSign && event2.code === "NumpadDecimal") {
+      isDecimalSign = true;
+      char = this._decimalChar;
+      code = char.charCodeAt(0);
+    }
+    const {
+      value,
+      selectionStart,
+      selectionEnd
+    } = this.input.nativeElement;
+    const newValue = this.parseValue(value + char);
     const newValueStr = newValue != null ? newValue.toString() : "";
+    const selectedValue = value.substring(selectionStart, selectionEnd);
+    const selectedValueParsed = this.parseValue(selectedValue);
+    const selectedValueStr = selectedValueParsed != null ? selectedValueParsed.toString() : "";
+    if (selectionStart !== selectionEnd && selectedValueStr.length > 0) {
+      this.insert(event2, char, {
+        isDecimalSign,
+        isMinusSign
+      });
+      return;
+    }
     if (this.maxlength && newValueStr.length > this.maxlength) {
       return;
     }
@@ -15552,12 +17440,15 @@ var InputNumber = class _InputNumber {
   }
   initCursor() {
     let selectionStart = this.input?.nativeElement.selectionStart;
+    let selectionEnd = this.input?.nativeElement.selectionEnd;
     let inputValue = this.input?.nativeElement.value;
     let valueLength = inputValue.length;
     let index = null;
     let prefixLength = (this.prefixChar || "").length;
     inputValue = inputValue.replace(this._prefix, "");
-    selectionStart = selectionStart - prefixLength;
+    if (selectionStart === selectionEnd || selectionStart !== 0 || selectionEnd < prefixLength) {
+      selectionStart -= prefixLength;
+    }
     let char = inputValue.charAt(selectionStart);
     if (this.isNumeralChar(char)) {
       return selectionStart + prefixLength;
@@ -15624,7 +17515,7 @@ var InputNumber = class _InputNumber {
     if (this.isValueChanged(currentValue, newValue)) {
       this.input.nativeElement.value = this.formatValue(newValue);
       this.input?.nativeElement.setAttribute("aria-valuenow", newValue);
-      this.updateModel(event2, newValue);
+      !this.isBlurUpdateOnMode && this.updateModel(event2, newValue);
       this.onInput.emit({
         originalEvent: event2,
         value: newValue,
@@ -15725,7 +17616,7 @@ var InputNumber = class _InputNumber {
       let decimalCharIndex = val2.search(this._decimal);
       this._decimal.lastIndex = 0;
       if (this.suffixChar) {
-        return val1.replace(this.suffixChar, "").split(this._decimal)[0] + val2.replace(this.suffixChar, "").slice(decimalCharIndex) + this.suffixChar;
+        return decimalCharIndex !== -1 ? val1 : val1.replace(this.suffixChar, "").split(this._decimal)[0] + val2.replace(this.suffixChar, "").slice(decimalCharIndex) + this.suffixChar;
       } else {
         return decimalCharIndex !== -1 ? val1.split(this._decimal)[0] + val2.slice(decimalCharIndex) : val1;
       }
@@ -15747,25 +17638,25 @@ var InputNumber = class _InputNumber {
   }
   onInputBlur(event2) {
     this.focused = false;
-    let newValue = this.validateValue(this.parseValue(this.input.nativeElement.value));
+    const newValueNumber = this.validateValue(this.parseValue(this.input.nativeElement.value));
+    const newValueString = newValueNumber?.toString();
+    this.input.nativeElement.value = this.formatValue(newValueString);
+    this.input.nativeElement.setAttribute("aria-valuenow", newValueString);
+    this.updateModel(event2, newValueNumber);
     this.onBlur.emit(event2);
-    this.input.nativeElement.value = this.formatValue(newValue);
-    this.input.nativeElement.setAttribute("aria-valuenow", newValue);
-    this.updateModel(event2, newValue);
   }
   formattedValue() {
     const val = !this.value && !this.allowEmpty ? 0 : this.value;
     return this.formatValue(val);
   }
   updateModel(event2, value) {
-    const isBlurUpdateOnMode = this.ngControl?.control?.updateOn === "blur";
     if (this.value !== value) {
       this.value = value;
-      if (!(isBlurUpdateOnMode && this.focused)) {
+      if (!(this.isBlurUpdateOnMode && this.focused)) {
+        this.onModelChange(value);
+      } else if (this.isBlurUpdateOnMode) {
         this.onModelChange(value);
       }
-    } else if (isBlurUpdateOnMode) {
-      this.onModelChange(value);
     }
     this.onModelTouched();
   }
@@ -15791,11 +17682,8 @@ var InputNumber = class _InputNumber {
       clearInterval(this.timer);
     }
   }
-  getFormatter() {
-    return this.numberFormat;
-  }
   static ɵfac = function InputNumber_Factory(t) {
-    return new (t || _InputNumber)(ɵɵdirectiveInject(DOCUMENT), ɵɵdirectiveInject(ElementRef), ɵɵdirectiveInject(ChangeDetectorRef), ɵɵdirectiveInject(Injector));
+    return new (t || _InputNumber)(ɵɵdirectiveInject(DOCUMENT), ɵɵdirectiveInject(ElementRef), ɵɵdirectiveInject(ChangeDetectorRef), ɵɵdirectiveInject(Injector), ɵɵdirectiveInject(PrimeNGConfig));
   };
   static ɵcmp = ɵɵdefineComponent({
     type: _InputNumber,
@@ -15826,45 +17714,47 @@ var InputNumber = class _InputNumber {
       }
     },
     inputs: {
-      showButtons: "showButtons",
-      format: "format",
+      showButtons: [InputFlags.HasDecoratorInputTransform, "showButtons", "showButtons", booleanAttribute],
+      format: [InputFlags.HasDecoratorInputTransform, "format", "format", booleanAttribute],
       buttonLayout: "buttonLayout",
       inputId: "inputId",
       styleClass: "styleClass",
       style: "style",
       placeholder: "placeholder",
-      size: "size",
-      maxlength: "maxlength",
-      tabindex: "tabindex",
+      size: [InputFlags.HasDecoratorInputTransform, "size", "size", numberAttribute],
+      maxlength: [InputFlags.HasDecoratorInputTransform, "maxlength", "maxlength", numberAttribute],
+      tabindex: [InputFlags.HasDecoratorInputTransform, "tabindex", "tabindex", numberAttribute],
       title: "title",
       ariaLabelledBy: "ariaLabelledBy",
       ariaLabel: "ariaLabel",
-      ariaRequired: "ariaRequired",
+      ariaRequired: [InputFlags.HasDecoratorInputTransform, "ariaRequired", "ariaRequired", booleanAttribute],
       name: "name",
-      required: "required",
+      required: [InputFlags.HasDecoratorInputTransform, "required", "required", booleanAttribute],
       autocomplete: "autocomplete",
-      min: "min",
-      max: "max",
+      min: [InputFlags.HasDecoratorInputTransform, "min", "min", numberAttribute],
+      max: [InputFlags.HasDecoratorInputTransform, "max", "max", numberAttribute],
       incrementButtonClass: "incrementButtonClass",
       decrementButtonClass: "decrementButtonClass",
       incrementButtonIcon: "incrementButtonIcon",
       decrementButtonIcon: "decrementButtonIcon",
-      readonly: "readonly",
-      step: "step",
-      allowEmpty: "allowEmpty",
+      readonly: [InputFlags.HasDecoratorInputTransform, "readonly", "readonly", booleanAttribute],
+      step: [InputFlags.HasDecoratorInputTransform, "step", "step", numberAttribute],
+      allowEmpty: [InputFlags.HasDecoratorInputTransform, "allowEmpty", "allowEmpty", booleanAttribute],
       locale: "locale",
       localeMatcher: "localeMatcher",
       mode: "mode",
       currency: "currency",
       currencyDisplay: "currencyDisplay",
-      useGrouping: "useGrouping",
-      minFractionDigits: "minFractionDigits",
-      maxFractionDigits: "maxFractionDigits",
+      useGrouping: [InputFlags.HasDecoratorInputTransform, "useGrouping", "useGrouping", booleanAttribute],
+      variant: "variant",
+      minFractionDigits: [InputFlags.HasDecoratorInputTransform, "minFractionDigits", "minFractionDigits", (value) => numberAttribute(value, null)],
+      maxFractionDigits: [InputFlags.HasDecoratorInputTransform, "maxFractionDigits", "maxFractionDigits", (value) => numberAttribute(value, null)],
       prefix: "prefix",
       suffix: "suffix",
       inputStyle: "inputStyle",
       inputStyleClass: "inputStyleClass",
-      showClear: "showClear",
+      showClear: [InputFlags.HasDecoratorInputTransform, "showClear", "showClear", booleanAttribute],
+      autofocus: [InputFlags.HasDecoratorInputTransform, "autofocus", "autofocus", booleanAttribute],
       disabled: "disabled"
     },
     outputs: {
@@ -15874,10 +17764,10 @@ var InputNumber = class _InputNumber {
       onKeyDown: "onKeyDown",
       onClear: "onClear"
     },
-    features: [ɵɵProvidersFeature([INPUTNUMBER_VALUE_ACCESSOR]), ɵɵNgOnChangesFeature],
+    features: [ɵɵProvidersFeature([INPUTNUMBER_VALUE_ACCESSOR]), ɵɵInputTransformsFeature, ɵɵNgOnChangesFeature],
     decls: 7,
-    vars: 39,
-    consts: [["input", ""], [3, "ngClass", "ngStyle"], ["pInputText", "", "role", "spinbutton", "inputmode", "decimal", 3, "input", "keydown", "keypress", "paste", "click", "focus", "blur", "ngClass", "ngStyle", "value", "disabled", "readonly"], [4, "ngIf"], ["class", "p-inputnumber-button-group", 4, "ngIf"], ["type", "button", "pButton", "", "class", "p-button-icon-only", "tabindex", "-1", 3, "ngClass", "class", "disabled", "mousedown", "mouseup", "mouseleave", "keydown", "keyup", 4, "ngIf"], [3, "ngClass", "click", 4, "ngIf"], ["class", "p-inputnumber-clear-icon", 3, "click", 4, "ngIf"], [3, "click", "ngClass"], [1, "p-inputnumber-clear-icon", 3, "click"], [4, "ngTemplateOutlet"], [1, "p-inputnumber-button-group"], ["type", "button", "pButton", "", "tabindex", "-1", 1, "p-button-icon-only", 3, "mousedown", "mouseup", "mouseleave", "keydown", "keyup", "ngClass", "disabled"], [3, "ngClass", 4, "ngIf"], [3, "ngClass"]],
+    vars: 43,
+    consts: [["input", ""], [3, "ngClass", "ngStyle"], ["pInputText", "", "role", "spinbutton", "inputmode", "decimal", "pAutoFocus", "", 3, "input", "keydown", "keypress", "paste", "click", "focus", "blur", "ngClass", "ngStyle", "value", "disabled", "readonly", "autofocus"], [4, "ngIf"], ["class", "p-inputnumber-button-group", 4, "ngIf"], ["type", "button", "pButton", "", "class", "p-button-icon-only", "tabindex", "0", 3, "ngClass", "class", "disabled", "mousedown", "mouseup", "mouseleave", "keydown", "keyup", 4, "ngIf"], [3, "ngClass", "click", 4, "ngIf"], ["class", "p-inputnumber-clear-icon", 3, "click", 4, "ngIf"], [3, "click", "ngClass"], [1, "p-inputnumber-clear-icon", 3, "click"], [4, "ngTemplateOutlet"], [1, "p-inputnumber-button-group"], ["type", "button", "pButton", "", "tabindex", "0", 1, "p-button-icon-only", 3, "mousedown", "mouseup", "mouseleave", "keydown", "keyup", "ngClass", "disabled"], [3, "ngClass", 4, "ngIf"], [3, "ngClass"]],
     template: function InputNumber_Template(rf, ctx) {
       if (rf & 1) {
         const _r1 = ɵɵgetCurrentView();
@@ -15910,12 +17800,13 @@ var InputNumber = class _InputNumber {
       }
       if (rf & 2) {
         ɵɵclassMap(ctx.styleClass);
-        ɵɵproperty("ngClass", ɵɵpureFunction3(35, _c17, ctx.showButtons && ctx.buttonLayout === "stacked", ctx.showButtons && ctx.buttonLayout === "horizontal", ctx.showButtons && ctx.buttonLayout === "vertical"))("ngStyle", ctx.style);
+        ɵɵproperty("ngClass", ɵɵpureFunction3(39, _c110, ctx.showButtons && ctx.buttonLayout === "stacked", ctx.showButtons && ctx.buttonLayout === "horizontal", ctx.showButtons && ctx.buttonLayout === "vertical"))("ngStyle", ctx.style);
         ɵɵattribute("data-pc-name", "inputnumber")("data-pc-section", "root");
         ɵɵadvance();
         ɵɵclassMap(ctx.inputStyleClass);
-        ɵɵproperty("ngClass", "p-inputnumber-input")("ngStyle", ctx.inputStyle)("value", ctx.formattedValue())("disabled", ctx.disabled)("readonly", ctx.readonly);
-        ɵɵattribute("id", ctx.inputId)("aria-valuemin", ctx.min)("aria-valuemax", ctx.max)("aria-valuenow", ctx.value)("placeholder", ctx.placeholder)("aria-label", ctx.ariaLabel)("aria-labelledby", ctx.ariaLabelledBy)("title", ctx.title)("size", ctx.size)("name", ctx.name)("autocomplete", ctx.autocomplete)("maxlength", ctx.maxlength)("tabindex", ctx.tabindex)("aria-required", ctx.ariaRequired)("required", ctx.required)("min", ctx.min)("max", ctx.max)("data-pc-section", "input");
+        ɵɵclassProp("p-variant-filled", ctx.variant === "filled" || ctx.config.inputStyle() === "filled");
+        ɵɵproperty("ngClass", "p-inputnumber-input")("ngStyle", ctx.inputStyle)("value", ctx.formattedValue())("disabled", ctx.disabled)("readonly", ctx.readonly)("autofocus", ctx.autofocus);
+        ɵɵattribute("id", ctx.inputId)("variant", ctx.variant)("aria-valuemin", ctx.min)("aria-valuemax", ctx.max)("aria-valuenow", ctx.value)("placeholder", ctx.placeholder)("aria-label", ctx.ariaLabel)("aria-labelledby", ctx.ariaLabelledBy)("title", ctx.title)("size", ctx.size)("name", ctx.name)("autocomplete", ctx.autocomplete)("maxlength", ctx.maxlength)("tabindex", ctx.tabindex)("aria-required", ctx.ariaRequired)("required", ctx.required)("min", ctx.min)("max", ctx.max)("data-pc-section", "input");
         ɵɵadvance(2);
         ɵɵproperty("ngIf", ctx.buttonLayout != "vertical" && ctx.showClear && ctx.value);
         ɵɵadvance();
@@ -15926,7 +17817,7 @@ var InputNumber = class _InputNumber {
         ɵɵproperty("ngIf", ctx.showButtons && ctx.buttonLayout !== "stacked");
       }
     },
-    dependencies: () => [NgClass, NgIf, NgTemplateOutlet, NgStyle, InputText, ButtonDirective, TimesIcon, AngleUpIcon, AngleDownIcon],
+    dependencies: () => [NgClass, NgIf, NgTemplateOutlet, NgStyle, InputText, ButtonDirective, AutoFocus, TimesIcon, AngleUpIcon, AngleDownIcon],
     styles: ["@layer primeng{p-inputnumber,.p-inputnumber{display:inline-flex}.p-inputnumber-button{display:flex;align-items:center;justify-content:center;flex:0 0 auto}.p-inputnumber-buttons-stacked .p-button.p-inputnumber-button .p-button-label,.p-inputnumber-buttons-horizontal .p-button.p-inputnumber-button .p-button-label{display:none}.p-inputnumber-buttons-stacked .p-button.p-inputnumber-button-up{border-top-left-radius:0;border-bottom-left-radius:0;border-bottom-right-radius:0;padding:0}.p-inputnumber-buttons-stacked .p-inputnumber-input{border-top-right-radius:0;border-bottom-right-radius:0}.p-inputnumber-buttons-stacked .p-button.p-inputnumber-button-down{border-top-left-radius:0;border-top-right-radius:0;border-bottom-left-radius:0;padding:0}.p-inputnumber-buttons-stacked .p-inputnumber-button-group{display:flex;flex-direction:column}.p-inputnumber-buttons-stacked .p-inputnumber-button-group .p-button.p-inputnumber-button{flex:1 1 auto}.p-inputnumber-buttons-horizontal .p-button.p-inputnumber-button-up{order:3;border-top-left-radius:0;border-bottom-left-radius:0}.p-inputnumber-buttons-horizontal .p-inputnumber-input{order:2;border-radius:0}.p-inputnumber-buttons-horizontal .p-button.p-inputnumber-button-down{order:1;border-top-right-radius:0;border-bottom-right-radius:0}.p-inputnumber-buttons-vertical{flex-direction:column}.p-inputnumber-buttons-vertical .p-button.p-inputnumber-button-up{order:1;border-bottom-left-radius:0;border-bottom-right-radius:0;width:100%}.p-inputnumber-buttons-vertical .p-inputnumber-input{order:2;border-radius:0;text-align:center}.p-inputnumber-buttons-vertical .p-button.p-inputnumber-button-down{order:3;border-top-left-radius:0;border-top-right-radius:0;width:100%}.p-inputnumber-input{flex:1 1 auto}.p-fluid p-inputnumber,.p-fluid .p-inputnumber{width:100%}.p-fluid .p-inputnumber .p-inputnumber-input{width:1%}.p-fluid .p-inputnumber-buttons-vertical .p-inputnumber-input{width:100%}.p-inputnumber-clear-icon{position:absolute;top:50%;margin-top:-.5rem;cursor:pointer}.p-inputnumber-clearable{position:relative}}\n"],
     encapsulation: 2,
     changeDetection: 0
@@ -15959,6 +17850,7 @@ var InputNumber = class _InputNumber {
                 [ngStyle]="inputStyle"
                 [class]="inputStyleClass"
                 [value]="formattedValue()"
+                [attr.variant]="variant"
                 [attr.aria-valuemin]="min"
                 [attr.aria-valuemax]="max"
                 [attr.aria-valuenow]="value"
@@ -15986,6 +17878,9 @@ var InputNumber = class _InputNumber {
                 (focus)="onInputFocus($event)"
                 (blur)="onInputBlur($event)"
                 [attr.data-pc-section]="'input'"
+                pAutoFocus
+                [autofocus]="autofocus"
+                [class.p-variant-filled]="variant === 'filled' || config.inputStyle() === 'filled'"
             />
             <ng-container *ngIf="buttonLayout != 'vertical' && showClear && value">
                 <TimesIcon *ngIf="!clearIconTemplate" [ngClass]="'p-inputnumber-clear-icon'" (click)="clear()" [attr.data-pc-section]="'clearIcon'" />
@@ -16001,7 +17896,7 @@ var InputNumber = class _InputNumber {
                     class="p-button-icon-only"
                     [class]="incrementButtonClass"
                     [disabled]="disabled"
-                    tabindex="-1"
+                    tabindex="0"
                     (mousedown)="onUpButtonMouseDown($event)"
                     (mouseup)="onUpButtonMouseUp()"
                     (mouseleave)="onUpButtonMouseLeave()"
@@ -16023,7 +17918,7 @@ var InputNumber = class _InputNumber {
                     class="p-button-icon-only"
                     [class]="decrementButtonClass"
                     [disabled]="disabled"
-                    tabindex="-1"
+                    tabindex="0"
                     [attr.aria-hidden]="true"
                     (mousedown)="onDownButtonMouseDown($event)"
                     (mouseup)="onDownButtonMouseUp()"
@@ -16047,7 +17942,7 @@ var InputNumber = class _InputNumber {
                 [class]="incrementButtonClass"
                 class="p-button-icon-only"
                 [disabled]="disabled"
-                tabindex="-1"
+                tabindex="0"
                 [attr.aria-hidden]="true"
                 (mousedown)="onUpButtonMouseDown($event)"
                 (mouseup)="onUpButtonMouseUp()"
@@ -16070,7 +17965,7 @@ var InputNumber = class _InputNumber {
                 class="p-button-icon-only"
                 [class]="decrementButtonClass"
                 [disabled]="disabled"
-                tabindex="-1"
+                tabindex="0"
                 [attr.aria-hidden]="true"
                 (mousedown)="onDownButtonMouseDown($event)"
                 (mouseup)="onDownButtonMouseUp()"
@@ -16110,12 +18005,20 @@ var InputNumber = class _InputNumber {
     type: ChangeDetectorRef
   }, {
     type: Injector
+  }, {
+    type: PrimeNGConfig
   }], {
     showButtons: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     format: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     buttonLayout: [{
       type: Input
@@ -16133,13 +18036,22 @@ var InputNumber = class _InputNumber {
       type: Input
     }],
     size: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     maxlength: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     tabindex: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     title: [{
       type: Input
@@ -16151,22 +18063,34 @@ var InputNumber = class _InputNumber {
       type: Input
     }],
     ariaRequired: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     name: [{
       type: Input
     }],
     required: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     autocomplete: [{
       type: Input
     }],
     min: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     max: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     incrementButtonClass: [{
       type: Input
@@ -16181,13 +18105,22 @@ var InputNumber = class _InputNumber {
       type: Input
     }],
     readonly: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     step: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     allowEmpty: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     locale: [{
       type: Input
@@ -16205,13 +18138,25 @@ var InputNumber = class _InputNumber {
       type: Input
     }],
     useGrouping: [{
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
+    }],
+    variant: [{
       type: Input
     }],
     minFractionDigits: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: (value) => numberAttribute(value, null)
+      }]
     }],
     maxFractionDigits: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: (value) => numberAttribute(value, null)
+      }]
     }],
     prefix: [{
       type: Input
@@ -16226,7 +18171,16 @@ var InputNumber = class _InputNumber {
       type: Input
     }],
     showClear: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
+    }],
+    autofocus: [{
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     disabled: [{
       type: Input
@@ -16263,18 +18217,18 @@ var InputNumberModule = class _InputNumberModule {
   static ɵmod = ɵɵdefineNgModule({
     type: _InputNumberModule,
     declarations: [InputNumber],
-    imports: [CommonModule, InputTextModule, ButtonModule, TimesIcon, AngleUpIcon, AngleDownIcon],
+    imports: [CommonModule, InputTextModule, ButtonModule, AutoFocusModule, TimesIcon, AngleUpIcon, AngleDownIcon],
     exports: [InputNumber, SharedModule]
   });
   static ɵinj = ɵɵdefineInjector({
-    imports: [CommonModule, InputTextModule, ButtonModule, TimesIcon, AngleUpIcon, AngleDownIcon, SharedModule]
+    imports: [CommonModule, InputTextModule, ButtonModule, AutoFocusModule, TimesIcon, AngleUpIcon, AngleDownIcon, SharedModule]
   });
 };
 (() => {
   (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(InputNumberModule, [{
     type: NgModule,
     args: [{
-      imports: [CommonModule, InputTextModule, ButtonModule, TimesIcon, AngleUpIcon, AngleDownIcon],
+      imports: [CommonModule, InputTextModule, ButtonModule, AutoFocusModule, TimesIcon, AngleUpIcon, AngleDownIcon],
       exports: [InputNumber, SharedModule],
       declarations: [InputNumber]
     }]
@@ -16489,7 +18443,7 @@ var AngleRightIcon = class _AngleRightIcon extends BaseIcon {
 var _c09 = (a0) => ({
   "p-disabled": a0
 });
-var _c18 = (a0) => ({
+var _c111 = (a0) => ({
   $implicit: a0
 });
 var _c26 = (a0) => ({
@@ -16510,7 +18464,7 @@ function Paginator_div_0_div_1_Template(rf, ctx) {
     const ctx_r1 = ɵɵnextContext(2);
     ɵɵattribute("data-pc-section", "start");
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", ctx_r1.templateLeft)("ngTemplateOutletContext", ɵɵpureFunction1(3, _c18, ctx_r1.paginatorState));
+    ɵɵproperty("ngTemplateOutlet", ctx_r1.templateLeft)("ngTemplateOutletContext", ɵɵpureFunction1(3, _c111, ctx_r1.paginatorState));
   }
 }
 function Paginator_div_0_span_2_Template(rf, ctx) {
@@ -16616,8 +18570,8 @@ function Paginator_div_0_span_7_button_1_Template(rf, ctx) {
   if (rf & 2) {
     const pageLink_r5 = ctx.$implicit;
     const ctx_r1 = ɵɵnextContext(3);
-    ɵɵproperty("ngClass", ɵɵpureFunction1(3, _c26, pageLink_r5 - 1 == ctx_r1.getPage()));
-    ɵɵattribute("aria-label", ctx_r1.getAriaLabel("pageLabel"));
+    ɵɵproperty("ngClass", ɵɵpureFunction1(4, _c26, pageLink_r5 - 1 == ctx_r1.getPage()));
+    ɵɵattribute("aria-label", ctx_r1.getPageAriaLabel(pageLink_r5))("aria-current", pageLink_r5 - 1 == ctx_r1.getPage() ? "page" : void 0);
     ɵɵadvance();
     ɵɵtextInterpolate1(" ", ctx_r1.getLocalization(pageLink_r5), " ");
   }
@@ -16625,7 +18579,7 @@ function Paginator_div_0_span_7_button_1_Template(rf, ctx) {
 function Paginator_div_0_span_7_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementStart(0, "span", 22);
-    ɵɵtemplate(1, Paginator_div_0_span_7_button_1_Template, 2, 5, "button", 23);
+    ɵɵtemplate(1, Paginator_div_0_span_7_button_1_Template, 2, 6, "button", 23);
     ɵɵelementEnd();
   }
   if (rf & 2) {
@@ -16643,6 +18597,47 @@ function Paginator_div_0_p_dropdown_8_ng_template_1_Template(rf, ctx) {
     ɵɵtextInterpolate(ctx_r1.currentPageReport);
   }
 }
+function Paginator_div_0_p_dropdown_8_ng_container_2_ng_template_1_ng_container_0_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵelementContainer(0);
+  }
+}
+function Paginator_div_0_p_dropdown_8_ng_container_2_ng_template_1_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵtemplate(0, Paginator_div_0_p_dropdown_8_ng_container_2_ng_template_1_ng_container_0_Template, 1, 0, "ng-container", 16);
+  }
+  if (rf & 2) {
+    const item_r7 = ctx.$implicit;
+    const ctx_r1 = ɵɵnextContext(4);
+    ɵɵproperty("ngTemplateOutlet", ctx_r1.jumpToPageItemTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(2, _c111, item_r7));
+  }
+}
+function Paginator_div_0_p_dropdown_8_ng_container_2_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵelementContainerStart(0);
+    ɵɵtemplate(1, Paginator_div_0_p_dropdown_8_ng_container_2_ng_template_1_Template, 1, 4, "ng-template", 28);
+    ɵɵelementContainerEnd();
+  }
+}
+function Paginator_div_0_p_dropdown_8_3_ng_template_0_ng_container_0_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵelementContainer(0);
+  }
+}
+function Paginator_div_0_p_dropdown_8_3_ng_template_0_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵtemplate(0, Paginator_div_0_p_dropdown_8_3_ng_template_0_ng_container_0_Template, 1, 0, "ng-container", 21);
+  }
+  if (rf & 2) {
+    const ctx_r1 = ɵɵnextContext(4);
+    ɵɵproperty("ngTemplateOutlet", ctx_r1.dropdownIconTemplate);
+  }
+}
+function Paginator_div_0_p_dropdown_8_3_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵtemplate(0, Paginator_div_0_p_dropdown_8_3_ng_template_0_Template, 1, 1, "ng-template", 29);
+  }
+}
 function Paginator_div_0_p_dropdown_8_Template(rf, ctx) {
   if (rf & 1) {
     const _r6 = ɵɵgetCurrentView();
@@ -16652,13 +18647,17 @@ function Paginator_div_0_p_dropdown_8_Template(rf, ctx) {
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onPageDropdownChange($event));
     });
-    ɵɵtemplate(1, Paginator_div_0_p_dropdown_8_ng_template_1_Template, 1, 1, "ng-template", 26);
+    ɵɵtemplate(1, Paginator_div_0_p_dropdown_8_ng_template_1_Template, 1, 1, "ng-template", 26)(2, Paginator_div_0_p_dropdown_8_ng_container_2_Template, 2, 0, "ng-container", 27)(3, Paginator_div_0_p_dropdown_8_3_Template, 1, 0, null, 27);
     ɵɵelementEnd();
   }
   if (rf & 2) {
     const ctx_r1 = ɵɵnextContext(2);
     ɵɵproperty("options", ctx_r1.pageItems)("ngModel", ctx_r1.getPage())("disabled", ctx_r1.empty())("appendTo", ctx_r1.dropdownAppendTo)("scrollHeight", ctx_r1.dropdownScrollHeight);
     ɵɵattribute("aria-label", ctx_r1.getAriaLabel("jumpToPageDropdownLabel"));
+    ɵɵadvance(2);
+    ɵɵproperty("ngIf", ctx_r1.jumpToPageItemTemplate);
+    ɵɵadvance();
+    ɵɵproperty("ngIf", ctx_r1.dropdownIconTemplate);
   }
 }
 function Paginator_div_0_AngleRightIcon_10_Template(rf, ctx) {
@@ -16717,10 +18716,10 @@ function Paginator_div_0_button_12_span_2_Template(rf, ctx) {
 }
 function Paginator_div_0_button_12_Template(rf, ctx) {
   if (rf & 1) {
-    const _r7 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "button", 27);
+    const _r8 = ɵɵgetCurrentView();
+    ɵɵelementStart(0, "button", 30);
     ɵɵlistener("click", function Paginator_div_0_button_12_Template_button_click_0_listener($event) {
-      ɵɵrestoreView(_r7);
+      ɵɵrestoreView(_r8);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.changePageToLast($event));
     });
@@ -16739,10 +18738,10 @@ function Paginator_div_0_button_12_Template(rf, ctx) {
 }
 function Paginator_div_0_p_inputNumber_13_Template(rf, ctx) {
   if (rf & 1) {
-    const _r8 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "p-inputNumber", 28);
+    const _r9 = ɵɵgetCurrentView();
+    ɵɵelementStart(0, "p-inputNumber", 31);
     ɵɵlistener("ngModelChange", function Paginator_div_0_p_inputNumber_13_Template_p_inputNumber_ngModelChange_0_listener($event) {
-      ɵɵrestoreView(_r8);
+      ɵɵrestoreView(_r9);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.changePage($event - 1));
     });
@@ -16763,34 +18762,53 @@ function Paginator_div_0_p_dropdown_14_ng_container_1_ng_template_1_Template(rf,
     ɵɵtemplate(0, Paginator_div_0_p_dropdown_14_ng_container_1_ng_template_1_ng_container_0_Template, 1, 0, "ng-container", 16);
   }
   if (rf & 2) {
-    const item_r10 = ctx.$implicit;
+    const item_r11 = ctx.$implicit;
     const ctx_r1 = ɵɵnextContext(4);
-    ɵɵproperty("ngTemplateOutlet", ctx_r1.dropdownItemTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(2, _c18, item_r10));
+    ɵɵproperty("ngTemplateOutlet", ctx_r1.dropdownItemTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(2, _c111, item_r11));
   }
 }
 function Paginator_div_0_p_dropdown_14_ng_container_1_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainerStart(0);
-    ɵɵtemplate(1, Paginator_div_0_p_dropdown_14_ng_container_1_ng_template_1_Template, 1, 4, "ng-template", 31);
+    ɵɵtemplate(1, Paginator_div_0_p_dropdown_14_ng_container_1_ng_template_1_Template, 1, 4, "ng-template", 28);
     ɵɵelementContainerEnd();
+  }
+}
+function Paginator_div_0_p_dropdown_14_2_ng_template_0_ng_container_0_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵelementContainer(0);
+  }
+}
+function Paginator_div_0_p_dropdown_14_2_ng_template_0_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵtemplate(0, Paginator_div_0_p_dropdown_14_2_ng_template_0_ng_container_0_Template, 1, 0, "ng-container", 21);
+  }
+  if (rf & 2) {
+    const ctx_r1 = ɵɵnextContext(4);
+    ɵɵproperty("ngTemplateOutlet", ctx_r1.dropdownIconTemplate);
+  }
+}
+function Paginator_div_0_p_dropdown_14_2_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵtemplate(0, Paginator_div_0_p_dropdown_14_2_ng_template_0_Template, 1, 1, "ng-template", 29);
   }
 }
 function Paginator_div_0_p_dropdown_14_Template(rf, ctx) {
   if (rf & 1) {
-    const _r9 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "p-dropdown", 29);
+    const _r10 = ɵɵgetCurrentView();
+    ɵɵelementStart(0, "p-dropdown", 32);
     ɵɵtwoWayListener("ngModelChange", function Paginator_div_0_p_dropdown_14_Template_p_dropdown_ngModelChange_0_listener($event) {
-      ɵɵrestoreView(_r9);
+      ɵɵrestoreView(_r10);
       const ctx_r1 = ɵɵnextContext(2);
       ɵɵtwoWayBindingSet(ctx_r1.rows, $event) || (ctx_r1.rows = $event);
       return ɵɵresetView($event);
     });
     ɵɵlistener("onChange", function Paginator_div_0_p_dropdown_14_Template_p_dropdown_onChange_0_listener($event) {
-      ɵɵrestoreView(_r9);
+      ɵɵrestoreView(_r10);
       const ctx_r1 = ɵɵnextContext(2);
       return ɵɵresetView(ctx_r1.onRppChange($event));
     });
-    ɵɵtemplate(1, Paginator_div_0_p_dropdown_14_ng_container_1_Template, 2, 0, "ng-container", 30);
+    ɵɵtemplate(1, Paginator_div_0_p_dropdown_14_ng_container_1_Template, 2, 0, "ng-container", 27)(2, Paginator_div_0_p_dropdown_14_2_Template, 1, 0, null, 27);
     ɵɵelementEnd();
   }
   if (rf & 2) {
@@ -16800,6 +18818,8 @@ function Paginator_div_0_p_dropdown_14_Template(rf, ctx) {
     ɵɵproperty("disabled", ctx_r1.empty())("appendTo", ctx_r1.dropdownAppendTo)("scrollHeight", ctx_r1.dropdownScrollHeight)("ariaLabel", ctx_r1.getAriaLabel("rowsPerPageLabel"));
     ɵɵadvance();
     ɵɵproperty("ngIf", ctx_r1.dropdownItemTemplate);
+    ɵɵadvance();
+    ɵɵproperty("ngIf", ctx_r1.dropdownIconTemplate);
   }
 }
 function Paginator_div_0_div_15_ng_container_1_Template(rf, ctx) {
@@ -16809,7 +18829,7 @@ function Paginator_div_0_div_15_ng_container_1_Template(rf, ctx) {
 }
 function Paginator_div_0_div_15_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "div", 32);
+    ɵɵelementStart(0, "div", 33);
     ɵɵtemplate(1, Paginator_div_0_div_15_ng_container_1_Template, 1, 0, "ng-container", 16);
     ɵɵelementEnd();
   }
@@ -16817,7 +18837,7 @@ function Paginator_div_0_div_15_Template(rf, ctx) {
     const ctx_r1 = ɵɵnextContext(2);
     ɵɵattribute("data-pc-section", "end");
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", ctx_r1.templateRight)("ngTemplateOutletContext", ɵɵpureFunction1(3, _c18, ctx_r1.paginatorState));
+    ɵɵproperty("ngTemplateOutlet", ctx_r1.templateRight)("ngTemplateOutletContext", ɵɵpureFunction1(3, _c111, ctx_r1.paginatorState));
   }
 }
 function Paginator_div_0_Template(rf, ctx) {
@@ -16833,7 +18853,7 @@ function Paginator_div_0_Template(rf, ctx) {
     });
     ɵɵtemplate(5, Paginator_div_0_AngleLeftIcon_5_Template, 1, 1, "AngleLeftIcon", 6)(6, Paginator_div_0_span_6_Template, 2, 1, "span", 7);
     ɵɵelementEnd();
-    ɵɵtemplate(7, Paginator_div_0_span_7_Template, 2, 1, "span", 8)(8, Paginator_div_0_p_dropdown_8_Template, 2, 6, "p-dropdown", 9);
+    ɵɵtemplate(7, Paginator_div_0_span_7_Template, 2, 1, "span", 8)(8, Paginator_div_0_p_dropdown_8_Template, 4, 8, "p-dropdown", 9);
     ɵɵelementStart(9, "button", 10);
     ɵɵlistener("click", function Paginator_div_0_Template_button_click_9_listener($event) {
       ɵɵrestoreView(_r1);
@@ -16842,7 +18862,7 @@ function Paginator_div_0_Template(rf, ctx) {
     });
     ɵɵtemplate(10, Paginator_div_0_AngleRightIcon_10_Template, 1, 1, "AngleRightIcon", 6)(11, Paginator_div_0_span_11_Template, 2, 1, "span", 7);
     ɵɵelementEnd();
-    ɵɵtemplate(12, Paginator_div_0_button_12_Template, 3, 7, "button", 11)(13, Paginator_div_0_p_inputNumber_13_Template, 1, 2, "p-inputNumber", 12)(14, Paginator_div_0_p_dropdown_14_Template, 2, 7, "p-dropdown", 13)(15, Paginator_div_0_div_15_Template, 2, 5, "div", 14);
+    ɵɵtemplate(12, Paginator_div_0_button_12_Template, 3, 7, "button", 11)(13, Paginator_div_0_p_inputNumber_13_Template, 1, 2, "p-inputNumber", 12)(14, Paginator_div_0_p_dropdown_14_Template, 3, 8, "p-dropdown", 13)(15, Paginator_div_0_div_15_Template, 2, 5, "div", 14);
     ɵɵelementEnd();
   }
   if (rf & 2) {
@@ -16975,6 +18995,12 @@ var Paginator = class _Paginator {
    */
   showJumpToPageInput;
   /**
+   * Template instance to inject into the jump to page dropdown item inside in the paginator.
+   * @param {Object} context - item instance.
+   * @group Props
+   */
+  jumpToPageItemTemplate;
+  /**
    * Whether to show page links.
    * @group Props
    */
@@ -16985,7 +19011,7 @@ var Paginator = class _Paginator {
    */
   locale;
   /**
-   * Template instance to inject into the dropdown item inside in the paginator.
+   * Template instance to inject into the rows per page dropdown item inside in the paginator.
    * @param {Object} context - item instance.
    * @group Props
    */
@@ -17007,6 +19033,7 @@ var Paginator = class _Paginator {
    */
   onPageChange = new EventEmitter();
   templates;
+  dropdownIconTemplate;
   firstPageLinkIconTemplate;
   previousPageLinkIconTemplate;
   lastPageLinkIconTemplate;
@@ -17027,6 +19054,9 @@ var Paginator = class _Paginator {
   getAriaLabel(labelType) {
     return this.config.translation.aria ? this.config.translation.aria[labelType] : void 0;
   }
+  getPageAriaLabel(value) {
+    return this.config.translation.aria ? this.config.translation.aria.pageLabel.replace(/{page}/g, `${value}`) : void 0;
+  }
   getLocalization(digit) {
     const numerals = [...new Intl.NumberFormat(this.locale, {
       useGrouping: false
@@ -17042,6 +19072,9 @@ var Paginator = class _Paginator {
   ngAfterContentInit() {
     this.templates.forEach((item) => {
       switch (item.getType()) {
+        case "dropdownicon":
+          this.dropdownIconTemplate = item.template;
+          break;
         case "firstpagelinkicon":
           this.firstPageLinkIconTemplate = item.template;
           break;
@@ -17075,6 +19108,9 @@ var Paginator = class _Paginator {
     }
     if (simpleChange.rowsPerPageOptions) {
       this.updateRowsPerPageOptions();
+    }
+    if (simpleChange.pageLinkSize) {
+      this.updatePageLinks();
     }
   }
   updateRowsPerPageOptions() {
@@ -17216,24 +19252,25 @@ var Paginator = class _Paginator {
     },
     hostAttrs: [1, "p-element"],
     inputs: {
-      pageLinkSize: "pageLinkSize",
+      pageLinkSize: [InputFlags.HasDecoratorInputTransform, "pageLinkSize", "pageLinkSize", numberAttribute],
       style: "style",
       styleClass: "styleClass",
-      alwaysShow: "alwaysShow",
+      alwaysShow: [InputFlags.HasDecoratorInputTransform, "alwaysShow", "alwaysShow", booleanAttribute],
       dropdownAppendTo: "dropdownAppendTo",
       templateLeft: "templateLeft",
       templateRight: "templateRight",
       appendTo: "appendTo",
       dropdownScrollHeight: "dropdownScrollHeight",
       currentPageReportTemplate: "currentPageReportTemplate",
-      showCurrentPageReport: "showCurrentPageReport",
-      showFirstLastIcon: "showFirstLastIcon",
-      totalRecords: "totalRecords",
-      rows: "rows",
+      showCurrentPageReport: [InputFlags.HasDecoratorInputTransform, "showCurrentPageReport", "showCurrentPageReport", booleanAttribute],
+      showFirstLastIcon: [InputFlags.HasDecoratorInputTransform, "showFirstLastIcon", "showFirstLastIcon", booleanAttribute],
+      totalRecords: [InputFlags.HasDecoratorInputTransform, "totalRecords", "totalRecords", numberAttribute],
+      rows: [InputFlags.HasDecoratorInputTransform, "rows", "rows", numberAttribute],
       rowsPerPageOptions: "rowsPerPageOptions",
-      showJumpToPageDropdown: "showJumpToPageDropdown",
-      showJumpToPageInput: "showJumpToPageInput",
-      showPageLinks: "showPageLinks",
+      showJumpToPageDropdown: [InputFlags.HasDecoratorInputTransform, "showJumpToPageDropdown", "showJumpToPageDropdown", booleanAttribute],
+      showJumpToPageInput: [InputFlags.HasDecoratorInputTransform, "showJumpToPageInput", "showJumpToPageInput", booleanAttribute],
+      jumpToPageItemTemplate: "jumpToPageItemTemplate",
+      showPageLinks: [InputFlags.HasDecoratorInputTransform, "showPageLinks", "showPageLinks", booleanAttribute],
       locale: "locale",
       dropdownItemTemplate: "dropdownItemTemplate",
       first: "first"
@@ -17241,10 +19278,10 @@ var Paginator = class _Paginator {
     outputs: {
       onPageChange: "onPageChange"
     },
-    features: [ɵɵNgOnChangesFeature],
+    features: [ɵɵInputTransformsFeature, ɵɵNgOnChangesFeature],
     decls: 1,
     vars: 1,
-    consts: [[3, "class", "ngStyle", "ngClass", 4, "ngIf"], [3, "ngStyle", "ngClass"], ["class", "p-paginator-left-content", 4, "ngIf"], ["class", "p-paginator-current", 4, "ngIf"], ["type", "button", "pRipple", "", "class", "p-paginator-first p-paginator-element p-link", 3, "disabled", "ngClass", "click", 4, "ngIf"], ["type", "button", "pRipple", "", 1, "p-paginator-prev", "p-paginator-element", "p-link", 3, "click", "disabled", "ngClass"], [3, "styleClass", 4, "ngIf"], ["class", "p-paginator-icon", 4, "ngIf"], ["class", "p-paginator-pages", 4, "ngIf"], ["styleClass", "p-paginator-page-options", 3, "options", "ngModel", "disabled", "appendTo", "scrollHeight", "onChange", 4, "ngIf"], ["type", "button", "pRipple", "", 1, "p-paginator-next", "p-paginator-element", "p-link", 3, "click", "disabled", "ngClass"], ["type", "button", "pRipple", "", "class", "p-paginator-last p-paginator-element p-link", 3, "disabled", "ngClass", "click", 4, "ngIf"], ["class", "p-paginator-page-input", 3, "ngModel", "disabled", "ngModelChange", 4, "ngIf"], ["styleClass", "p-paginator-rpp-options", 3, "options", "ngModel", "disabled", "appendTo", "scrollHeight", "ariaLabel", "ngModelChange", "onChange", 4, "ngIf"], ["class", "p-paginator-right-content", 4, "ngIf"], [1, "p-paginator-left-content"], [4, "ngTemplateOutlet", "ngTemplateOutletContext"], [1, "p-paginator-current"], ["type", "button", "pRipple", "", 1, "p-paginator-first", "p-paginator-element", "p-link", 3, "click", "disabled", "ngClass"], [3, "styleClass"], [1, "p-paginator-icon"], [4, "ngTemplateOutlet"], [1, "p-paginator-pages"], ["type", "button", "class", "p-paginator-page p-paginator-element p-link", "pRipple", "", 3, "ngClass", "click", 4, "ngFor", "ngForOf"], ["type", "button", "pRipple", "", 1, "p-paginator-page", "p-paginator-element", "p-link", 3, "click", "ngClass"], ["styleClass", "p-paginator-page-options", 3, "onChange", "options", "ngModel", "disabled", "appendTo", "scrollHeight"], ["pTemplate", "selectedItem"], ["type", "button", "pRipple", "", 1, "p-paginator-last", "p-paginator-element", "p-link", 3, "click", "disabled", "ngClass"], [1, "p-paginator-page-input", 3, "ngModelChange", "ngModel", "disabled"], ["styleClass", "p-paginator-rpp-options", 3, "ngModelChange", "onChange", "options", "ngModel", "disabled", "appendTo", "scrollHeight", "ariaLabel"], [4, "ngIf"], ["pTemplate", "item"], [1, "p-paginator-right-content"]],
+    consts: [[3, "class", "ngStyle", "ngClass", 4, "ngIf"], [3, "ngStyle", "ngClass"], ["class", "p-paginator-left-content", 4, "ngIf"], ["class", "p-paginator-current", 4, "ngIf"], ["type", "button", "pRipple", "", "class", "p-paginator-first p-paginator-element p-link", 3, "disabled", "ngClass", "click", 4, "ngIf"], ["type", "button", "pRipple", "", 1, "p-paginator-prev", "p-paginator-element", "p-link", 3, "click", "disabled", "ngClass"], [3, "styleClass", 4, "ngIf"], ["class", "p-paginator-icon", 4, "ngIf"], ["class", "p-paginator-pages", 4, "ngIf"], ["styleClass", "p-paginator-page-options", 3, "options", "ngModel", "disabled", "appendTo", "scrollHeight", "onChange", 4, "ngIf"], ["type", "button", "pRipple", "", 1, "p-paginator-next", "p-paginator-element", "p-link", 3, "click", "disabled", "ngClass"], ["type", "button", "pRipple", "", "class", "p-paginator-last p-paginator-element p-link", 3, "disabled", "ngClass", "click", 4, "ngIf"], ["class", "p-paginator-page-input", 3, "ngModel", "disabled", "ngModelChange", 4, "ngIf"], ["styleClass", "p-paginator-rpp-options", 3, "options", "ngModel", "disabled", "appendTo", "scrollHeight", "ariaLabel", "ngModelChange", "onChange", 4, "ngIf"], ["class", "p-paginator-right-content", 4, "ngIf"], [1, "p-paginator-left-content"], [4, "ngTemplateOutlet", "ngTemplateOutletContext"], [1, "p-paginator-current"], ["type", "button", "pRipple", "", 1, "p-paginator-first", "p-paginator-element", "p-link", 3, "click", "disabled", "ngClass"], [3, "styleClass"], [1, "p-paginator-icon"], [4, "ngTemplateOutlet"], [1, "p-paginator-pages"], ["type", "button", "class", "p-paginator-page p-paginator-element p-link", "pRipple", "", 3, "ngClass", "click", 4, "ngFor", "ngForOf"], ["type", "button", "pRipple", "", 1, "p-paginator-page", "p-paginator-element", "p-link", 3, "click", "ngClass"], ["styleClass", "p-paginator-page-options", 3, "onChange", "options", "ngModel", "disabled", "appendTo", "scrollHeight"], ["pTemplate", "selectedItem"], [4, "ngIf"], ["pTemplate", "item"], ["pTemplate", "dropdownicon"], ["type", "button", "pRipple", "", 1, "p-paginator-last", "p-paginator-element", "p-link", 3, "click", "disabled", "ngClass"], [1, "p-paginator-page-input", 3, "ngModelChange", "ngModel", "disabled"], ["styleClass", "p-paginator-rpp-options", 3, "ngModelChange", "onChange", "options", "ngModel", "disabled", "appendTo", "scrollHeight", "ariaLabel"], [1, "p-paginator-right-content"]],
     template: function Paginator_Template(rf, ctx) {
       if (rf & 1) {
         ɵɵtemplate(0, Paginator_div_0_Template, 16, 29, "div", 0);
@@ -17305,7 +19342,8 @@ var Paginator = class _Paginator {
                     *ngFor="let pageLink of pageLinks"
                     class="p-paginator-page p-paginator-element p-link"
                     [ngClass]="{ 'p-highlight': pageLink - 1 == getPage() }"
-                    [attr.aria-label]="getAriaLabel('pageLabel')"
+                    [attr.aria-label]="getPageAriaLabel(pageLink)"
+                    [attr.aria-current]="pageLink - 1 == getPage() ? 'page' : undefined"
                     (click)="onPageLinkClick($event, pageLink - 1)"
                     pRipple
                 >
@@ -17324,6 +19362,14 @@ var Paginator = class _Paginator {
                 [scrollHeight]="dropdownScrollHeight"
             >
                 <ng-template pTemplate="selectedItem">{{ currentPageReport }}</ng-template>
+                <ng-container *ngIf="jumpToPageItemTemplate">
+                    <ng-template let-item pTemplate="item">
+                        <ng-container *ngTemplateOutlet="jumpToPageItemTemplate; context: { $implicit: item }"> </ng-container>
+                    </ng-template>
+                </ng-container>
+                <ng-template pTemplate="dropdownicon" *ngIf="dropdownIconTemplate">
+                    <ng-container *ngTemplateOutlet="dropdownIconTemplate"></ng-container>
+                </ng-template>
             </p-dropdown>
             <button
                 type="button"
@@ -17371,6 +19417,9 @@ var Paginator = class _Paginator {
                         <ng-container *ngTemplateOutlet="dropdownItemTemplate; context: { $implicit: item }"> </ng-container>
                     </ng-template>
                 </ng-container>
+                <ng-template pTemplate="dropdownicon" *ngIf="dropdownIconTemplate">
+                    <ng-container *ngTemplateOutlet="dropdownIconTemplate"></ng-container>
+                </ng-template>
             </p-dropdown>
             <div class="p-paginator-right-content" *ngIf="templateRight" [attr.data-pc-section]="'end'">
                 <ng-container *ngTemplateOutlet="templateRight; context: { $implicit: paginatorState }"></ng-container>
@@ -17390,7 +19439,10 @@ var Paginator = class _Paginator {
     type: PrimeNGConfig
   }], {
     pageLinkSize: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     style: [{
       type: Input
@@ -17399,7 +19451,10 @@ var Paginator = class _Paginator {
       type: Input
     }],
     alwaysShow: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     dropdownAppendTo: [{
       type: Input
@@ -17420,28 +19475,52 @@ var Paginator = class _Paginator {
       type: Input
     }],
     showCurrentPageReport: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     showFirstLastIcon: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     totalRecords: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     rows: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     rowsPerPageOptions: [{
       type: Input
     }],
     showJumpToPageDropdown: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     showJumpToPageInput: [{
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
+    }],
+    jumpToPageItemTemplate: [{
       type: Input
     }],
     showPageLinks: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     locale: [{
       type: Input
@@ -17488,7 +19567,7 @@ var PaginatorModule = class _PaginatorModule {
 
 // node_modules/primeng/fesm2022/primeng-selectbutton.mjs
 var _c010 = ["container"];
-var _c19 = (a0, a1, a2) => ({
+var _c113 = (a0, a1, a2) => ({
   "p-highlight": a0,
   "p-disabled": a1,
   "p-button-icon-only": a2
@@ -17579,8 +19658,8 @@ function SelectButton_div_2_Template(rf, ctx) {
     const customcontent_r8 = ɵɵreference(3);
     const ctx_r4 = ɵɵnextContext();
     ɵɵclassMap(option_r3.styleClass);
-    ɵɵproperty("role", ctx_r4.multiple ? "checkbox" : "radio")("ngClass", ɵɵpureFunction3(14, _c19, ctx_r4.isSelected(option_r3), ctx_r4.disabled || ctx_r4.isOptionDisabled(option_r3), option_r3.icon && !ctx_r4.getOptionLabel(option_r3)));
-    ɵɵattribute("tabindex", i_r4 === ctx_r4.focusedIndex ? "0" : "-1")("aria-label", option_r3.label)("aria-checked", ctx_r4.isSelected(option_r3))("aria-disabled", ctx_r4.optionDisabled)("aria-pressed", ctx_r4.isSelected(option_r3))("title", option_r3.title)("aria-labelledby", ctx_r4.getOptionLabel(option_r3))("data-pc-section", "button");
+    ɵɵproperty("role", ctx_r4.multiple ? "checkbox" : "radio")("ngClass", ɵɵpureFunction3(14, _c113, ctx_r4.isSelected(option_r3), ctx_r4.disabled || ctx_r4.isOptionDisabled(option_r3), option_r3.icon && !ctx_r4.getOptionLabel(option_r3)))("autofocus", ctx_r4.autofocus);
+    ɵɵattribute("tabindex", i_r4 === ctx_r4.focusedIndex && !ctx_r4.disabled ? "0" : "-1")("aria-label", option_r3.label)("aria-checked", ctx_r4.isSelected(option_r3))("aria-disabled", ctx_r4.optionDisabled)("title", option_r3.title)("aria-labelledby", ctx_r4.getOptionLabel(option_r3))("data-pc-section", "button");
     ɵɵadvance();
     ɵɵproperty("ngIf", !ctx_r4.itemTemplate)("ngIfElse", customcontent_r8);
   }
@@ -17657,6 +19736,11 @@ var SelectButton = class _SelectButton {
    * @group Props
    */
   dataKey;
+  /**
+   * When present, it specifies that the component should automatically get focus on load.
+   * @group Props
+   */
+  autofocus;
   /**
    * Callback to invoke on input click.
    * @param {SelectButtonOptionClickEvent} event - Custom click event.
@@ -17838,24 +19922,25 @@ var SelectButton = class _SelectButton {
       optionLabel: "optionLabel",
       optionValue: "optionValue",
       optionDisabled: "optionDisabled",
-      unselectable: "unselectable",
-      tabindex: "tabindex",
-      multiple: "multiple",
-      allowEmpty: "allowEmpty",
+      unselectable: [InputFlags.HasDecoratorInputTransform, "unselectable", "unselectable", booleanAttribute],
+      tabindex: [InputFlags.HasDecoratorInputTransform, "tabindex", "tabindex", numberAttribute],
+      multiple: [InputFlags.HasDecoratorInputTransform, "multiple", "multiple", booleanAttribute],
+      allowEmpty: [InputFlags.HasDecoratorInputTransform, "allowEmpty", "allowEmpty", booleanAttribute],
       style: "style",
       styleClass: "styleClass",
       ariaLabelledBy: "ariaLabelledBy",
-      disabled: "disabled",
-      dataKey: "dataKey"
+      disabled: [InputFlags.HasDecoratorInputTransform, "disabled", "disabled", booleanAttribute],
+      dataKey: "dataKey",
+      autofocus: [InputFlags.HasDecoratorInputTransform, "autofocus", "autofocus", booleanAttribute]
     },
     outputs: {
       onOptionClick: "onOptionClick",
       onChange: "onChange"
     },
-    features: [ɵɵProvidersFeature([SELECTBUTTON_VALUE_ACCESSOR])],
+    features: [ɵɵProvidersFeature([SELECTBUTTON_VALUE_ACCESSOR]), ɵɵInputTransformsFeature],
     decls: 3,
     vars: 8,
-    consts: [["container", ""], ["customcontent", ""], ["role", "group", 3, "ngClass", "ngStyle"], ["pRipple", "", "class", "p-button p-component", 3, "role", "class", "ngClass", "click", "keydown", "focus", "blur", 4, "ngFor", "ngForOf"], ["pRipple", "", 1, "p-button", "p-component", 3, "click", "keydown", "focus", "blur", "role", "ngClass"], [4, "ngIf", "ngIfElse"], [3, "ngClass", "class", 4, "ngIf"], [1, "p-button-label"], [3, "ngClass"], [4, "ngTemplateOutlet", "ngTemplateOutletContext"]],
+    consts: [["container", ""], ["customcontent", ""], ["role", "group", 3, "ngClass", "ngStyle"], ["pRipple", "", "class", "p-button p-component", "pAutoFocus", "", 3, "role", "class", "ngClass", "autofocus", "click", "keydown", "focus", "blur", 4, "ngFor", "ngForOf"], ["pRipple", "", "pAutoFocus", "", 1, "p-button", "p-component", 3, "click", "keydown", "focus", "blur", "role", "ngClass", "autofocus"], [4, "ngIf", "ngIfElse"], [3, "ngClass", "class", 4, "ngIf"], [1, "p-button-label"], [3, "ngClass"], [4, "ngTemplateOutlet", "ngTemplateOutletContext"]],
     template: function SelectButton_Template(rf, ctx) {
       if (rf & 1) {
         ɵɵelementStart(0, "div", 2, 0);
@@ -17870,8 +19955,8 @@ var SelectButton = class _SelectButton {
         ɵɵproperty("ngForOf", ctx.options);
       }
     },
-    dependencies: [NgClass, NgForOf, NgIf, NgTemplateOutlet, NgStyle, Ripple],
-    styles: ['@layer primeng{.p-button{margin:0;display:inline-flex;cursor:pointer;-webkit-user-select:none;user-select:none;align-items:center;vertical-align:bottom;text-align:center;overflow:hidden;position:relative}.p-button-label{flex:1 1 auto}.p-button-icon-right{order:1}.p-button:disabled{cursor:default;pointer-events:none}.p-button-icon-only{justify-content:center}.p-button-icon-only:after{content:"p";visibility:hidden;clip:rect(0 0 0 0);width:0}.p-button-vertical{flex-direction:column}.p-button-icon-bottom{order:2}.p-buttonset .p-button{margin:0}.p-buttonset .p-button:not(:last-child){border-right:0 none}.p-buttonset .p-button:not(:first-of-type):not(:last-of-type){border-radius:0}.p-buttonset .p-button:first-of-type{border-top-right-radius:0;border-bottom-right-radius:0}.p-buttonset .p-button:last-of-type{border-top-left-radius:0;border-bottom-left-radius:0}.p-buttonset .p-button:focus{position:relative;z-index:1}p-button[iconpos=right] spinnericon{order:1}}\n'],
+    dependencies: [NgClass, NgForOf, NgIf, NgTemplateOutlet, NgStyle, Ripple, AutoFocus],
+    styles: ['@layer primeng{.p-button{margin:0;display:inline-flex;cursor:pointer;-webkit-user-select:none;user-select:none;align-items:center;vertical-align:bottom;text-align:center;overflow:hidden;position:relative}.p-button-label{flex:1 1 auto}.p-button-icon-right{order:1}.p-button:disabled{cursor:default;pointer-events:none}.p-button-icon-only{justify-content:center}.p-button-icon-only:after{content:"p";visibility:hidden;clip:rect(0 0 0 0);width:0}.p-button-vertical{flex-direction:column}.p-button-icon-bottom{order:2}.p-button-group .p-button{margin:0}.p-button-group .p-button:focus,.p-button-group p-button:focus .p-button,.p-buttonset .p-button:focus,.p-buttonset p-button:focus .p-button{position:relative;z-index:1}.p-button-group .p-button:not(:last-child),.p-button-group .p-button:not(:last-child):hover,.p-button-group p-button:not(:last-child) .p-button,.p-button-group p-button:not(:last-child) .p-button:hover,.p-buttonset .p-button:not(:last-child),.p-buttonset .p-button:not(:last-child):hover,.p-buttonset p-button:not(:last-child) .p-button,.p-buttonset p-button:not(:last-child) .p-button:hover{border-right:0 none}.p-button-group .p-button:not(:first-of-type):not(:last-of-type),.p-button-group p-button:not(:first-of-type):not(:last-of-type) .p-button,.p-buttonset .p-button:not(:first-of-type):not(:last-of-type),.p-buttonset p-button:not(:first-of-type):not(:last-of-type) .p-button{border-radius:0}.p-button-group .p-button:first-of-type:not(:only-of-type),.p-button-group p-button:first-of-type:not(:only-of-type) .p-button,.p-buttonset .p-button:first-of-type:not(:only-of-type),.p-buttonset p-button:first-of-type:not(:only-of-type) .p-button{border-top-right-radius:0;border-bottom-right-radius:0}.p-button-group .p-button:last-of-type:not(:only-of-type),.p-button-group p-button:last-of-type:not(:only-of-type) .p-button,.p-buttonset .p-button:last-of-type:not(:only-of-type),.p-buttonset p-button:last-of-type:not(:only-of-type) .p-button{border-top-left-radius:0;border-bottom-left-radius:0}p-button[iconpos=right] spinnericon{order:1}}\n'],
     encapsulation: 2,
     changeDetection: 0
   });
@@ -17886,7 +19971,7 @@ var SelectButton = class _SelectButton {
             <div
                 *ngFor="let option of options; let i = index"
                 pRipple
-                [attr.tabindex]="i === focusedIndex ? '0' : '-1'"
+                [attr.tabindex]="i === focusedIndex && !disabled ? '0' : '-1'"
                 [attr.aria-label]="option.label"
                 [role]="multiple ? 'checkbox' : 'radio'"
                 [attr.aria-checked]="isSelected(option)"
@@ -17894,7 +19979,6 @@ var SelectButton = class _SelectButton {
                 class="p-button p-component"
                 [class]="option.styleClass"
                 [ngClass]="{ 'p-highlight': isSelected(option), 'p-disabled': disabled || isOptionDisabled(option), 'p-button-icon-only': option.icon && !getOptionLabel(option) }"
-                [attr.aria-pressed]="isSelected(option)"
                 (click)="onOptionSelect($event, option, i)"
                 (keydown)="onKeyDown($event, option, i)"
                 [attr.title]="option.title"
@@ -17902,6 +19986,8 @@ var SelectButton = class _SelectButton {
                 (blur)="onBlur()"
                 [attr.aria-labelledby]="this.getOptionLabel(option)"
                 [attr.data-pc-section]="'button'"
+                pAutoFocus
+                [autofocus]="autofocus"
             >
                 <ng-container *ngIf="!itemTemplate; else customcontent">
                     <span [ngClass]="'p-button-icon p-button-icon-left'" [class]="option.icon" *ngIf="option.icon" [attr.data-pc-section]="'icon'"></span>
@@ -17919,7 +20005,7 @@ var SelectButton = class _SelectButton {
       host: {
         class: "p-element"
       },
-      styles: ['@layer primeng{.p-button{margin:0;display:inline-flex;cursor:pointer;-webkit-user-select:none;user-select:none;align-items:center;vertical-align:bottom;text-align:center;overflow:hidden;position:relative}.p-button-label{flex:1 1 auto}.p-button-icon-right{order:1}.p-button:disabled{cursor:default;pointer-events:none}.p-button-icon-only{justify-content:center}.p-button-icon-only:after{content:"p";visibility:hidden;clip:rect(0 0 0 0);width:0}.p-button-vertical{flex-direction:column}.p-button-icon-bottom{order:2}.p-buttonset .p-button{margin:0}.p-buttonset .p-button:not(:last-child){border-right:0 none}.p-buttonset .p-button:not(:first-of-type):not(:last-of-type){border-radius:0}.p-buttonset .p-button:first-of-type{border-top-right-radius:0;border-bottom-right-radius:0}.p-buttonset .p-button:last-of-type{border-top-left-radius:0;border-bottom-left-radius:0}.p-buttonset .p-button:focus{position:relative;z-index:1}p-button[iconpos=right] spinnericon{order:1}}\n']
+      styles: ['@layer primeng{.p-button{margin:0;display:inline-flex;cursor:pointer;-webkit-user-select:none;user-select:none;align-items:center;vertical-align:bottom;text-align:center;overflow:hidden;position:relative}.p-button-label{flex:1 1 auto}.p-button-icon-right{order:1}.p-button:disabled{cursor:default;pointer-events:none}.p-button-icon-only{justify-content:center}.p-button-icon-only:after{content:"p";visibility:hidden;clip:rect(0 0 0 0);width:0}.p-button-vertical{flex-direction:column}.p-button-icon-bottom{order:2}.p-button-group .p-button{margin:0}.p-button-group .p-button:focus,.p-button-group p-button:focus .p-button,.p-buttonset .p-button:focus,.p-buttonset p-button:focus .p-button{position:relative;z-index:1}.p-button-group .p-button:not(:last-child),.p-button-group .p-button:not(:last-child):hover,.p-button-group p-button:not(:last-child) .p-button,.p-button-group p-button:not(:last-child) .p-button:hover,.p-buttonset .p-button:not(:last-child),.p-buttonset .p-button:not(:last-child):hover,.p-buttonset p-button:not(:last-child) .p-button,.p-buttonset p-button:not(:last-child) .p-button:hover{border-right:0 none}.p-button-group .p-button:not(:first-of-type):not(:last-of-type),.p-button-group p-button:not(:first-of-type):not(:last-of-type) .p-button,.p-buttonset .p-button:not(:first-of-type):not(:last-of-type),.p-buttonset p-button:not(:first-of-type):not(:last-of-type) .p-button{border-radius:0}.p-button-group .p-button:first-of-type:not(:only-of-type),.p-button-group p-button:first-of-type:not(:only-of-type) .p-button,.p-buttonset .p-button:first-of-type:not(:only-of-type),.p-buttonset p-button:first-of-type:not(:only-of-type) .p-button{border-top-right-radius:0;border-bottom-right-radius:0}.p-button-group .p-button:last-of-type:not(:only-of-type),.p-button-group p-button:last-of-type:not(:only-of-type) .p-button,.p-buttonset .p-button:last-of-type:not(:only-of-type),.p-buttonset p-button:last-of-type:not(:only-of-type) .p-button{border-top-left-radius:0;border-bottom-left-radius:0}p-button[iconpos=right] spinnericon{order:1}}\n']
     }]
   }], () => [{
     type: ChangeDetectorRef
@@ -17937,16 +20023,28 @@ var SelectButton = class _SelectButton {
       type: Input
     }],
     unselectable: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     tabindex: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     multiple: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     allowEmpty: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     style: [{
       type: Input
@@ -17958,10 +20056,19 @@ var SelectButton = class _SelectButton {
       type: Input
     }],
     disabled: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     dataKey: [{
       type: Input
+    }],
+    autofocus: [{
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     onOptionClick: [{
       type: Output
@@ -17986,81 +20093,32 @@ var SelectButtonModule = class _SelectButtonModule {
   static ɵmod = ɵɵdefineNgModule({
     type: _SelectButtonModule,
     declarations: [SelectButton],
-    imports: [CommonModule, RippleModule, SharedModule],
+    imports: [CommonModule, RippleModule, SharedModule, AutoFocusModule],
     exports: [SelectButton, SharedModule]
   });
   static ɵinj = ɵɵdefineInjector({
-    imports: [CommonModule, RippleModule, SharedModule, SharedModule]
+    imports: [CommonModule, RippleModule, SharedModule, AutoFocusModule, SharedModule]
   });
 };
 (() => {
   (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(SelectButtonModule, [{
     type: NgModule,
     args: [{
-      imports: [CommonModule, RippleModule, SharedModule],
+      imports: [CommonModule, RippleModule, SharedModule, AutoFocusModule],
       exports: [SelectButton, SharedModule],
       declarations: [SelectButton]
     }]
   }], null, null);
 })();
 
-// node_modules/primeng/fesm2022/primeng-icons-check.mjs
-var CheckIcon = class _CheckIcon extends BaseIcon {
-  static ɵfac = /* @__PURE__ */ (() => {
-    let ɵCheckIcon_BaseFactory;
-    return function CheckIcon_Factory(t) {
-      return (ɵCheckIcon_BaseFactory || (ɵCheckIcon_BaseFactory = ɵɵgetInheritedFactory(_CheckIcon)))(t || _CheckIcon);
-    };
-  })();
-  static ɵcmp = ɵɵdefineComponent({
-    type: _CheckIcon,
-    selectors: [["CheckIcon"]],
-    standalone: true,
-    features: [ɵɵInheritDefinitionFeature, ɵɵStandaloneFeature],
-    decls: 2,
-    vars: 5,
-    consts: [["width", "14", "height", "14", "viewBox", "0 0 14 14", "fill", "none", "xmlns", "http://www.w3.org/2000/svg"], ["d", "M4.86199 11.5948C4.78717 11.5923 4.71366 11.5745 4.64596 11.5426C4.57826 11.5107 4.51779 11.4652 4.46827 11.4091L0.753985 7.69483C0.683167 7.64891 0.623706 7.58751 0.580092 7.51525C0.536478 7.44299 0.509851 7.36177 0.502221 7.27771C0.49459 7.19366 0.506156 7.10897 0.536046 7.03004C0.565935 6.95111 0.613367 6.88 0.674759 6.82208C0.736151 6.76416 0.8099 6.72095 0.890436 6.69571C0.970973 6.67046 1.05619 6.66385 1.13966 6.67635C1.22313 6.68886 1.30266 6.72017 1.37226 6.76792C1.44186 6.81567 1.4997 6.8786 1.54141 6.95197L4.86199 10.2503L12.6397 2.49483C12.7444 2.42694 12.8689 2.39617 12.9932 2.40745C13.1174 2.41873 13.2343 2.47141 13.3251 2.55705C13.4159 2.64268 13.4753 2.75632 13.4938 2.87973C13.5123 3.00315 13.4888 3.1292 13.4271 3.23768L5.2557 11.4091C5.20618 11.4652 5.14571 11.5107 5.07801 11.5426C5.01031 11.5745 4.9368 11.5923 4.86199 11.5948Z", "fill", "currentColor"]],
-    template: function CheckIcon_Template(rf, ctx) {
-      if (rf & 1) {
-        ɵɵnamespaceSVG();
-        ɵɵelementStart(0, "svg", 0);
-        ɵɵelement(1, "path", 1);
-        ɵɵelementEnd();
-      }
-      if (rf & 2) {
-        ɵɵclassMap(ctx.getClassNames());
-        ɵɵattribute("aria-label", ctx.ariaLabel)("aria-hidden", ctx.ariaHidden)("role", ctx.role);
-      }
-    },
-    encapsulation: 2
-  });
-};
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(CheckIcon, [{
-    type: Component,
-    args: [{
-      selector: "CheckIcon",
-      standalone: true,
-      imports: [BaseIcon],
-      template: `
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" [attr.aria-label]="ariaLabel" [attr.aria-hidden]="ariaHidden" [attr.role]="role" [class]="getClassNames()">
-            <path
-                d="M4.86199 11.5948C4.78717 11.5923 4.71366 11.5745 4.64596 11.5426C4.57826 11.5107 4.51779 11.4652 4.46827 11.4091L0.753985 7.69483C0.683167 7.64891 0.623706 7.58751 0.580092 7.51525C0.536478 7.44299 0.509851 7.36177 0.502221 7.27771C0.49459 7.19366 0.506156 7.10897 0.536046 7.03004C0.565935 6.95111 0.613367 6.88 0.674759 6.82208C0.736151 6.76416 0.8099 6.72095 0.890436 6.69571C0.970973 6.67046 1.05619 6.66385 1.13966 6.67635C1.22313 6.68886 1.30266 6.72017 1.37226 6.76792C1.44186 6.81567 1.4997 6.8786 1.54141 6.95197L4.86199 10.2503L12.6397 2.49483C12.7444 2.42694 12.8689 2.39617 12.9932 2.40745C13.1174 2.41873 13.2343 2.47141 13.3251 2.55705C13.4159 2.64268 13.4753 2.75632 13.4938 2.87973C13.5123 3.00315 13.4888 3.1292 13.4271 3.23768L5.2557 11.4091C5.20618 11.4652 5.14571 11.5107 5.07801 11.5426C5.01031 11.5745 4.9368 11.5923 4.86199 11.5948Z"
-                fill="currentColor"
-            />
-        </svg>
-    `
-    }]
-  }], null, null);
-})();
-
 // node_modules/primeng/fesm2022/primeng-tristatecheckbox.mjs
-var _c011 = (a0, a1) => ({
+var _c011 = (a0, a1, a2) => ({
   "p-checkbox p-component": true,
   "p-checkbox-disabled": a0,
-  "p-checkbox-focused": a1
+  "p-checkbox-focused": a1,
+  "p-variant-filled": a2
 });
-var _c110 = (a0, a1, a2) => ({
+var _c114 = (a0, a1, a2) => ({
   "p-highlight": a0,
   "p-disabled": a1,
   "p-focus": a2
@@ -18206,7 +20264,14 @@ function TriStateCheckbox_ng_container_6_Template(rf, ctx) {
 }
 function TriStateCheckbox_label_7_Template(rf, ctx) {
   if (rf & 1) {
+    const _r4 = ɵɵgetCurrentView();
     ɵɵelementStart(0, "label", 14);
+    ɵɵlistener("click", function TriStateCheckbox_label_7_Template_label_click_0_listener($event) {
+      ɵɵrestoreView(_r4);
+      const ctx_r2 = ɵɵnextContext();
+      const input_r2 = ɵɵreference(3);
+      return ɵɵresetView(ctx_r2.onClick($event, input_r2));
+    });
     ɵɵtext(1);
     ɵɵelementEnd();
   }
@@ -18225,8 +20290,10 @@ var TRISTATECHECKBOX_VALUE_ACCESSOR = {
 };
 var TriStateCheckbox = class _TriStateCheckbox {
   cd;
-  constructor(cd) {
+  config;
+  constructor(cd, config) {
     this.cd = cd;
+    this.config = config;
   }
   /**
    * When present, it specifies that the element should be disabled.
@@ -18248,6 +20315,11 @@ var TriStateCheckbox = class _TriStateCheckbox {
    * @group Props
    */
   ariaLabelledBy;
+  /**
+   * Specifies the input variant of the component.
+   * @group Props
+   */
+  variant = "outlined";
   /**
    * Index of the element in tabbing order.
    * @group Props
@@ -18288,6 +20360,11 @@ var TriStateCheckbox = class _TriStateCheckbox {
    * @group Props
    */
   checkboxFalseIcon;
+  /**
+   * When present, it specifies that the component should automatically get focus on load.
+   * @group Props
+   */
+  autofocus;
   /**
    * Callback to invoke on value change.
    * @param {TriStateCheckboxChangeEvent} event - Custom change event.
@@ -18360,7 +20437,7 @@ var TriStateCheckbox = class _TriStateCheckbox {
     this.cd.markForCheck();
   }
   static ɵfac = function TriStateCheckbox_Factory(t) {
-    return new (t || _TriStateCheckbox)(ɵɵdirectiveInject(ChangeDetectorRef));
+    return new (t || _TriStateCheckbox)(ɵɵdirectiveInject(ChangeDetectorRef), ɵɵdirectiveInject(PrimeNGConfig));
   };
   static ɵcmp = ɵɵdefineComponent({
     type: _TriStateCheckbox,
@@ -18376,26 +20453,28 @@ var TriStateCheckbox = class _TriStateCheckbox {
     },
     hostAttrs: [1, "p-element"],
     inputs: {
-      disabled: "disabled",
+      disabled: [InputFlags.HasDecoratorInputTransform, "disabled", "disabled", booleanAttribute],
       name: "name",
       ariaLabel: "ariaLabel",
       ariaLabelledBy: "ariaLabelledBy",
-      tabindex: "tabindex",
+      variant: "variant",
+      tabindex: [InputFlags.HasDecoratorInputTransform, "tabindex", "tabindex", numberAttribute],
       inputId: "inputId",
       style: "style",
       styleClass: "styleClass",
       label: "label",
-      readonly: "readonly",
+      readonly: [InputFlags.HasDecoratorInputTransform, "readonly", "readonly", booleanAttribute],
       checkboxTrueIcon: "checkboxTrueIcon",
-      checkboxFalseIcon: "checkboxFalseIcon"
+      checkboxFalseIcon: "checkboxFalseIcon",
+      autofocus: [InputFlags.HasDecoratorInputTransform, "autofocus", "autofocus", booleanAttribute]
     },
     outputs: {
       onChange: "onChange"
     },
-    features: [ɵɵProvidersFeature([TRISTATECHECKBOX_VALUE_ACCESSOR])],
+    features: [ɵɵProvidersFeature([TRISTATECHECKBOX_VALUE_ACCESSOR]), ɵɵInputTransformsFeature],
     decls: 8,
-    vars: 26,
-    consts: [["input", ""], [3, "click", "ngStyle", "ngClass"], [1, "p-hidden-accessible"], ["type", "checkbox", "inputmode", "none", 3, "keydown", "focus", "blur", "name", "readonly", "disabled"], ["role", "checkbox", 1, "p-checkbox-box", 3, "ngClass"], [4, "ngIf"], ["class", "p-tristatecheckbox-label", 3, "ngClass", 4, "ngIf"], ["class", "p-checkbox-icon", 3, "ngClass", 4, "ngIf"], [1, "p-checkbox-icon", 3, "ngClass"], [3, "styleClass", 4, "ngIf"], ["class", "p-checkbox-icon", 4, "ngIf"], [3, "styleClass"], [1, "p-checkbox-icon"], [4, "ngTemplateOutlet"], [1, "p-tristatecheckbox-label", 3, "ngClass"]],
+    vars: 28,
+    consts: [["input", ""], [3, "click", "ngStyle", "ngClass"], [1, "p-hidden-accessible"], ["type", "checkbox", "inputmode", "none", "pAutoFocus", "", 3, "keydown", "focus", "blur", "name", "readonly", "disabled", "autofocus"], ["role", "checkbox", 1, "p-checkbox-box", 3, "ngClass"], [4, "ngIf"], ["class", "p-checkbox-label", 3, "ngClass", "click", 4, "ngIf"], ["class", "p-checkbox-icon", 3, "ngClass", 4, "ngIf"], [1, "p-checkbox-icon", 3, "ngClass"], [3, "styleClass", 4, "ngIf"], ["class", "p-checkbox-icon", 4, "ngIf"], [3, "styleClass"], [1, "p-checkbox-icon"], [4, "ngTemplateOutlet"], [1, "p-checkbox-label", 3, "click", "ngClass"]],
     template: function TriStateCheckbox_Template(rf, ctx) {
       if (rf & 1) {
         const _r1 = ɵɵgetCurrentView();
@@ -18424,13 +20503,13 @@ var TriStateCheckbox = class _TriStateCheckbox {
       }
       if (rf & 2) {
         ɵɵclassMap(ctx.styleClass);
-        ɵɵproperty("ngStyle", ctx.style)("ngClass", ɵɵpureFunction2(19, _c011, ctx.disabled, ctx.focused));
+        ɵɵproperty("ngStyle", ctx.style)("ngClass", ɵɵpureFunction3(20, _c011, ctx.disabled, ctx.focused, ctx.variant === "filled" || ctx.config.inputStyle() === "filled"));
         ɵɵattribute("data-pc-name", "tristatecheckbox")("data-pc-section", "root");
         ɵɵadvance(2);
-        ɵɵproperty("name", ctx.name)("readonly", ctx.readonly)("disabled", ctx.disabled);
+        ɵɵproperty("name", ctx.name)("readonly", ctx.readonly)("disabled", ctx.disabled)("autofocus", ctx.autofocus);
         ɵɵattribute("id", ctx.inputId)("tabindex", ctx.tabindex)("aria-labelledby", ctx.ariaLabelledBy)("aria-label", ctx.ariaLabel)("data-pc-section", "hiddenInput");
         ɵɵadvance(2);
-        ɵɵproperty("ngClass", ɵɵpureFunction3(22, _c110, ctx.value != null, ctx.disabled, ctx.focused));
+        ɵɵproperty("ngClass", ɵɵpureFunction3(24, _c114, ctx.value != null, ctx.disabled, ctx.focused));
         ɵɵattribute("aria-checked", ctx.value === true);
         ɵɵadvance();
         ɵɵproperty("ngIf", ctx.value === true);
@@ -18440,7 +20519,7 @@ var TriStateCheckbox = class _TriStateCheckbox {
         ɵɵproperty("ngIf", ctx.label);
       }
     },
-    dependencies: () => [NgClass, NgIf, NgTemplateOutlet, NgStyle, CheckIcon, TimesIcon],
+    dependencies: () => [NgClass, NgIf, NgTemplateOutlet, NgStyle, AutoFocus, CheckIcon, TimesIcon],
     encapsulation: 2,
     changeDetection: 0
   });
@@ -18453,7 +20532,7 @@ var TriStateCheckbox = class _TriStateCheckbox {
       template: `
         <div
             [ngStyle]="style"
-            [ngClass]="{ 'p-checkbox p-component': true, 'p-checkbox-disabled': disabled, 'p-checkbox-focused': focused }"
+            [ngClass]="{ 'p-checkbox p-component': true, 'p-checkbox-disabled': disabled, 'p-checkbox-focused': focused, 'p-variant-filled': variant === 'filled' || config.inputStyle() === 'filled' }"
             [class]="styleClass"
             (click)="onClick($event, input)"
             [attr.data-pc-name]="'tristatecheckbox'"
@@ -18475,6 +20554,8 @@ var TriStateCheckbox = class _TriStateCheckbox {
                     [attr.aria-label]="ariaLabel"
                     inputmode="none"
                     [attr.data-pc-section]="'hiddenInput'"
+                    pAutoFocus
+                    [autofocus]="autofocus"
                 />
             </div>
             <div class="p-checkbox-box" role="checkbox" [attr.aria-checked]="value === true" [ngClass]="{ 'p-highlight': value != null, 'p-disabled': disabled, 'p-focus': focused }">
@@ -18498,7 +20579,7 @@ var TriStateCheckbox = class _TriStateCheckbox {
                 </ng-container>
             </div>
         </div>
-        <label class="p-tristatecheckbox-label" [ngClass]="{ 'p-checkbox-label-active': value != null, 'p-disabled': disabled, 'p-checkbox-label-focus': focused }" *ngIf="label" [attr.for]="inputId">{{ label }}</label>
+        <label class="p-checkbox-label" (click)="onClick($event, input)" [ngClass]="{ 'p-checkbox-label-active': value != null, 'p-disabled': disabled, 'p-checkbox-label-focus': focused }" *ngIf="label" [attr.for]="inputId">{{ label }}</label>
     `,
       providers: [TRISTATECHECKBOX_VALUE_ACCESSOR],
       changeDetection: ChangeDetectionStrategy.OnPush,
@@ -18509,9 +20590,14 @@ var TriStateCheckbox = class _TriStateCheckbox {
     }]
   }], () => [{
     type: ChangeDetectorRef
+  }, {
+    type: PrimeNGConfig
   }], {
     disabled: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     name: [{
       type: Input
@@ -18522,8 +20608,14 @@ var TriStateCheckbox = class _TriStateCheckbox {
     ariaLabelledBy: [{
       type: Input
     }],
-    tabindex: [{
+    variant: [{
       type: Input
+    }],
+    tabindex: [{
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     inputId: [{
       type: Input
@@ -18538,13 +20630,22 @@ var TriStateCheckbox = class _TriStateCheckbox {
       type: Input
     }],
     readonly: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     checkboxTrueIcon: [{
       type: Input
     }],
     checkboxFalseIcon: [{
       type: Input
+    }],
+    autofocus: [{
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     onChange: [{
       type: Output
@@ -18562,555 +20663,27 @@ var TriStateCheckboxModule = class _TriStateCheckboxModule {
   static ɵmod = ɵɵdefineNgModule({
     type: _TriStateCheckboxModule,
     declarations: [TriStateCheckbox],
-    imports: [CommonModule, SharedModule, CheckIcon, TimesIcon],
+    imports: [CommonModule, SharedModule, AutoFocusModule, CheckIcon, TimesIcon],
     exports: [TriStateCheckbox, SharedModule]
   });
   static ɵinj = ɵɵdefineInjector({
-    imports: [CommonModule, SharedModule, CheckIcon, TimesIcon, SharedModule]
+    imports: [CommonModule, SharedModule, AutoFocusModule, CheckIcon, TimesIcon, SharedModule]
   });
 };
 (() => {
   (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(TriStateCheckboxModule, [{
     type: NgModule,
     args: [{
-      imports: [CommonModule, SharedModule, CheckIcon, TimesIcon],
+      imports: [CommonModule, SharedModule, AutoFocusModule, CheckIcon, TimesIcon],
       exports: [TriStateCheckbox, SharedModule],
       declarations: [TriStateCheckbox]
     }]
   }], null, null);
 })();
 
-// node_modules/primeng/fesm2022/primeng-icons-arrowdown.mjs
-var ArrowDownIcon = class _ArrowDownIcon extends BaseIcon {
-  pathId;
-  ngOnInit() {
-    this.pathId = "url(#" + UniqueComponentId() + ")";
-  }
-  static ɵfac = /* @__PURE__ */ (() => {
-    let ɵArrowDownIcon_BaseFactory;
-    return function ArrowDownIcon_Factory(t) {
-      return (ɵArrowDownIcon_BaseFactory || (ɵArrowDownIcon_BaseFactory = ɵɵgetInheritedFactory(_ArrowDownIcon)))(t || _ArrowDownIcon);
-    };
-  })();
-  static ɵcmp = ɵɵdefineComponent({
-    type: _ArrowDownIcon,
-    selectors: [["ArrowDownIcon"]],
-    standalone: true,
-    features: [ɵɵInheritDefinitionFeature, ɵɵStandaloneFeature],
-    decls: 6,
-    vars: 7,
-    consts: [["width", "14", "height", "14", "viewBox", "0 0 14 14", "fill", "none", "xmlns", "http://www.w3.org/2000/svg"], ["fill-rule", "evenodd", "clip-rule", "evenodd", "d", "M6.99994 14C6.91097 14.0004 6.82281 13.983 6.74064 13.9489C6.65843 13.9148 6.58387 13.8646 6.52133 13.8013L1.10198 8.38193C0.982318 8.25351 0.917175 8.08367 0.920272 7.90817C0.923368 7.73267 0.994462 7.56523 1.11858 7.44111C1.24269 7.317 1.41014 7.2459 1.58563 7.2428C1.76113 7.23971 1.93098 7.30485 2.0594 7.42451L6.32263 11.6877V0.677419C6.32263 0.497756 6.394 0.325452 6.52104 0.198411C6.64808 0.0713706 6.82039 0 7.00005 0C7.17971 0 7.35202 0.0713706 7.47906 0.198411C7.6061 0.325452 7.67747 0.497756 7.67747 0.677419V11.6877L11.9407 7.42451C12.0691 7.30485 12.2389 7.23971 12.4144 7.2428C12.5899 7.2459 12.7574 7.317 12.8815 7.44111C13.0056 7.56523 13.0767 7.73267 13.0798 7.90817C13.0829 8.08367 13.0178 8.25351 12.8981 8.38193L7.47875 13.8013C7.41621 13.8646 7.34164 13.9148 7.25944 13.9489C7.17727 13.983 7.08912 14.0004 7.00015 14C7.00012 14 7.00009 14 7.00005 14C7.00001 14 6.99998 14 6.99994 14Z", "fill", "currentColor"], [3, "id"], ["width", "14", "height", "14", "fill", "white"]],
-    template: function ArrowDownIcon_Template(rf, ctx) {
-      if (rf & 1) {
-        ɵɵnamespaceSVG();
-        ɵɵelementStart(0, "svg", 0)(1, "g");
-        ɵɵelement(2, "path", 1);
-        ɵɵelementEnd();
-        ɵɵelementStart(3, "defs")(4, "clipPath", 2);
-        ɵɵelement(5, "rect", 3);
-        ɵɵelementEnd()()();
-      }
-      if (rf & 2) {
-        ɵɵclassMap(ctx.getClassNames());
-        ɵɵattribute("aria-label", ctx.ariaLabel)("aria-hidden", ctx.ariaHidden)("role", ctx.role);
-        ɵɵadvance();
-        ɵɵattribute("clip-path", ctx.pathId);
-        ɵɵadvance(3);
-        ɵɵproperty("id", ctx.pathId);
-      }
-    },
-    encapsulation: 2
-  });
-};
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ArrowDownIcon, [{
-    type: Component,
-    args: [{
-      selector: "ArrowDownIcon",
-      standalone: true,
-      imports: [BaseIcon],
-      template: `
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" [attr.aria-label]="ariaLabel" [attr.aria-hidden]="ariaHidden" [attr.role]="role" [class]="getClassNames()">
-            <g [attr.clip-path]="pathId">
-                <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M6.99994 14C6.91097 14.0004 6.82281 13.983 6.74064 13.9489C6.65843 13.9148 6.58387 13.8646 6.52133 13.8013L1.10198 8.38193C0.982318 8.25351 0.917175 8.08367 0.920272 7.90817C0.923368 7.73267 0.994462 7.56523 1.11858 7.44111C1.24269 7.317 1.41014 7.2459 1.58563 7.2428C1.76113 7.23971 1.93098 7.30485 2.0594 7.42451L6.32263 11.6877V0.677419C6.32263 0.497756 6.394 0.325452 6.52104 0.198411C6.64808 0.0713706 6.82039 0 7.00005 0C7.17971 0 7.35202 0.0713706 7.47906 0.198411C7.6061 0.325452 7.67747 0.497756 7.67747 0.677419V11.6877L11.9407 7.42451C12.0691 7.30485 12.2389 7.23971 12.4144 7.2428C12.5899 7.2459 12.7574 7.317 12.8815 7.44111C13.0056 7.56523 13.0767 7.73267 13.0798 7.90817C13.0829 8.08367 13.0178 8.25351 12.8981 8.38193L7.47875 13.8013C7.41621 13.8646 7.34164 13.9148 7.25944 13.9489C7.17727 13.983 7.08912 14.0004 7.00015 14C7.00012 14 7.00009 14 7.00005 14C7.00001 14 6.99998 14 6.99994 14Z"
-                    fill="currentColor"
-                />
-            </g>
-            <defs>
-                <clipPath [id]="pathId">
-                    <rect width="14" height="14" fill="white" />
-                </clipPath>
-            </defs>
-        </svg>
-    `
-    }]
-  }], null, null);
-})();
-
-// node_modules/primeng/fesm2022/primeng-icons-arrowup.mjs
-var ArrowUpIcon = class _ArrowUpIcon extends BaseIcon {
-  pathId;
-  ngOnInit() {
-    this.pathId = "url(#" + UniqueComponentId() + ")";
-  }
-  static ɵfac = /* @__PURE__ */ (() => {
-    let ɵArrowUpIcon_BaseFactory;
-    return function ArrowUpIcon_Factory(t) {
-      return (ɵArrowUpIcon_BaseFactory || (ɵArrowUpIcon_BaseFactory = ɵɵgetInheritedFactory(_ArrowUpIcon)))(t || _ArrowUpIcon);
-    };
-  })();
-  static ɵcmp = ɵɵdefineComponent({
-    type: _ArrowUpIcon,
-    selectors: [["ArrowUpIcon"]],
-    standalone: true,
-    features: [ɵɵInheritDefinitionFeature, ɵɵStandaloneFeature],
-    decls: 6,
-    vars: 7,
-    consts: [["width", "14", "height", "14", "viewBox", "0 0 14 14", "fill", "none", "xmlns", "http://www.w3.org/2000/svg"], ["fill-rule", "evenodd", "clip-rule", "evenodd", "d", "M6.51551 13.799C6.64205 13.9255 6.813 13.9977 6.99193 14C7.17087 13.9977 7.34182 13.9255 7.46835 13.799C7.59489 13.6725 7.66701 13.5015 7.66935 13.3226V2.31233L11.9326 6.57554C11.9951 6.63887 12.0697 6.68907 12.1519 6.72319C12.2341 6.75731 12.3223 6.77467 12.4113 6.77425C12.5003 6.77467 12.5885 6.75731 12.6707 6.72319C12.7529 6.68907 12.8274 6.63887 12.89 6.57554C13.0168 6.44853 13.0881 6.27635 13.0881 6.09683C13.0881 5.91732 13.0168 5.74514 12.89 5.61812L7.48846 0.216594C7.48274 0.210436 7.4769 0.204374 7.47094 0.198411C7.3439 0.0713707 7.1716 0 6.99193 0C6.81227 0 6.63997 0.0713707 6.51293 0.198411C6.50704 0.204296 6.50128 0.210278 6.49563 0.216354L1.09386 5.61812C0.974201 5.74654 0.909057 5.91639 0.912154 6.09189C0.91525 6.26738 0.986345 6.43483 1.11046 6.55894C1.23457 6.68306 1.40202 6.75415 1.57752 6.75725C1.75302 6.76035 1.92286 6.6952 2.05128 6.57554L6.31451 2.31231V13.3226C6.31685 13.5015 6.38898 13.6725 6.51551 13.799Z", "fill", "currentColor"], [3, "id"], ["width", "14", "height", "14", "fill", "white"]],
-    template: function ArrowUpIcon_Template(rf, ctx) {
-      if (rf & 1) {
-        ɵɵnamespaceSVG();
-        ɵɵelementStart(0, "svg", 0)(1, "g");
-        ɵɵelement(2, "path", 1);
-        ɵɵelementEnd();
-        ɵɵelementStart(3, "defs")(4, "clipPath", 2);
-        ɵɵelement(5, "rect", 3);
-        ɵɵelementEnd()()();
-      }
-      if (rf & 2) {
-        ɵɵclassMap(ctx.getClassNames());
-        ɵɵattribute("aria-label", ctx.ariaLabel)("aria-hidden", ctx.ariaHidden)("role", ctx.role);
-        ɵɵadvance();
-        ɵɵattribute("clip-path", ctx.pathId);
-        ɵɵadvance(3);
-        ɵɵproperty("id", ctx.pathId);
-      }
-    },
-    encapsulation: 2
-  });
-};
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ArrowUpIcon, [{
-    type: Component,
-    args: [{
-      selector: "ArrowUpIcon",
-      standalone: true,
-      imports: [BaseIcon],
-      template: `
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" [attr.aria-label]="ariaLabel" [attr.aria-hidden]="ariaHidden" [attr.role]="role" [class]="getClassNames()">
-            <g [attr.clip-path]="pathId">
-                <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M6.51551 13.799C6.64205 13.9255 6.813 13.9977 6.99193 14C7.17087 13.9977 7.34182 13.9255 7.46835 13.799C7.59489 13.6725 7.66701 13.5015 7.66935 13.3226V2.31233L11.9326 6.57554C11.9951 6.63887 12.0697 6.68907 12.1519 6.72319C12.2341 6.75731 12.3223 6.77467 12.4113 6.77425C12.5003 6.77467 12.5885 6.75731 12.6707 6.72319C12.7529 6.68907 12.8274 6.63887 12.89 6.57554C13.0168 6.44853 13.0881 6.27635 13.0881 6.09683C13.0881 5.91732 13.0168 5.74514 12.89 5.61812L7.48846 0.216594C7.48274 0.210436 7.4769 0.204374 7.47094 0.198411C7.3439 0.0713707 7.1716 0 6.99193 0C6.81227 0 6.63997 0.0713707 6.51293 0.198411C6.50704 0.204296 6.50128 0.210278 6.49563 0.216354L1.09386 5.61812C0.974201 5.74654 0.909057 5.91639 0.912154 6.09189C0.91525 6.26738 0.986345 6.43483 1.11046 6.55894C1.23457 6.68306 1.40202 6.75415 1.57752 6.75725C1.75302 6.76035 1.92286 6.6952 2.05128 6.57554L6.31451 2.31231V13.3226C6.31685 13.5015 6.38898 13.6725 6.51551 13.799Z"
-                    fill="currentColor"
-                />
-            </g>
-            <defs>
-                <clipPath [id]="pathId">
-                    <rect width="14" height="14" fill="white" />
-                </clipPath>
-            </defs>
-        </svg>
-    `
-    }]
-  }], null, null);
-})();
-
-// node_modules/primeng/fesm2022/primeng-icons-filter.mjs
-var FilterIcon = class _FilterIcon extends BaseIcon {
-  pathId;
-  ngOnInit() {
-    this.pathId = "url(#" + UniqueComponentId() + ")";
-  }
-  static ɵfac = /* @__PURE__ */ (() => {
-    let ɵFilterIcon_BaseFactory;
-    return function FilterIcon_Factory(t) {
-      return (ɵFilterIcon_BaseFactory || (ɵFilterIcon_BaseFactory = ɵɵgetInheritedFactory(_FilterIcon)))(t || _FilterIcon);
-    };
-  })();
-  static ɵcmp = ɵɵdefineComponent({
-    type: _FilterIcon,
-    selectors: [["FilterIcon"]],
-    standalone: true,
-    features: [ɵɵInheritDefinitionFeature, ɵɵStandaloneFeature],
-    decls: 6,
-    vars: 7,
-    consts: [["width", "14", "height", "14", "viewBox", "0 0 14 14", "fill", "none", "xmlns", "http://www.w3.org/2000/svg"], ["d", "M8.64708 14H5.35296C5.18981 13.9979 5.03395 13.9321 4.91858 13.8167C4.8032 13.7014 4.73745 13.5455 4.73531 13.3824V7L0.329431 0.98C0.259794 0.889466 0.217389 0.780968 0.20718 0.667208C0.19697 0.553448 0.219379 0.439133 0.271783 0.337647C0.324282 0.236453 0.403423 0.151519 0.500663 0.0920138C0.597903 0.0325088 0.709548 0.000692754 0.823548 0H13.1765C13.2905 0.000692754 13.4021 0.0325088 13.4994 0.0920138C13.5966 0.151519 13.6758 0.236453 13.7283 0.337647C13.7807 0.439133 13.8031 0.553448 13.7929 0.667208C13.7826 0.780968 13.7402 0.889466 13.6706 0.98L9.26472 7V13.3824C9.26259 13.5455 9.19683 13.7014 9.08146 13.8167C8.96609 13.9321 8.81022 13.9979 8.64708 14ZM5.97061 12.7647H8.02943V6.79412C8.02878 6.66289 8.07229 6.53527 8.15296 6.43177L11.9412 1.23529H2.05884L5.86355 6.43177C5.94422 6.53527 5.98773 6.66289 5.98708 6.79412L5.97061 12.7647Z", "fill", "currentColor"], [3, "id"], ["width", "14", "height", "14", "fill", "white"]],
-    template: function FilterIcon_Template(rf, ctx) {
-      if (rf & 1) {
-        ɵɵnamespaceSVG();
-        ɵɵelementStart(0, "svg", 0)(1, "g");
-        ɵɵelement(2, "path", 1);
-        ɵɵelementEnd();
-        ɵɵelementStart(3, "defs")(4, "clipPath", 2);
-        ɵɵelement(5, "rect", 3);
-        ɵɵelementEnd()()();
-      }
-      if (rf & 2) {
-        ɵɵclassMap(ctx.getClassNames());
-        ɵɵattribute("aria-label", ctx.ariaLabel)("aria-hidden", ctx.ariaHidden)("role", ctx.role);
-        ɵɵadvance();
-        ɵɵattribute("clip-path", ctx.pathId);
-        ɵɵadvance(3);
-        ɵɵproperty("id", ctx.pathId);
-      }
-    },
-    encapsulation: 2
-  });
-};
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(FilterIcon, [{
-    type: Component,
-    args: [{
-      selector: "FilterIcon",
-      standalone: true,
-      imports: [BaseIcon],
-      template: `
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" [attr.aria-label]="ariaLabel" [attr.aria-hidden]="ariaHidden" [attr.role]="role" [class]="getClassNames()">
-            <g [attr.clip-path]="pathId">
-                <path
-                    d="M8.64708 14H5.35296C5.18981 13.9979 5.03395 13.9321 4.91858 13.8167C4.8032 13.7014 4.73745 13.5455 4.73531 13.3824V7L0.329431 0.98C0.259794 0.889466 0.217389 0.780968 0.20718 0.667208C0.19697 0.553448 0.219379 0.439133 0.271783 0.337647C0.324282 0.236453 0.403423 0.151519 0.500663 0.0920138C0.597903 0.0325088 0.709548 0.000692754 0.823548 0H13.1765C13.2905 0.000692754 13.4021 0.0325088 13.4994 0.0920138C13.5966 0.151519 13.6758 0.236453 13.7283 0.337647C13.7807 0.439133 13.8031 0.553448 13.7929 0.667208C13.7826 0.780968 13.7402 0.889466 13.6706 0.98L9.26472 7V13.3824C9.26259 13.5455 9.19683 13.7014 9.08146 13.8167C8.96609 13.9321 8.81022 13.9979 8.64708 14ZM5.97061 12.7647H8.02943V6.79412C8.02878 6.66289 8.07229 6.53527 8.15296 6.43177L11.9412 1.23529H2.05884L5.86355 6.43177C5.94422 6.53527 5.98773 6.66289 5.98708 6.79412L5.97061 12.7647Z"
-                    fill="currentColor"
-                />
-            </g>
-            <defs>
-                <clipPath [id]="pathId">
-                    <rect width="14" height="14" fill="white" />
-                </clipPath>
-            </defs>
-        </svg>
-    `
-    }]
-  }], null, null);
-})();
-
-// node_modules/primeng/fesm2022/primeng-icons-sortalt.mjs
-var SortAltIcon = class _SortAltIcon extends BaseIcon {
-  pathId;
-  ngOnInit() {
-    this.pathId = "url(#" + UniqueComponentId() + ")";
-  }
-  static ɵfac = /* @__PURE__ */ (() => {
-    let ɵSortAltIcon_BaseFactory;
-    return function SortAltIcon_Factory(t) {
-      return (ɵSortAltIcon_BaseFactory || (ɵSortAltIcon_BaseFactory = ɵɵgetInheritedFactory(_SortAltIcon)))(t || _SortAltIcon);
-    };
-  })();
-  static ɵcmp = ɵɵdefineComponent({
-    type: _SortAltIcon,
-    selectors: [["SortAltIcon"]],
-    standalone: true,
-    features: [ɵɵInheritDefinitionFeature, ɵɵStandaloneFeature],
-    decls: 9,
-    vars: 7,
-    consts: [["width", "14", "height", "14", "viewBox", "0 0 14 14", "fill", "none", "xmlns", "http://www.w3.org/2000/svg"], ["d", "M5.64515 3.61291C5.47353 3.61291 5.30192 3.54968 5.16644 3.4142L3.38708 1.63484L1.60773 3.4142C1.34579 3.67613 0.912244 3.67613 0.650309 3.4142C0.388374 3.15226 0.388374 2.71871 0.650309 2.45678L2.90837 0.198712C3.17031 -0.0632236 3.60386 -0.0632236 3.86579 0.198712L6.12386 2.45678C6.38579 2.71871 6.38579 3.15226 6.12386 3.4142C5.98837 3.54968 5.81676 3.61291 5.64515 3.61291Z", "fill", "currentColor"], ["d", "M3.38714 14C3.01681 14 2.70972 13.6929 2.70972 13.3226V0.677419C2.70972 0.307097 3.01681 0 3.38714 0C3.75746 0 4.06456 0.307097 4.06456 0.677419V13.3226C4.06456 13.6929 3.75746 14 3.38714 14Z", "fill", "currentColor"], ["d", "M10.6129 14C10.4413 14 10.2697 13.9368 10.1342 13.8013L7.87611 11.5432C7.61418 11.2813 7.61418 10.8477 7.87611 10.5858C8.13805 10.3239 8.5716 10.3239 8.83353 10.5858L10.6129 12.3652L12.3922 10.5858C12.6542 10.3239 13.0877 10.3239 13.3497 10.5858C13.6116 10.8477 13.6116 11.2813 13.3497 11.5432L11.0916 13.8013C10.9561 13.9368 10.7845 14 10.6129 14Z", "fill", "currentColor"], ["d", "M10.6129 14C10.2426 14 9.93552 13.6929 9.93552 13.3226V0.677419C9.93552 0.307097 10.2426 0 10.6129 0C10.9833 0 11.2904 0.307097 11.2904 0.677419V13.3226C11.2904 13.6929 10.9832 14 10.6129 14Z", "fill", "currentColor"], [3, "id"], ["width", "14", "height", "14", "fill", "white"]],
-    template: function SortAltIcon_Template(rf, ctx) {
-      if (rf & 1) {
-        ɵɵnamespaceSVG();
-        ɵɵelementStart(0, "svg", 0)(1, "g");
-        ɵɵelement(2, "path", 1)(3, "path", 2)(4, "path", 3)(5, "path", 4);
-        ɵɵelementEnd();
-        ɵɵelementStart(6, "defs")(7, "clipPath", 5);
-        ɵɵelement(8, "rect", 6);
-        ɵɵelementEnd()()();
-      }
-      if (rf & 2) {
-        ɵɵclassMap(ctx.getClassNames());
-        ɵɵattribute("aria-label", ctx.ariaLabel)("aria-hidden", ctx.ariaHidden)("role", ctx.role);
-        ɵɵadvance();
-        ɵɵattribute("clip-path", ctx.pathId);
-        ɵɵadvance(6);
-        ɵɵproperty("id", ctx.pathId);
-      }
-    },
-    encapsulation: 2
-  });
-};
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(SortAltIcon, [{
-    type: Component,
-    args: [{
-      selector: "SortAltIcon",
-      standalone: true,
-      imports: [BaseIcon],
-      template: `
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" [attr.aria-label]="ariaLabel" [attr.aria-hidden]="ariaHidden" [attr.role]="role" [class]="getClassNames()">
-            <g [attr.clip-path]="pathId">
-                <path
-                    d="M5.64515 3.61291C5.47353 3.61291 5.30192 3.54968 5.16644 3.4142L3.38708 1.63484L1.60773 3.4142C1.34579 3.67613 0.912244 3.67613 0.650309 3.4142C0.388374 3.15226 0.388374 2.71871 0.650309 2.45678L2.90837 0.198712C3.17031 -0.0632236 3.60386 -0.0632236 3.86579 0.198712L6.12386 2.45678C6.38579 2.71871 6.38579 3.15226 6.12386 3.4142C5.98837 3.54968 5.81676 3.61291 5.64515 3.61291Z"
-                    fill="currentColor"
-                />
-                <path d="M3.38714 14C3.01681 14 2.70972 13.6929 2.70972 13.3226V0.677419C2.70972 0.307097 3.01681 0 3.38714 0C3.75746 0 4.06456 0.307097 4.06456 0.677419V13.3226C4.06456 13.6929 3.75746 14 3.38714 14Z" fill="currentColor" />
-                <path
-                    d="M10.6129 14C10.4413 14 10.2697 13.9368 10.1342 13.8013L7.87611 11.5432C7.61418 11.2813 7.61418 10.8477 7.87611 10.5858C8.13805 10.3239 8.5716 10.3239 8.83353 10.5858L10.6129 12.3652L12.3922 10.5858C12.6542 10.3239 13.0877 10.3239 13.3497 10.5858C13.6116 10.8477 13.6116 11.2813 13.3497 11.5432L11.0916 13.8013C10.9561 13.9368 10.7845 14 10.6129 14Z"
-                    fill="currentColor"
-                />
-                <path d="M10.6129 14C10.2426 14 9.93552 13.6929 9.93552 13.3226V0.677419C9.93552 0.307097 10.2426 0 10.6129 0C10.9833 0 11.2904 0.307097 11.2904 0.677419V13.3226C11.2904 13.6929 10.9832 14 10.6129 14Z" fill="currentColor" />
-            </g>
-            <defs>
-                <clipPath [id]="pathId">
-                    <rect width="14" height="14" fill="white" />
-                </clipPath>
-            </defs>
-        </svg>
-    `
-    }]
-  }], null, null);
-})();
-
-// node_modules/primeng/fesm2022/primeng-icons-sortamountdown.mjs
-var SortAmountDownIcon = class _SortAmountDownIcon extends BaseIcon {
-  pathId;
-  ngOnInit() {
-    this.pathId = "url(#" + UniqueComponentId() + ")";
-  }
-  static ɵfac = /* @__PURE__ */ (() => {
-    let ɵSortAmountDownIcon_BaseFactory;
-    return function SortAmountDownIcon_Factory(t) {
-      return (ɵSortAmountDownIcon_BaseFactory || (ɵSortAmountDownIcon_BaseFactory = ɵɵgetInheritedFactory(_SortAmountDownIcon)))(t || _SortAmountDownIcon);
-    };
-  })();
-  static ɵcmp = ɵɵdefineComponent({
-    type: _SortAmountDownIcon,
-    selectors: [["SortAmountDownIcon"]],
-    standalone: true,
-    features: [ɵɵInheritDefinitionFeature, ɵɵStandaloneFeature],
-    decls: 11,
-    vars: 7,
-    consts: [["width", "14", "height", "14", "viewBox", "0 0 14 14", "fill", "none", "xmlns", "http://www.w3.org/2000/svg"], ["d", "M2.59836 13.2009C2.44634 13.2009 2.29432 13.1449 2.1743 13.0248L0.174024 11.0246C-0.0580081 10.7925 -0.0580081 10.4085 0.174024 10.1764C0.406057 9.94441 0.79011 9.94441 1.02214 10.1764L2.59836 11.7527L4.17458 10.1764C4.40662 9.94441 4.79067 9.94441 5.0227 10.1764C5.25473 10.4085 5.25473 10.7925 5.0227 11.0246L3.02242 13.0248C2.90241 13.1449 2.75038 13.2009 2.59836 13.2009Z", "fill", "currentColor"], ["d", "M2.59836 13.2009C2.27032 13.2009 1.99833 12.9288 1.99833 12.6008V1.39922C1.99833 1.07117 2.27036 0.799133 2.59841 0.799133C2.92646 0.799133 3.19849 1.07117 3.19849 1.39922V12.6008C3.19849 12.9288 2.92641 13.2009 2.59836 13.2009Z", "fill", "currentColor"], ["d", "M13.3999 11.2006H6.99902C6.67098 11.2006 6.39894 10.9285 6.39894 10.6005C6.39894 10.2725 6.67098 10.0004 6.99902 10.0004H13.3999C13.728 10.0004 14 10.2725 14 10.6005C14 10.9285 13.728 11.2006 13.3999 11.2006Z", "fill", "currentColor"], ["d", "M10.1995 6.39991H6.99902C6.67098 6.39991 6.39894 6.12788 6.39894 5.79983C6.39894 5.47179 6.67098 5.19975 6.99902 5.19975H10.1995C10.5275 5.19975 10.7996 5.47179 10.7996 5.79983C10.7996 6.12788 10.5275 6.39991 10.1995 6.39991Z", "fill", "currentColor"], ["d", "M8.59925 3.99958H6.99902C6.67098 3.99958 6.39894 3.72754 6.39894 3.3995C6.39894 3.07145 6.67098 2.79941 6.99902 2.79941H8.59925C8.92729 2.79941 9.19933 3.07145 9.19933 3.3995C9.19933 3.72754 8.92729 3.99958 8.59925 3.99958Z", "fill", "currentColor"], ["d", "M11.7997 8.80025H6.99902C6.67098 8.80025 6.39894 8.52821 6.39894 8.20017C6.39894 7.87212 6.67098 7.60008 6.99902 7.60008H11.7997C12.1277 7.60008 12.3998 7.87212 12.3998 8.20017C12.3998 8.52821 12.1277 8.80025 11.7997 8.80025Z", "fill", "currentColor"], [3, "id"], ["width", "14", "height", "14", "fill", "white"]],
-    template: function SortAmountDownIcon_Template(rf, ctx) {
-      if (rf & 1) {
-        ɵɵnamespaceSVG();
-        ɵɵelementStart(0, "svg", 0)(1, "g");
-        ɵɵelement(2, "path", 1)(3, "path", 2)(4, "path", 3)(5, "path", 4)(6, "path", 5)(7, "path", 6);
-        ɵɵelementEnd();
-        ɵɵelementStart(8, "defs")(9, "clipPath", 7);
-        ɵɵelement(10, "rect", 8);
-        ɵɵelementEnd()()();
-      }
-      if (rf & 2) {
-        ɵɵclassMap(ctx.getClassNames());
-        ɵɵattribute("aria-label", ctx.ariaLabel)("aria-hidden", ctx.ariaHidden)("role", ctx.role);
-        ɵɵadvance();
-        ɵɵattribute("clip-path", ctx.pathId);
-        ɵɵadvance(8);
-        ɵɵproperty("id", ctx.pathId);
-      }
-    },
-    encapsulation: 2
-  });
-};
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(SortAmountDownIcon, [{
-    type: Component,
-    args: [{
-      selector: "SortAmountDownIcon",
-      standalone: true,
-      imports: [BaseIcon],
-      template: `
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" [attr.aria-label]="ariaLabel" [attr.aria-hidden]="ariaHidden" [attr.role]="role" [class]="getClassNames()">
-            <g [attr.clip-path]="pathId">
-                <path
-                    d="M2.59836 13.2009C2.44634 13.2009 2.29432 13.1449 2.1743 13.0248L0.174024 11.0246C-0.0580081 10.7925 -0.0580081 10.4085 0.174024 10.1764C0.406057 9.94441 0.79011 9.94441 1.02214 10.1764L2.59836 11.7527L4.17458 10.1764C4.40662 9.94441 4.79067 9.94441 5.0227 10.1764C5.25473 10.4085 5.25473 10.7925 5.0227 11.0246L3.02242 13.0248C2.90241 13.1449 2.75038 13.2009 2.59836 13.2009Z"
-                    fill="currentColor"
-                />
-                <path
-                    d="M2.59836 13.2009C2.27032 13.2009 1.99833 12.9288 1.99833 12.6008V1.39922C1.99833 1.07117 2.27036 0.799133 2.59841 0.799133C2.92646 0.799133 3.19849 1.07117 3.19849 1.39922V12.6008C3.19849 12.9288 2.92641 13.2009 2.59836 13.2009Z"
-                    fill="currentColor"
-                />
-                <path
-                    d="M13.3999 11.2006H6.99902C6.67098 11.2006 6.39894 10.9285 6.39894 10.6005C6.39894 10.2725 6.67098 10.0004 6.99902 10.0004H13.3999C13.728 10.0004 14 10.2725 14 10.6005C14 10.9285 13.728 11.2006 13.3999 11.2006Z"
-                    fill="currentColor"
-                />
-                <path
-                    d="M10.1995 6.39991H6.99902C6.67098 6.39991 6.39894 6.12788 6.39894 5.79983C6.39894 5.47179 6.67098 5.19975 6.99902 5.19975H10.1995C10.5275 5.19975 10.7996 5.47179 10.7996 5.79983C10.7996 6.12788 10.5275 6.39991 10.1995 6.39991Z"
-                    fill="currentColor"
-                />
-                <path
-                    d="M8.59925 3.99958H6.99902C6.67098 3.99958 6.39894 3.72754 6.39894 3.3995C6.39894 3.07145 6.67098 2.79941 6.99902 2.79941H8.59925C8.92729 2.79941 9.19933 3.07145 9.19933 3.3995C9.19933 3.72754 8.92729 3.99958 8.59925 3.99958Z"
-                    fill="currentColor"
-                />
-                <path
-                    d="M11.7997 8.80025H6.99902C6.67098 8.80025 6.39894 8.52821 6.39894 8.20017C6.39894 7.87212 6.67098 7.60008 6.99902 7.60008H11.7997C12.1277 7.60008 12.3998 7.87212 12.3998 8.20017C12.3998 8.52821 12.1277 8.80025 11.7997 8.80025Z"
-                    fill="currentColor"
-                />
-            </g>
-            <defs>
-                <clipPath [id]="pathId">
-                    <rect width="14" height="14" fill="white" />
-                </clipPath>
-            </defs>
-        </svg>
-    `
-    }]
-  }], null, null);
-})();
-
-// node_modules/primeng/fesm2022/primeng-icons-sortamountupalt.mjs
-var SortAmountUpAltIcon = class _SortAmountUpAltIcon extends BaseIcon {
-  pathId;
-  ngOnInit() {
-    this.pathId = "url(#" + UniqueComponentId() + ")";
-  }
-  static ɵfac = /* @__PURE__ */ (() => {
-    let ɵSortAmountUpAltIcon_BaseFactory;
-    return function SortAmountUpAltIcon_Factory(t) {
-      return (ɵSortAmountUpAltIcon_BaseFactory || (ɵSortAmountUpAltIcon_BaseFactory = ɵɵgetInheritedFactory(_SortAmountUpAltIcon)))(t || _SortAmountUpAltIcon);
-    };
-  })();
-  static ɵcmp = ɵɵdefineComponent({
-    type: _SortAmountUpAltIcon,
-    selectors: [["SortAmountUpAltIcon"]],
-    standalone: true,
-    features: [ɵɵInheritDefinitionFeature, ɵɵStandaloneFeature],
-    decls: 11,
-    vars: 7,
-    consts: [["width", "14", "height", "14", "viewBox", "0 0 14 14", "fill", "none", "xmlns", "http://www.w3.org/2000/svg"], ["d", "M4.59864 3.99958C4.44662 3.99958 4.2946 3.94357 4.17458 3.82356L2.59836 2.24734L1.02214 3.82356C0.79011 4.05559 0.406057 4.05559 0.174024 3.82356C-0.0580081 3.59152 -0.0580081 3.20747 0.174024 2.97544L2.1743 0.97516C2.40634 0.743127 2.79039 0.743127 3.02242 0.97516L5.0227 2.97544C5.25473 3.20747 5.25473 3.59152 5.0227 3.82356C4.90268 3.94357 4.75066 3.99958 4.59864 3.99958Z", "fill", "currentColor"], ["d", "M2.59841 13.2009C2.27036 13.2009 1.99833 12.9288 1.99833 12.6008V1.39922C1.99833 1.07117 2.27036 0.799133 2.59841 0.799133C2.92646 0.799133 3.19849 1.07117 3.19849 1.39922V12.6008C3.19849 12.9288 2.92646 13.2009 2.59841 13.2009Z", "fill", "currentColor"], ["d", "M13.3999 11.2006H6.99902C6.67098 11.2006 6.39894 10.9285 6.39894 10.6005C6.39894 10.2725 6.67098 10.0004 6.99902 10.0004H13.3999C13.728 10.0004 14 10.2725 14 10.6005C14 10.9285 13.728 11.2006 13.3999 11.2006Z", "fill", "currentColor"], ["d", "M10.1995 6.39991H6.99902C6.67098 6.39991 6.39894 6.12788 6.39894 5.79983C6.39894 5.47179 6.67098 5.19975 6.99902 5.19975H10.1995C10.5275 5.19975 10.7996 5.47179 10.7996 5.79983C10.7996 6.12788 10.5275 6.39991 10.1995 6.39991Z", "fill", "currentColor"], ["d", "M8.59925 3.99958H6.99902C6.67098 3.99958 6.39894 3.72754 6.39894 3.3995C6.39894 3.07145 6.67098 2.79941 6.99902 2.79941H8.59925C8.92729 2.79941 9.19933 3.07145 9.19933 3.3995C9.19933 3.72754 8.92729 3.99958 8.59925 3.99958Z", "fill", "currentColor"], ["d", "M11.7997 8.80025H6.99902C6.67098 8.80025 6.39894 8.52821 6.39894 8.20017C6.39894 7.87212 6.67098 7.60008 6.99902 7.60008H11.7997C12.1277 7.60008 12.3998 7.87212 12.3998 8.20017C12.3998 8.52821 12.1277 8.80025 11.7997 8.80025Z", "fill", "currentColor"], [3, "id"], ["width", "14", "height", "14", "fill", "white"]],
-    template: function SortAmountUpAltIcon_Template(rf, ctx) {
-      if (rf & 1) {
-        ɵɵnamespaceSVG();
-        ɵɵelementStart(0, "svg", 0)(1, "g");
-        ɵɵelement(2, "path", 1)(3, "path", 2)(4, "path", 3)(5, "path", 4)(6, "path", 5)(7, "path", 6);
-        ɵɵelementEnd();
-        ɵɵelementStart(8, "defs")(9, "clipPath", 7);
-        ɵɵelement(10, "rect", 8);
-        ɵɵelementEnd()()();
-      }
-      if (rf & 2) {
-        ɵɵclassMap(ctx.getClassNames());
-        ɵɵattribute("aria-label", ctx.ariaLabel)("aria-hidden", ctx.ariaHidden)("role", ctx.role);
-        ɵɵadvance();
-        ɵɵattribute("clip-path", ctx.pathId);
-        ɵɵadvance(8);
-        ɵɵproperty("id", ctx.pathId);
-      }
-    },
-    encapsulation: 2
-  });
-};
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(SortAmountUpAltIcon, [{
-    type: Component,
-    args: [{
-      selector: "SortAmountUpAltIcon",
-      standalone: true,
-      imports: [BaseIcon],
-      template: `
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" [attr.aria-label]="ariaLabel" [attr.aria-hidden]="ariaHidden" [attr.role]="role" [class]="getClassNames()">
-            <g [attr.clip-path]="pathId">
-                <path
-                    d="M4.59864 3.99958C4.44662 3.99958 4.2946 3.94357 4.17458 3.82356L2.59836 2.24734L1.02214 3.82356C0.79011 4.05559 0.406057 4.05559 0.174024 3.82356C-0.0580081 3.59152 -0.0580081 3.20747 0.174024 2.97544L2.1743 0.97516C2.40634 0.743127 2.79039 0.743127 3.02242 0.97516L5.0227 2.97544C5.25473 3.20747 5.25473 3.59152 5.0227 3.82356C4.90268 3.94357 4.75066 3.99958 4.59864 3.99958Z"
-                    fill="currentColor"
-                />
-                <path
-                    d="M2.59841 13.2009C2.27036 13.2009 1.99833 12.9288 1.99833 12.6008V1.39922C1.99833 1.07117 2.27036 0.799133 2.59841 0.799133C2.92646 0.799133 3.19849 1.07117 3.19849 1.39922V12.6008C3.19849 12.9288 2.92646 13.2009 2.59841 13.2009Z"
-                    fill="currentColor"
-                />
-                <path
-                    d="M13.3999 11.2006H6.99902C6.67098 11.2006 6.39894 10.9285 6.39894 10.6005C6.39894 10.2725 6.67098 10.0004 6.99902 10.0004H13.3999C13.728 10.0004 14 10.2725 14 10.6005C14 10.9285 13.728 11.2006 13.3999 11.2006Z"
-                    fill="currentColor"
-                />
-                <path
-                    d="M10.1995 6.39991H6.99902C6.67098 6.39991 6.39894 6.12788 6.39894 5.79983C6.39894 5.47179 6.67098 5.19975 6.99902 5.19975H10.1995C10.5275 5.19975 10.7996 5.47179 10.7996 5.79983C10.7996 6.12788 10.5275 6.39991 10.1995 6.39991Z"
-                    fill="currentColor"
-                />
-                <path
-                    d="M8.59925 3.99958H6.99902C6.67098 3.99958 6.39894 3.72754 6.39894 3.3995C6.39894 3.07145 6.67098 2.79941 6.99902 2.79941H8.59925C8.92729 2.79941 9.19933 3.07145 9.19933 3.3995C9.19933 3.72754 8.92729 3.99958 8.59925 3.99958Z"
-                    fill="currentColor"
-                />
-                <path
-                    d="M11.7997 8.80025H6.99902C6.67098 8.80025 6.39894 8.52821 6.39894 8.20017C6.39894 7.87212 6.67098 7.60008 6.99902 7.60008H11.7997C12.1277 7.60008 12.3998 7.87212 12.3998 8.20017C12.3998 8.52821 12.1277 8.80025 11.7997 8.80025Z"
-                    fill="currentColor"
-                />
-            </g>
-            <defs>
-                <clipPath [id]="pathId">
-                    <rect width="14" height="14" fill="white" />
-                </clipPath>
-            </defs>
-        </svg>
-    `
-    }]
-  }], null, null);
-})();
-
-// node_modules/primeng/fesm2022/primeng-icons-filterslash.mjs
-var FilterSlashIcon = class _FilterSlashIcon extends BaseIcon {
-  pathId;
-  ngOnInit() {
-    this.pathId = "url(#" + UniqueComponentId() + ")";
-  }
-  static ɵfac = /* @__PURE__ */ (() => {
-    let ɵFilterSlashIcon_BaseFactory;
-    return function FilterSlashIcon_Factory(t) {
-      return (ɵFilterSlashIcon_BaseFactory || (ɵFilterSlashIcon_BaseFactory = ɵɵgetInheritedFactory(_FilterSlashIcon)))(t || _FilterSlashIcon);
-    };
-  })();
-  static ɵcmp = ɵɵdefineComponent({
-    type: _FilterSlashIcon,
-    selectors: [["FilterSlashIcon"]],
-    standalone: true,
-    features: [ɵɵInheritDefinitionFeature, ɵɵStandaloneFeature],
-    decls: 6,
-    vars: 7,
-    consts: [["width", "14", "height", "14", "viewBox", "0 0 14 14", "fill", "none", "xmlns", "http://www.w3.org/2000/svg"], ["fill-rule", "evenodd", "clip-rule", "evenodd", "d", "M13.4994 0.0920138C13.5967 0.151519 13.6758 0.236453 13.7283 0.337647C13.7807 0.439133 13.8031 0.553448 13.7929 0.667208C13.7827 0.780968 13.7403 0.889466 13.6707 0.98L11.406 4.06823C11.3099 4.19928 11.1656 4.28679 11.005 4.3115C10.8444 4.33621 10.6805 4.2961 10.5495 4.2C10.4184 4.1039 10.3309 3.95967 10.3062 3.79905C10.2815 3.63843 10.3216 3.47458 10.4177 3.34353L11.9412 1.23529H7.41184C7.24803 1.23529 7.09093 1.17022 6.97509 1.05439C6.85926 0.938558 6.79419 0.781457 6.79419 0.617647C6.79419 0.453837 6.85926 0.296736 6.97509 0.180905C7.09093 0.0650733 7.24803 0 7.41184 0H13.1765C13.2905 0.000692754 13.4022 0.0325088 13.4994 0.0920138ZM4.20008 0.181168H4.24126L13.2013 9.03411C13.3169 9.14992 13.3819 9.3069 13.3819 9.47058C13.3819 9.63426 13.3169 9.79124 13.2013 9.90705C13.1445 9.96517 13.0766 10.0112 13.0016 10.0423C12.9266 10.0735 12.846 10.0891 12.7648 10.0882C12.6836 10.0886 12.6032 10.0728 12.5283 10.0417C12.4533 10.0106 12.3853 9.96479 12.3283 9.90705L9.3142 6.92587L9.26479 6.99999V13.3823C9.26265 13.5455 9.19689 13.7014 9.08152 13.8167C8.96615 13.9321 8.81029 13.9979 8.64714 14H5.35302C5.18987 13.9979 5.03401 13.9321 4.91864 13.8167C4.80327 13.7014 4.73751 13.5455 4.73537 13.3823V6.99999L0.329492 1.02117C0.259855 0.930634 0.21745 0.822137 0.207241 0.708376C0.197031 0.594616 0.21944 0.480301 0.271844 0.378815C0.324343 0.277621 0.403484 0.192687 0.500724 0.133182C0.597964 0.073677 0.709609 0.041861 0.823609 0.0411682H3.86243C3.92448 0.0461551 3.9855 0.060022 4.04361 0.0823446C4.10037 0.10735 4.15311 0.140655 4.20008 0.181168ZM8.02949 6.79411C8.02884 6.66289 8.07235 6.53526 8.15302 6.43176L8.42478 6.05293L3.55773 1.23529H2.0589L5.84714 6.43176C5.92781 6.53526 5.97132 6.66289 5.97067 6.79411V12.7647H8.02949V6.79411Z", "fill", "currentColor"], [3, "id"], ["width", "14", "height", "14", "fill", "white"]],
-    template: function FilterSlashIcon_Template(rf, ctx) {
-      if (rf & 1) {
-        ɵɵnamespaceSVG();
-        ɵɵelementStart(0, "svg", 0)(1, "g");
-        ɵɵelement(2, "path", 1);
-        ɵɵelementEnd();
-        ɵɵelementStart(3, "defs")(4, "clipPath", 2);
-        ɵɵelement(5, "rect", 3);
-        ɵɵelementEnd()()();
-      }
-      if (rf & 2) {
-        ɵɵclassMap(ctx.getClassNames());
-        ɵɵattribute("aria-label", ctx.ariaLabel)("aria-hidden", ctx.ariaHidden)("role", ctx.role);
-        ɵɵadvance();
-        ɵɵattribute("clip-path", ctx.pathId);
-        ɵɵadvance(3);
-        ɵɵproperty("id", ctx.pathId);
-      }
-    },
-    encapsulation: 2
-  });
-};
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(FilterSlashIcon, [{
-    type: Component,
-    args: [{
-      selector: "FilterSlashIcon",
-      standalone: true,
-      imports: [BaseIcon],
-      template: `
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" [attr.aria-label]="ariaLabel" [attr.aria-hidden]="ariaHidden" [attr.role]="role" [class]="getClassNames()">
-            <g [attr.clip-path]="pathId">
-                <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M13.4994 0.0920138C13.5967 0.151519 13.6758 0.236453 13.7283 0.337647C13.7807 0.439133 13.8031 0.553448 13.7929 0.667208C13.7827 0.780968 13.7403 0.889466 13.6707 0.98L11.406 4.06823C11.3099 4.19928 11.1656 4.28679 11.005 4.3115C10.8444 4.33621 10.6805 4.2961 10.5495 4.2C10.4184 4.1039 10.3309 3.95967 10.3062 3.79905C10.2815 3.63843 10.3216 3.47458 10.4177 3.34353L11.9412 1.23529H7.41184C7.24803 1.23529 7.09093 1.17022 6.97509 1.05439C6.85926 0.938558 6.79419 0.781457 6.79419 0.617647C6.79419 0.453837 6.85926 0.296736 6.97509 0.180905C7.09093 0.0650733 7.24803 0 7.41184 0H13.1765C13.2905 0.000692754 13.4022 0.0325088 13.4994 0.0920138ZM4.20008 0.181168H4.24126L13.2013 9.03411C13.3169 9.14992 13.3819 9.3069 13.3819 9.47058C13.3819 9.63426 13.3169 9.79124 13.2013 9.90705C13.1445 9.96517 13.0766 10.0112 13.0016 10.0423C12.9266 10.0735 12.846 10.0891 12.7648 10.0882C12.6836 10.0886 12.6032 10.0728 12.5283 10.0417C12.4533 10.0106 12.3853 9.96479 12.3283 9.90705L9.3142 6.92587L9.26479 6.99999V13.3823C9.26265 13.5455 9.19689 13.7014 9.08152 13.8167C8.96615 13.9321 8.81029 13.9979 8.64714 14H5.35302C5.18987 13.9979 5.03401 13.9321 4.91864 13.8167C4.80327 13.7014 4.73751 13.5455 4.73537 13.3823V6.99999L0.329492 1.02117C0.259855 0.930634 0.21745 0.822137 0.207241 0.708376C0.197031 0.594616 0.21944 0.480301 0.271844 0.378815C0.324343 0.277621 0.403484 0.192687 0.500724 0.133182C0.597964 0.073677 0.709609 0.041861 0.823609 0.0411682H3.86243C3.92448 0.0461551 3.9855 0.060022 4.04361 0.0823446C4.10037 0.10735 4.15311 0.140655 4.20008 0.181168ZM8.02949 6.79411C8.02884 6.66289 8.07235 6.53526 8.15302 6.43176L8.42478 6.05293L3.55773 1.23529H2.0589L5.84714 6.43176C5.92781 6.53526 5.97132 6.66289 5.97067 6.79411V12.7647H8.02949V6.79411Z"
-                    fill="currentColor"
-                />
-            </g>
-            <defs>
-                <clipPath [id]="pathId">
-                    <rect width="14" height="14" fill="white" />
-                </clipPath>
-            </defs>
-        </svg>
-    `
-    }]
-  }], null, null);
-})();
-
 // node_modules/primeng/fesm2022/primeng-table.mjs
 var _c012 = ["container"];
-var _c111 = ["resizeHelper"];
+var _c115 = ["resizeHelper"];
 var _c29 = ["reorderIndicatorUp"];
 var _c36 = ["reorderIndicatorDown"];
 var _c45 = ["wrapper"];
@@ -19127,10 +20700,10 @@ var _c94 = (a0, a1, a2) => ({
 var _c104 = (a0) => ({
   maxHeight: a0
 });
-var _c113 = (a0) => ({
+var _c116 = (a0) => ({
   height: a0
 });
-var _c123 = (a0, a1) => ({
+var _c124 = (a0, a1) => ({
   $implicit: a0,
   options: a1
 });
@@ -19143,8 +20716,11 @@ var _c143 = (a0, a1, a2) => ({
   "p-datatable-resizable-table": a1,
   "p-datatable-resizable-table-fit": a2
 });
-var _c152 = (a0) => ({
+var _c153 = (a0) => ({
   $implicit: a0
+});
+var _c163 = () => ({
+  display: "none"
 });
 function Table_div_2_i_1_Template(rf, ctx) {
   if (rf & 1) {
@@ -19157,7 +20733,7 @@ function Table_div_2_i_1_Template(rf, ctx) {
 }
 function Table_div_2_ng_container_2_SpinnerIcon_1_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelement(0, "SpinnerIcon", 26);
+    ɵɵelement(0, "SpinnerIcon", 25);
   }
   if (rf & 2) {
     ɵɵproperty("spin", true)("styleClass", "p-datatable-loading-icon");
@@ -19172,8 +20748,8 @@ function Table_div_2_ng_container_2_span_2_1_Template(rf, ctx) {
 }
 function Table_div_2_ng_container_2_span_2_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "span", 27);
-    ɵɵtemplate(1, Table_div_2_ng_container_2_span_2_1_Template, 1, 0, null, 28);
+    ɵɵelementStart(0, "span", 26);
+    ɵɵtemplate(1, Table_div_2_ng_container_2_span_2_1_Template, 1, 0, null, 27);
     ɵɵelementEnd();
   }
   if (rf & 2) {
@@ -19185,7 +20761,7 @@ function Table_div_2_ng_container_2_span_2_Template(rf, ctx) {
 function Table_div_2_ng_container_2_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainerStart(0);
-    ɵɵtemplate(1, Table_div_2_ng_container_2_SpinnerIcon_1_Template, 1, 2, "SpinnerIcon", 24)(2, Table_div_2_ng_container_2_span_2_Template, 2, 1, "span", 25);
+    ɵɵtemplate(1, Table_div_2_ng_container_2_SpinnerIcon_1_Template, 1, 2, "SpinnerIcon", 23)(2, Table_div_2_ng_container_2_span_2_Template, 2, 1, "span", 24);
     ɵɵelementContainerEnd();
   }
   if (rf & 2) {
@@ -19198,8 +20774,8 @@ function Table_div_2_ng_container_2_Template(rf, ctx) {
 }
 function Table_div_2_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "div", 22);
-    ɵɵtemplate(1, Table_div_2_i_1_Template, 1, 2, "i", 23)(2, Table_div_2_ng_container_2_Template, 3, 2, "ng-container", 16);
+    ɵɵelementStart(0, "div", 21);
+    ɵɵtemplate(1, Table_div_2_i_1_Template, 1, 2, "i", 22)(2, Table_div_2_ng_container_2_Template, 3, 2, "ng-container", 16);
     ɵɵelementEnd();
   }
   if (rf & 2) {
@@ -19217,8 +20793,8 @@ function Table_div_3_ng_container_1_Template(rf, ctx) {
 }
 function Table_div_3_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "div", 29);
-    ɵɵtemplate(1, Table_div_3_ng_container_1_Template, 1, 0, "ng-container", 28);
+    ɵɵelementStart(0, "div", 28);
+    ɵɵtemplate(1, Table_div_3_ng_container_1_Template, 1, 0, "ng-container", 27);
     ɵɵelementEnd();
   }
   if (rf & 2) {
@@ -19234,16 +20810,16 @@ function Table_p_paginator_4_1_ng_template_0_ng_container_0_Template(rf, ctx) {
 }
 function Table_p_paginator_4_1_ng_template_0_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵtemplate(0, Table_p_paginator_4_1_ng_template_0_ng_container_0_Template, 1, 0, "ng-container", 28);
+    ɵɵtemplate(0, Table_p_paginator_4_1_ng_template_0_ng_container_0_Template, 1, 0, "ng-container", 27);
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext(3);
-    ɵɵproperty("ngTemplateOutlet", ctx_r0.paginatorFirstPageLinkIconTemplate);
+    ɵɵproperty("ngTemplateOutlet", ctx_r0.paginatorDropdownIconTemplate);
   }
 }
 function Table_p_paginator_4_1_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵtemplate(0, Table_p_paginator_4_1_ng_template_0_Template, 1, 1, "ng-template", 31);
+    ɵɵtemplate(0, Table_p_paginator_4_1_ng_template_0_Template, 1, 1, "ng-template", 30);
   }
 }
 function Table_p_paginator_4_2_ng_template_0_ng_container_0_Template(rf, ctx) {
@@ -19253,16 +20829,16 @@ function Table_p_paginator_4_2_ng_template_0_ng_container_0_Template(rf, ctx) {
 }
 function Table_p_paginator_4_2_ng_template_0_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵtemplate(0, Table_p_paginator_4_2_ng_template_0_ng_container_0_Template, 1, 0, "ng-container", 28);
+    ɵɵtemplate(0, Table_p_paginator_4_2_ng_template_0_ng_container_0_Template, 1, 0, "ng-container", 27);
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext(3);
-    ɵɵproperty("ngTemplateOutlet", ctx_r0.paginatorPreviousPageLinkIconTemplate);
+    ɵɵproperty("ngTemplateOutlet", ctx_r0.paginatorFirstPageLinkIconTemplate);
   }
 }
 function Table_p_paginator_4_2_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵtemplate(0, Table_p_paginator_4_2_ng_template_0_Template, 1, 1, "ng-template", 32);
+    ɵɵtemplate(0, Table_p_paginator_4_2_ng_template_0_Template, 1, 1, "ng-template", 31);
   }
 }
 function Table_p_paginator_4_3_ng_template_0_ng_container_0_Template(rf, ctx) {
@@ -19272,16 +20848,16 @@ function Table_p_paginator_4_3_ng_template_0_ng_container_0_Template(rf, ctx) {
 }
 function Table_p_paginator_4_3_ng_template_0_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵtemplate(0, Table_p_paginator_4_3_ng_template_0_ng_container_0_Template, 1, 0, "ng-container", 28);
+    ɵɵtemplate(0, Table_p_paginator_4_3_ng_template_0_ng_container_0_Template, 1, 0, "ng-container", 27);
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext(3);
-    ɵɵproperty("ngTemplateOutlet", ctx_r0.paginatorLastPageLinkIconTemplate);
+    ɵɵproperty("ngTemplateOutlet", ctx_r0.paginatorPreviousPageLinkIconTemplate);
   }
 }
 function Table_p_paginator_4_3_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵtemplate(0, Table_p_paginator_4_3_ng_template_0_Template, 1, 1, "ng-template", 33);
+    ɵɵtemplate(0, Table_p_paginator_4_3_ng_template_0_Template, 1, 1, "ng-template", 32);
   }
 }
 function Table_p_paginator_4_4_ng_template_0_ng_container_0_Template(rf, ctx) {
@@ -19291,33 +20867,54 @@ function Table_p_paginator_4_4_ng_template_0_ng_container_0_Template(rf, ctx) {
 }
 function Table_p_paginator_4_4_ng_template_0_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵtemplate(0, Table_p_paginator_4_4_ng_template_0_ng_container_0_Template, 1, 0, "ng-container", 28);
+    ɵɵtemplate(0, Table_p_paginator_4_4_ng_template_0_ng_container_0_Template, 1, 0, "ng-container", 27);
+  }
+  if (rf & 2) {
+    const ctx_r0 = ɵɵnextContext(3);
+    ɵɵproperty("ngTemplateOutlet", ctx_r0.paginatorLastPageLinkIconTemplate);
+  }
+}
+function Table_p_paginator_4_4_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵtemplate(0, Table_p_paginator_4_4_ng_template_0_Template, 1, 1, "ng-template", 33);
+  }
+}
+function Table_p_paginator_4_5_ng_template_0_ng_container_0_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵelementContainer(0);
+  }
+}
+function Table_p_paginator_4_5_ng_template_0_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵtemplate(0, Table_p_paginator_4_5_ng_template_0_ng_container_0_Template, 1, 0, "ng-container", 27);
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext(3);
     ɵɵproperty("ngTemplateOutlet", ctx_r0.paginatorNextPageLinkIconTemplate);
   }
 }
-function Table_p_paginator_4_4_Template(rf, ctx) {
+function Table_p_paginator_4_5_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵtemplate(0, Table_p_paginator_4_4_ng_template_0_Template, 1, 1, "ng-template", 34);
+    ɵɵtemplate(0, Table_p_paginator_4_5_ng_template_0_Template, 1, 1, "ng-template", 34);
   }
 }
 function Table_p_paginator_4_Template(rf, ctx) {
   if (rf & 1) {
     const _r2 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "p-paginator", 30);
+    ɵɵelementStart(0, "p-paginator", 29);
     ɵɵlistener("onPageChange", function Table_p_paginator_4_Template_p_paginator_onPageChange_0_listener($event) {
       ɵɵrestoreView(_r2);
       const ctx_r0 = ɵɵnextContext();
       return ɵɵresetView(ctx_r0.onPageChange($event));
     });
-    ɵɵtemplate(1, Table_p_paginator_4_1_Template, 1, 0, null, 16)(2, Table_p_paginator_4_2_Template, 1, 0, null, 16)(3, Table_p_paginator_4_3_Template, 1, 0, null, 16)(4, Table_p_paginator_4_4_Template, 1, 0, null, 16);
+    ɵɵtemplate(1, Table_p_paginator_4_1_Template, 1, 0, null, 16)(2, Table_p_paginator_4_2_Template, 1, 0, null, 16)(3, Table_p_paginator_4_3_Template, 1, 0, null, 16)(4, Table_p_paginator_4_4_Template, 1, 0, null, 16)(5, Table_p_paginator_4_5_Template, 1, 0, null, 16);
     ɵɵelementEnd();
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext();
-    ɵɵproperty("rows", ctx_r0.rows)("first", ctx_r0.first)("totalRecords", ctx_r0.totalRecords)("pageLinkSize", ctx_r0.pageLinks)("alwaysShow", ctx_r0.alwaysShowPaginator)("rowsPerPageOptions", ctx_r0.rowsPerPageOptions)("templateLeft", ctx_r0.paginatorLeftTemplate)("templateRight", ctx_r0.paginatorRightTemplate)("dropdownAppendTo", ctx_r0.paginatorDropdownAppendTo)("dropdownScrollHeight", ctx_r0.paginatorDropdownScrollHeight)("currentPageReportTemplate", ctx_r0.currentPageReportTemplate)("showFirstLastIcon", ctx_r0.showFirstLastIcon)("dropdownItemTemplate", ctx_r0.paginatorDropdownItemTemplate)("showCurrentPageReport", ctx_r0.showCurrentPageReport)("showJumpToPageDropdown", ctx_r0.showJumpToPageDropdown)("showJumpToPageInput", ctx_r0.showJumpToPageInput)("showPageLinks", ctx_r0.showPageLinks)("styleClass", ctx_r0.paginatorStyleClass)("locale", ctx_r0.paginatorLocale);
+    ɵɵproperty("rows", ctx_r0.rows)("first", ctx_r0.first)("totalRecords", ctx_r0.totalRecords)("pageLinkSize", ctx_r0.pageLinks)("alwaysShow", ctx_r0.alwaysShowPaginator)("rowsPerPageOptions", ctx_r0.rowsPerPageOptions)("templateLeft", ctx_r0.paginatorLeftTemplate)("templateRight", ctx_r0.paginatorRightTemplate)("dropdownAppendTo", ctx_r0.paginatorDropdownAppendTo)("dropdownScrollHeight", ctx_r0.paginatorDropdownScrollHeight)("currentPageReportTemplate", ctx_r0.currentPageReportTemplate)("showFirstLastIcon", ctx_r0.showFirstLastIcon)("dropdownItemTemplate", ctx_r0.paginatorDropdownItemTemplate)("showCurrentPageReport", ctx_r0.showCurrentPageReport)("showJumpToPageDropdown", ctx_r0.showJumpToPageDropdown)("showJumpToPageInput", ctx_r0.showJumpToPageInput)("showPageLinks", ctx_r0.showPageLinks)("styleClass", ctx_r0.getPaginatorStyleClasses("p-paginator-top"))("locale", ctx_r0.paginatorLocale);
+    ɵɵadvance();
+    ɵɵproperty("ngIf", ctx_r0.paginatorDropdownIconTemplate);
     ɵɵadvance();
     ɵɵproperty("ngIf", ctx_r0.paginatorFirstPageLinkIconTemplate);
     ɵɵadvance();
@@ -19342,7 +20939,7 @@ function Table_p_scroller_7_ng_template_2_Template(rf, ctx) {
     const scrollerOptions_r5 = ctx.options;
     ɵɵnextContext(2);
     const buildInTable_r6 = ɵɵreference(10);
-    ɵɵproperty("ngTemplateOutlet", buildInTable_r6)("ngTemplateOutletContext", ɵɵpureFunction2(2, _c123, items_r4, scrollerOptions_r5));
+    ɵɵproperty("ngTemplateOutlet", buildInTable_r6)("ngTemplateOutletContext", ɵɵpureFunction2(2, _c124, items_r4, scrollerOptions_r5));
   }
 }
 function Table_p_scroller_7_Template(rf, ctx) {
@@ -19359,8 +20956,8 @@ function Table_p_scroller_7_Template(rf, ctx) {
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext();
-    ɵɵstyleMap(ɵɵpureFunction1(15, _c113, ctx_r0.scrollHeight !== "flex" ? ctx_r0.scrollHeight : void 0));
-    ɵɵproperty("items", ctx_r0.processedData)("columns", ctx_r0.columns)("scrollHeight", ctx_r0.scrollHeight !== "flex" ? void 0 : "100%")("itemSize", ctx_r0.virtualScrollItemSize || ctx_r0._virtualRowHeight)("step", ctx_r0.rows)("delay", ctx_r0.lazy ? ctx_r0.virtualScrollDelay : 0)("inline", true)("lazy", ctx_r0.lazy)("loaderDisabled", true)("showSpacer", false)("showLoader", ctx_r0.loadingBodyTemplate)("options", ctx_r0.virtualScrollOptions)("autoSize", true);
+    ɵɵstyleMap(ɵɵpureFunction1(15, _c116, ctx_r0.scrollHeight !== "flex" ? ctx_r0.scrollHeight : void 0));
+    ɵɵproperty("items", ctx_r0.processedData)("columns", ctx_r0.columns)("scrollHeight", ctx_r0.scrollHeight !== "flex" ? void 0 : "100%")("itemSize", ctx_r0.virtualScrollItemSize || ctx_r0._virtualRowHeight)("step", ctx_r0.rows)("delay", ctx_r0.lazy ? ctx_r0.virtualScrollDelay : 0)("inline", true)("autoSize", true)("lazy", ctx_r0.lazy)("loaderDisabled", true)("showSpacer", false)("showLoader", ctx_r0.loadingBodyTemplate)("options", ctx_r0.virtualScrollOptions);
   }
 }
 function Table_ng_container_8_ng_container_1_Template(rf, ctx) {
@@ -19378,7 +20975,7 @@ function Table_ng_container_8_Template(rf, ctx) {
     const ctx_r0 = ɵɵnextContext();
     const buildInTable_r6 = ɵɵreference(10);
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", buildInTable_r6)("ngTemplateOutletContext", ɵɵpureFunction2(4, _c123, ctx_r0.processedData, ɵɵpureFunction1(2, _c133, ctx_r0.columns)));
+    ɵɵproperty("ngTemplateOutlet", buildInTable_r6)("ngTemplateOutletContext", ɵɵpureFunction2(4, _c124, ctx_r0.processedData, ɵɵpureFunction1(2, _c133, ctx_r0.columns)));
   }
 }
 function Table_ng_template_9_ng_container_2_Template(rf, ctx) {
@@ -19407,7 +21004,7 @@ function Table_ng_template_9_tbody_8_Template(rf, ctx) {
   }
   if (rf & 2) {
     const scrollerOptions_r7 = ɵɵnextContext().options;
-    ɵɵstyleMap("height: calc(" + scrollerOptions_r7.spacerStyle.height + " - " + scrollerOptions_r7.rows.length * scrollerOptions_r7.itemSize + "px);");
+    ɵɵproperty("ngStyle", ɵɵpureFunction1(1, _c116, "calc(" + scrollerOptions_r7.spacerStyle.height + " - " + scrollerOptions_r7.rows.length * scrollerOptions_r7.itemSize + "px)"));
   }
 }
 function Table_ng_template_9_tfoot_9_ng_container_2_Template(rf, ctx) {
@@ -19425,7 +21022,7 @@ function Table_ng_template_9_tfoot_9_Template(rf, ctx) {
     const scrollerOptions_r7 = ɵɵnextContext().options;
     const ctx_r0 = ɵɵnextContext();
     ɵɵadvance(2);
-    ɵɵproperty("ngTemplateOutlet", ctx_r0.footerGroupedTemplate || ctx_r0.footerTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(2, _c152, scrollerOptions_r7.columns));
+    ɵɵproperty("ngTemplateOutlet", ctx_r0.footerGroupedTemplate || ctx_r0.footerTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(2, _c153, scrollerOptions_r7.columns));
   }
 }
 function Table_ng_template_9_Template(rf, ctx) {
@@ -19437,25 +21034,23 @@ function Table_ng_template_9_Template(rf, ctx) {
     ɵɵelementEnd();
     ɵɵtemplate(6, Table_ng_template_9_tbody_6_Template, 1, 5, "tbody", 40);
     ɵɵelement(7, "tbody", 41);
-    ɵɵtemplate(8, Table_ng_template_9_tbody_8_Template, 1, 2, "tbody", 42)(9, Table_ng_template_9_tfoot_9_Template, 3, 4, "tfoot", 43);
+    ɵɵtemplate(8, Table_ng_template_9_tbody_8_Template, 1, 3, "tbody", 42)(9, Table_ng_template_9_tfoot_9_Template, 3, 4, "tfoot", 43);
     ɵɵelementEnd();
   }
   if (rf & 2) {
     const scrollerOptions_r7 = ctx.options;
     const ctx_r0 = ɵɵnextContext();
-    ɵɵstyleMap(ctx_r0.tableStyle);
     ɵɵclassMap(ctx_r0.tableStyleClass);
-    ɵɵproperty("ngClass", ɵɵpureFunction3(20, _c143, ctx_r0.scrollable, ctx_r0.resizableColumns, ctx_r0.resizableColumns && ctx_r0.columnResizeMode === "fit"));
+    ɵɵproperty("ngClass", ɵɵpureFunction3(18, _c143, ctx_r0.scrollable, ctx_r0.resizableColumns, ctx_r0.resizableColumns && ctx_r0.columnResizeMode === "fit"))("ngStyle", ctx_r0.tableStyle);
     ɵɵattribute("id", ctx_r0.id + "-table");
     ɵɵadvance(2);
-    ɵɵproperty("ngTemplateOutlet", ctx_r0.colGroupTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(24, _c152, scrollerOptions_r7.columns));
+    ɵɵproperty("ngTemplateOutlet", ctx_r0.colGroupTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(22, _c153, scrollerOptions_r7.columns));
     ɵɵadvance(3);
-    ɵɵproperty("ngTemplateOutlet", ctx_r0.headerGroupedTemplate || ctx_r0.headerTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(26, _c152, scrollerOptions_r7.columns));
+    ɵɵproperty("ngTemplateOutlet", ctx_r0.headerGroupedTemplate || ctx_r0.headerTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(24, _c153, scrollerOptions_r7.columns));
     ɵɵadvance();
     ɵɵproperty("ngIf", ctx_r0.frozenValue || ctx_r0.frozenBodyTemplate);
     ɵɵadvance();
-    ɵɵstyleMap(scrollerOptions_r7.contentStyle);
-    ɵɵproperty("ngClass", scrollerOptions_r7.contentStyleClass)("value", ctx_r0.dataToRender(scrollerOptions_r7.rows))("pTableBody", scrollerOptions_r7.columns)("pTableBodyTemplate", ctx_r0.bodyTemplate)("scrollerOptions", scrollerOptions_r7);
+    ɵɵproperty("ngClass", scrollerOptions_r7.contentStyleClass)("ngStyle", scrollerOptions_r7.contentStyle)("value", ctx_r0.dataToRender(scrollerOptions_r7.rows))("pTableBody", scrollerOptions_r7.columns)("pTableBodyTemplate", ctx_r0.bodyTemplate)("scrollerOptions", scrollerOptions_r7);
     ɵɵadvance();
     ɵɵproperty("ngIf", scrollerOptions_r7.spacerStyle);
     ɵɵadvance();
@@ -19469,16 +21064,16 @@ function Table_p_paginator_11_1_ng_template_0_ng_container_0_Template(rf, ctx) {
 }
 function Table_p_paginator_11_1_ng_template_0_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵtemplate(0, Table_p_paginator_11_1_ng_template_0_ng_container_0_Template, 1, 0, "ng-container", 28);
+    ɵɵtemplate(0, Table_p_paginator_11_1_ng_template_0_ng_container_0_Template, 1, 0, "ng-container", 27);
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext(3);
-    ɵɵproperty("ngTemplateOutlet", ctx_r0.paginatorFirstPageLinkIconTemplate);
+    ɵɵproperty("ngTemplateOutlet", ctx_r0.paginatorDropdownIconTemplate);
   }
 }
 function Table_p_paginator_11_1_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵtemplate(0, Table_p_paginator_11_1_ng_template_0_Template, 1, 1, "ng-template", 31);
+    ɵɵtemplate(0, Table_p_paginator_11_1_ng_template_0_Template, 1, 1, "ng-template", 30);
   }
 }
 function Table_p_paginator_11_2_ng_template_0_ng_container_0_Template(rf, ctx) {
@@ -19488,16 +21083,16 @@ function Table_p_paginator_11_2_ng_template_0_ng_container_0_Template(rf, ctx) {
 }
 function Table_p_paginator_11_2_ng_template_0_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵtemplate(0, Table_p_paginator_11_2_ng_template_0_ng_container_0_Template, 1, 0, "ng-container", 28);
+    ɵɵtemplate(0, Table_p_paginator_11_2_ng_template_0_ng_container_0_Template, 1, 0, "ng-container", 27);
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext(3);
-    ɵɵproperty("ngTemplateOutlet", ctx_r0.paginatorPreviousPageLinkIconTemplate);
+    ɵɵproperty("ngTemplateOutlet", ctx_r0.paginatorFirstPageLinkIconTemplate);
   }
 }
 function Table_p_paginator_11_2_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵtemplate(0, Table_p_paginator_11_2_ng_template_0_Template, 1, 1, "ng-template", 32);
+    ɵɵtemplate(0, Table_p_paginator_11_2_ng_template_0_Template, 1, 1, "ng-template", 31);
   }
 }
 function Table_p_paginator_11_3_ng_template_0_ng_container_0_Template(rf, ctx) {
@@ -19507,16 +21102,16 @@ function Table_p_paginator_11_3_ng_template_0_ng_container_0_Template(rf, ctx) {
 }
 function Table_p_paginator_11_3_ng_template_0_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵtemplate(0, Table_p_paginator_11_3_ng_template_0_ng_container_0_Template, 1, 0, "ng-container", 28);
+    ɵɵtemplate(0, Table_p_paginator_11_3_ng_template_0_ng_container_0_Template, 1, 0, "ng-container", 27);
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext(3);
-    ɵɵproperty("ngTemplateOutlet", ctx_r0.paginatorLastPageLinkIconTemplate);
+    ɵɵproperty("ngTemplateOutlet", ctx_r0.paginatorPreviousPageLinkIconTemplate);
   }
 }
 function Table_p_paginator_11_3_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵtemplate(0, Table_p_paginator_11_3_ng_template_0_Template, 1, 1, "ng-template", 33);
+    ɵɵtemplate(0, Table_p_paginator_11_3_ng_template_0_Template, 1, 1, "ng-template", 32);
   }
 }
 function Table_p_paginator_11_4_ng_template_0_ng_container_0_Template(rf, ctx) {
@@ -19526,33 +21121,54 @@ function Table_p_paginator_11_4_ng_template_0_ng_container_0_Template(rf, ctx) {
 }
 function Table_p_paginator_11_4_ng_template_0_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵtemplate(0, Table_p_paginator_11_4_ng_template_0_ng_container_0_Template, 1, 0, "ng-container", 28);
+    ɵɵtemplate(0, Table_p_paginator_11_4_ng_template_0_ng_container_0_Template, 1, 0, "ng-container", 27);
+  }
+  if (rf & 2) {
+    const ctx_r0 = ɵɵnextContext(3);
+    ɵɵproperty("ngTemplateOutlet", ctx_r0.paginatorLastPageLinkIconTemplate);
+  }
+}
+function Table_p_paginator_11_4_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵtemplate(0, Table_p_paginator_11_4_ng_template_0_Template, 1, 1, "ng-template", 33);
+  }
+}
+function Table_p_paginator_11_5_ng_template_0_ng_container_0_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵelementContainer(0);
+  }
+}
+function Table_p_paginator_11_5_ng_template_0_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵtemplate(0, Table_p_paginator_11_5_ng_template_0_ng_container_0_Template, 1, 0, "ng-container", 27);
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext(3);
     ɵɵproperty("ngTemplateOutlet", ctx_r0.paginatorNextPageLinkIconTemplate);
   }
 }
-function Table_p_paginator_11_4_Template(rf, ctx) {
+function Table_p_paginator_11_5_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵtemplate(0, Table_p_paginator_11_4_ng_template_0_Template, 1, 1, "ng-template", 34);
+    ɵɵtemplate(0, Table_p_paginator_11_5_ng_template_0_Template, 1, 1, "ng-template", 34);
   }
 }
 function Table_p_paginator_11_Template(rf, ctx) {
   if (rf & 1) {
     const _r8 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "p-paginator", 47);
+    ɵɵelementStart(0, "p-paginator", 29);
     ɵɵlistener("onPageChange", function Table_p_paginator_11_Template_p_paginator_onPageChange_0_listener($event) {
       ɵɵrestoreView(_r8);
       const ctx_r0 = ɵɵnextContext();
       return ɵɵresetView(ctx_r0.onPageChange($event));
     });
-    ɵɵtemplate(1, Table_p_paginator_11_1_Template, 1, 0, null, 16)(2, Table_p_paginator_11_2_Template, 1, 0, null, 16)(3, Table_p_paginator_11_3_Template, 1, 0, null, 16)(4, Table_p_paginator_11_4_Template, 1, 0, null, 16);
+    ɵɵtemplate(1, Table_p_paginator_11_1_Template, 1, 0, null, 16)(2, Table_p_paginator_11_2_Template, 1, 0, null, 16)(3, Table_p_paginator_11_3_Template, 1, 0, null, 16)(4, Table_p_paginator_11_4_Template, 1, 0, null, 16)(5, Table_p_paginator_11_5_Template, 1, 0, null, 16);
     ɵɵelementEnd();
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext();
-    ɵɵproperty("rows", ctx_r0.rows)("first", ctx_r0.first)("totalRecords", ctx_r0.totalRecords)("pageLinkSize", ctx_r0.pageLinks)("alwaysShow", ctx_r0.alwaysShowPaginator)("rowsPerPageOptions", ctx_r0.rowsPerPageOptions)("templateLeft", ctx_r0.paginatorLeftTemplate)("templateRight", ctx_r0.paginatorRightTemplate)("dropdownAppendTo", ctx_r0.paginatorDropdownAppendTo)("dropdownScrollHeight", ctx_r0.paginatorDropdownScrollHeight)("currentPageReportTemplate", ctx_r0.currentPageReportTemplate)("showFirstLastIcon", ctx_r0.showFirstLastIcon)("dropdownItemTemplate", ctx_r0.paginatorDropdownItemTemplate)("showCurrentPageReport", ctx_r0.showCurrentPageReport)("showJumpToPageDropdown", ctx_r0.showJumpToPageDropdown)("showJumpToPageInput", ctx_r0.showJumpToPageInput)("showPageLinks", ctx_r0.showPageLinks)("styleClass", ctx_r0.paginatorStyleClass)("locale", ctx_r0.paginatorLocale);
+    ɵɵproperty("rows", ctx_r0.rows)("first", ctx_r0.first)("totalRecords", ctx_r0.totalRecords)("pageLinkSize", ctx_r0.pageLinks)("alwaysShow", ctx_r0.alwaysShowPaginator)("rowsPerPageOptions", ctx_r0.rowsPerPageOptions)("templateLeft", ctx_r0.paginatorLeftTemplate)("templateRight", ctx_r0.paginatorRightTemplate)("dropdownAppendTo", ctx_r0.paginatorDropdownAppendTo)("dropdownScrollHeight", ctx_r0.paginatorDropdownScrollHeight)("currentPageReportTemplate", ctx_r0.currentPageReportTemplate)("showFirstLastIcon", ctx_r0.showFirstLastIcon)("dropdownItemTemplate", ctx_r0.paginatorDropdownItemTemplate)("showCurrentPageReport", ctx_r0.showCurrentPageReport)("showJumpToPageDropdown", ctx_r0.showJumpToPageDropdown)("showJumpToPageInput", ctx_r0.showJumpToPageInput)("showPageLinks", ctx_r0.showPageLinks)("styleClass", ctx_r0.getPaginatorStyleClasses("p-paginator-bottom"))("locale", ctx_r0.paginatorLocale);
+    ɵɵadvance();
+    ɵɵproperty("ngIf", ctx_r0.paginatorDropdownIconTemplate);
     ɵɵadvance();
     ɵɵproperty("ngIf", ctx_r0.paginatorFirstPageLinkIconTemplate);
     ɵɵadvance();
@@ -19570,8 +21186,8 @@ function Table_div_12_ng_container_1_Template(rf, ctx) {
 }
 function Table_div_12_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "div", 48);
-    ɵɵtemplate(1, Table_div_12_ng_container_1_Template, 1, 0, "ng-container", 28);
+    ɵɵelementStart(0, "div", 47);
+    ɵɵtemplate(1, Table_div_12_ng_container_1_Template, 1, 0, "ng-container", 27);
     ɵɵelementEnd();
   }
   if (rf & 2) {
@@ -19582,7 +21198,10 @@ function Table_div_12_Template(rf, ctx) {
 }
 function Table_div_13_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelement(0, "div", 49, 7);
+    ɵɵelement(0, "div", 48, 7);
+  }
+  if (rf & 2) {
+    ɵɵproperty("ngStyle", ɵɵpureFunction0(1, _c163));
   }
 }
 function Table_span_14_ArrowDownIcon_2_Template(rf, ctx) {
@@ -19599,12 +21218,13 @@ function Table_span_14_3_Template(rf, ctx) {
 }
 function Table_span_14_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "span", 50, 8);
-    ɵɵtemplate(2, Table_span_14_ArrowDownIcon_2_Template, 1, 0, "ArrowDownIcon", 16)(3, Table_span_14_3_Template, 1, 0, null, 28);
+    ɵɵelementStart(0, "span", 49, 8);
+    ɵɵtemplate(2, Table_span_14_ArrowDownIcon_2_Template, 1, 0, "ArrowDownIcon", 16)(3, Table_span_14_3_Template, 1, 0, null, 27);
     ɵɵelementEnd();
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext();
+    ɵɵproperty("ngStyle", ɵɵpureFunction0(3, _c163));
     ɵɵadvance(2);
     ɵɵproperty("ngIf", !ctx_r0.reorderIndicatorUpIconTemplate);
     ɵɵadvance();
@@ -19625,27 +21245,28 @@ function Table_span_15_3_Template(rf, ctx) {
 }
 function Table_span_15_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "span", 51, 9);
-    ɵɵtemplate(2, Table_span_15_ArrowUpIcon_2_Template, 1, 0, "ArrowUpIcon", 16)(3, Table_span_15_3_Template, 1, 0, null, 28);
+    ɵɵelementStart(0, "span", 50, 9);
+    ɵɵtemplate(2, Table_span_15_ArrowUpIcon_2_Template, 1, 0, "ArrowUpIcon", 16)(3, Table_span_15_3_Template, 1, 0, null, 27);
     ɵɵelementEnd();
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext();
+    ɵɵproperty("ngStyle", ɵɵpureFunction0(3, _c163));
     ɵɵadvance(2);
     ɵɵproperty("ngIf", !ctx_r0.reorderIndicatorDownIconTemplate);
     ɵɵadvance();
     ɵɵproperty("ngTemplateOutlet", ctx_r0.reorderIndicatorDownIconTemplate);
   }
 }
-var _c162 = ["pTableBody", ""];
-var _c172 = (a0, a1, a2, a3, a4) => ({
+var _c172 = ["pTableBody", ""];
+var _c182 = (a0, a1, a2, a3, a4) => ({
   $implicit: a0,
   rowIndex: a1,
   columns: a2,
   editing: a3,
   frozen: a4
 });
-var _c182 = (a0, a1, a2, a3, a4, a5, a6) => ({
+var _c192 = (a0, a1, a2, a3, a4, a5, a6) => ({
   $implicit: a0,
   rowIndex: a1,
   columns: a2,
@@ -19654,7 +21275,7 @@ var _c182 = (a0, a1, a2, a3, a4, a5, a6) => ({
   rowgroup: a5,
   rowspan: a6
 });
-var _c192 = (a0, a1, a2, a3, a4, a5) => ({
+var _c20 = (a0, a1, a2, a3, a4, a5) => ({
   $implicit: a0,
   rowIndex: a1,
   columns: a2,
@@ -19662,13 +21283,13 @@ var _c192 = (a0, a1, a2, a3, a4, a5) => ({
   editing: a4,
   frozen: a5
 });
-var _c20 = (a0, a1, a2, a3) => ({
+var _c21 = (a0, a1, a2, a3) => ({
   $implicit: a0,
   rowIndex: a1,
   columns: a2,
   frozen: a3
 });
-var _c21 = (a0, a1) => ({
+var _c222 = (a0, a1) => ({
   $implicit: a0,
   frozen: a1
 });
@@ -19689,7 +21310,7 @@ function TableBody_ng_container_0_ng_template_1_ng_container_0_Template(rf, ctx)
     const rowIndex_r3 = ctx_r0.index;
     const ctx_r3 = ɵɵnextContext(2);
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", ctx_r3.dt.groupHeaderTemplate)("ngTemplateOutletContext", ɵɵpureFunction5(2, _c172, rowData_r2, ctx_r3.getRowIndex(rowIndex_r3), ctx_r3.columns, ctx_r3.dt.editMode === "row" && ctx_r3.dt.isRowEditing(rowData_r2), ctx_r3.frozen));
+    ɵɵproperty("ngTemplateOutlet", ctx_r3.dt.groupHeaderTemplate)("ngTemplateOutletContext", ɵɵpureFunction5(2, _c182, rowData_r2, ctx_r3.getRowIndex(rowIndex_r3), ctx_r3.columns, ctx_r3.dt.editMode === "row" && ctx_r3.dt.isRowEditing(rowData_r2), ctx_r3.frozen));
   }
 }
 function TableBody_ng_container_0_ng_template_1_ng_container_1_ng_container_1_Template(rf, ctx) {
@@ -19709,7 +21330,7 @@ function TableBody_ng_container_0_ng_template_1_ng_container_1_Template(rf, ctx)
     const rowIndex_r3 = ctx_r0.index;
     const ctx_r3 = ɵɵnextContext(2);
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", rowData_r2 ? ctx_r3.template : ctx_r3.dt.loadingBodyTemplate)("ngTemplateOutletContext", ɵɵpureFunction5(2, _c172, rowData_r2, ctx_r3.getRowIndex(rowIndex_r3), ctx_r3.columns, ctx_r3.dt.editMode === "row" && ctx_r3.dt.isRowEditing(rowData_r2), ctx_r3.frozen));
+    ɵɵproperty("ngTemplateOutlet", rowData_r2 ? ctx_r3.template : ctx_r3.dt.loadingBodyTemplate)("ngTemplateOutletContext", ɵɵpureFunction5(2, _c182, rowData_r2, ctx_r3.getRowIndex(rowIndex_r3), ctx_r3.columns, ctx_r3.dt.editMode === "row" && ctx_r3.dt.isRowEditing(rowData_r2), ctx_r3.frozen));
   }
 }
 function TableBody_ng_container_0_ng_template_1_ng_container_2_ng_container_1_Template(rf, ctx) {
@@ -19729,7 +21350,7 @@ function TableBody_ng_container_0_ng_template_1_ng_container_2_Template(rf, ctx)
     const rowIndex_r3 = ctx_r0.index;
     const ctx_r3 = ɵɵnextContext(2);
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", rowData_r2 ? ctx_r3.template : ctx_r3.dt.loadingBodyTemplate)("ngTemplateOutletContext", ɵɵpureFunction7(2, _c182, rowData_r2, ctx_r3.getRowIndex(rowIndex_r3), ctx_r3.columns, ctx_r3.dt.editMode === "row" && ctx_r3.dt.isRowEditing(rowData_r2), ctx_r3.frozen, ctx_r3.shouldRenderRowspan(ctx_r3.value, rowData_r2, rowIndex_r3), ctx_r3.calculateRowGroupSize(ctx_r3.value, rowData_r2, rowIndex_r3)));
+    ɵɵproperty("ngTemplateOutlet", rowData_r2 ? ctx_r3.template : ctx_r3.dt.loadingBodyTemplate)("ngTemplateOutletContext", ɵɵpureFunction7(2, _c192, rowData_r2, ctx_r3.getRowIndex(rowIndex_r3), ctx_r3.columns, ctx_r3.dt.editMode === "row" && ctx_r3.dt.isRowEditing(rowData_r2), ctx_r3.frozen, ctx_r3.shouldRenderRowspan(ctx_r3.value, rowData_r2, rowIndex_r3), ctx_r3.calculateRowGroupSize(ctx_r3.value, rowData_r2, rowIndex_r3)));
   }
 }
 function TableBody_ng_container_0_ng_template_1_ng_container_3_ng_container_1_Template(rf, ctx) {
@@ -19749,7 +21370,7 @@ function TableBody_ng_container_0_ng_template_1_ng_container_3_Template(rf, ctx)
     const rowIndex_r3 = ctx_r0.index;
     const ctx_r3 = ɵɵnextContext(2);
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", ctx_r3.dt.groupFooterTemplate)("ngTemplateOutletContext", ɵɵpureFunction5(2, _c172, rowData_r2, ctx_r3.getRowIndex(rowIndex_r3), ctx_r3.columns, ctx_r3.dt.editMode === "row" && ctx_r3.dt.isRowEditing(rowData_r2), ctx_r3.frozen));
+    ɵɵproperty("ngTemplateOutlet", ctx_r3.dt.groupFooterTemplate)("ngTemplateOutletContext", ɵɵpureFunction5(2, _c182, rowData_r2, ctx_r3.getRowIndex(rowIndex_r3), ctx_r3.columns, ctx_r3.dt.editMode === "row" && ctx_r3.dt.isRowEditing(rowData_r2), ctx_r3.frozen));
   }
 }
 function TableBody_ng_container_0_ng_template_1_Template(rf, ctx) {
@@ -19760,7 +21381,7 @@ function TableBody_ng_container_0_ng_template_1_Template(rf, ctx) {
     const rowData_r2 = ctx.$implicit;
     const rowIndex_r3 = ctx.index;
     const ctx_r3 = ɵɵnextContext(2);
-    ɵɵproperty("ngIf", ctx_r3.dt.groupHeaderTemplate && !ctx_r3.dt.virtualScroll && ctx_r3.dt.rowGroupMode === "subheader" && ctx_r3.shouldRenderRowGroupHeader(ctx_r3.value, rowData_r2, rowIndex_r3));
+    ɵɵproperty("ngIf", ctx_r3.dt.groupHeaderTemplate && !ctx_r3.dt.virtualScroll && ctx_r3.dt.rowGroupMode === "subheader" && ctx_r3.shouldRenderRowGroupHeader(ctx_r3.value, rowData_r2, ctx_r3.getRowIndex(rowIndex_r3)));
     ɵɵadvance();
     ɵɵproperty("ngIf", ctx_r3.dt.rowGroupMode !== "rowspan");
     ɵɵadvance();
@@ -19798,7 +21419,7 @@ function TableBody_ng_container_1_ng_template_1_ng_container_0_Template(rf, ctx)
     const rowIndex_r7 = ctx_r4.index;
     const ctx_r3 = ɵɵnextContext(2);
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", ctx_r3.template)("ngTemplateOutletContext", ɵɵpureFunction6(2, _c192, rowData_r6, ctx_r3.getRowIndex(rowIndex_r7), ctx_r3.columns, ctx_r3.dt.isRowExpanded(rowData_r6), ctx_r3.dt.editMode === "row" && ctx_r3.dt.isRowEditing(rowData_r6), ctx_r3.frozen));
+    ɵɵproperty("ngTemplateOutlet", ctx_r3.template)("ngTemplateOutletContext", ɵɵpureFunction6(2, _c20, rowData_r6, ctx_r3.getRowIndex(rowIndex_r7), ctx_r3.columns, ctx_r3.dt.isRowExpanded(rowData_r6), ctx_r3.dt.editMode === "row" && ctx_r3.dt.isRowEditing(rowData_r6), ctx_r3.frozen));
   }
 }
 function TableBody_ng_container_1_ng_template_1_ng_container_1_ng_container_1_Template(rf, ctx) {
@@ -19818,7 +21439,7 @@ function TableBody_ng_container_1_ng_template_1_ng_container_1_Template(rf, ctx)
     const rowIndex_r7 = ctx_r4.index;
     const ctx_r3 = ɵɵnextContext(2);
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", ctx_r3.dt.groupHeaderTemplate)("ngTemplateOutletContext", ɵɵpureFunction6(2, _c192, rowData_r6, ctx_r3.getRowIndex(rowIndex_r7), ctx_r3.columns, ctx_r3.dt.isRowExpanded(rowData_r6), ctx_r3.dt.editMode === "row" && ctx_r3.dt.isRowEditing(rowData_r6), ctx_r3.frozen));
+    ɵɵproperty("ngTemplateOutlet", ctx_r3.dt.groupHeaderTemplate)("ngTemplateOutletContext", ɵɵpureFunction6(2, _c20, rowData_r6, ctx_r3.getRowIndex(rowIndex_r7), ctx_r3.columns, ctx_r3.dt.isRowExpanded(rowData_r6), ctx_r3.dt.editMode === "row" && ctx_r3.dt.isRowEditing(rowData_r6), ctx_r3.frozen));
   }
 }
 function TableBody_ng_container_1_ng_template_1_ng_container_2_ng_container_1_Template(rf, ctx) {
@@ -19843,7 +21464,7 @@ function TableBody_ng_container_1_ng_template_1_ng_container_2_ng_container_2_Te
     const rowIndex_r7 = ctx_r4.index;
     const ctx_r3 = ɵɵnextContext(2);
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", ctx_r3.dt.groupFooterTemplate)("ngTemplateOutletContext", ɵɵpureFunction6(2, _c192, rowData_r6, ctx_r3.getRowIndex(rowIndex_r7), ctx_r3.columns, ctx_r3.dt.isRowExpanded(rowData_r6), ctx_r3.dt.editMode === "row" && ctx_r3.dt.isRowEditing(rowData_r6), ctx_r3.frozen));
+    ɵɵproperty("ngTemplateOutlet", ctx_r3.dt.groupFooterTemplate)("ngTemplateOutletContext", ɵɵpureFunction6(2, _c20, rowData_r6, ctx_r3.getRowIndex(rowIndex_r7), ctx_r3.columns, ctx_r3.dt.isRowExpanded(rowData_r6), ctx_r3.dt.editMode === "row" && ctx_r3.dt.isRowEditing(rowData_r6), ctx_r3.frozen));
   }
 }
 function TableBody_ng_container_1_ng_template_1_ng_container_2_Template(rf, ctx) {
@@ -19858,7 +21479,7 @@ function TableBody_ng_container_1_ng_template_1_ng_container_2_Template(rf, ctx)
     const rowIndex_r7 = ctx_r4.index;
     const ctx_r3 = ɵɵnextContext(2);
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", ctx_r3.dt.expandedRowTemplate)("ngTemplateOutletContext", ɵɵpureFunction4(3, _c20, rowData_r6, ctx_r3.getRowIndex(rowIndex_r7), ctx_r3.columns, ctx_r3.frozen));
+    ɵɵproperty("ngTemplateOutlet", ctx_r3.dt.expandedRowTemplate)("ngTemplateOutletContext", ɵɵpureFunction4(3, _c21, rowData_r6, ctx_r3.getRowIndex(rowIndex_r7), ctx_r3.columns, ctx_r3.frozen));
     ɵɵadvance();
     ɵɵproperty("ngIf", ctx_r3.dt.groupFooterTemplate && ctx_r3.dt.rowGroupMode === "subheader" && ctx_r3.shouldRenderRowGroupFooter(ctx_r3.value, rowData_r6, ctx_r3.getRowIndex(rowIndex_r7)));
   }
@@ -19912,7 +21533,7 @@ function TableBody_ng_container_2_ng_template_1_ng_container_1_Template(rf, ctx)
     const rowIndex_r10 = ctx_r7.index;
     const ctx_r3 = ɵɵnextContext(2);
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", ctx_r3.dt.frozenExpandedRowTemplate)("ngTemplateOutletContext", ɵɵpureFunction4(2, _c20, rowData_r9, ctx_r3.getRowIndex(rowIndex_r10), ctx_r3.columns, ctx_r3.frozen));
+    ɵɵproperty("ngTemplateOutlet", ctx_r3.dt.frozenExpandedRowTemplate)("ngTemplateOutletContext", ɵɵpureFunction4(2, _c21, rowData_r9, ctx_r3.getRowIndex(rowIndex_r10), ctx_r3.columns, ctx_r3.frozen));
   }
 }
 function TableBody_ng_container_2_ng_template_1_Template(rf, ctx) {
@@ -19923,7 +21544,7 @@ function TableBody_ng_container_2_ng_template_1_Template(rf, ctx) {
     const rowData_r9 = ctx.$implicit;
     const rowIndex_r10 = ctx.index;
     const ctx_r3 = ɵɵnextContext(2);
-    ɵɵproperty("ngTemplateOutlet", ctx_r3.template)("ngTemplateOutletContext", ɵɵpureFunction6(3, _c192, rowData_r9, ctx_r3.getRowIndex(rowIndex_r10), ctx_r3.columns, ctx_r3.dt.isRowExpanded(rowData_r9), ctx_r3.dt.editMode === "row" && ctx_r3.dt.isRowEditing(rowData_r9), ctx_r3.frozen));
+    ɵɵproperty("ngTemplateOutlet", ctx_r3.template)("ngTemplateOutletContext", ɵɵpureFunction6(3, _c20, rowData_r9, ctx_r3.getRowIndex(rowIndex_r10), ctx_r3.columns, ctx_r3.dt.isRowExpanded(rowData_r9), ctx_r3.dt.editMode === "row" && ctx_r3.dt.isRowEditing(rowData_r9), ctx_r3.frozen));
     ɵɵadvance();
     ɵɵproperty("ngIf", ctx_r3.dt.isRowExpanded(rowData_r9));
   }
@@ -19954,7 +21575,7 @@ function TableBody_ng_container_3_Template(rf, ctx) {
   if (rf & 2) {
     const ctx_r3 = ɵɵnextContext();
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", ctx_r3.dt.loadingBodyTemplate)("ngTemplateOutletContext", ɵɵpureFunction2(2, _c21, ctx_r3.columns, ctx_r3.frozen));
+    ɵɵproperty("ngTemplateOutlet", ctx_r3.dt.loadingBodyTemplate)("ngTemplateOutletContext", ɵɵpureFunction2(2, _c222, ctx_r3.columns, ctx_r3.frozen));
   }
 }
 function TableBody_ng_container_4_ng_container_1_Template(rf, ctx) {
@@ -19971,7 +21592,7 @@ function TableBody_ng_container_4_Template(rf, ctx) {
   if (rf & 2) {
     const ctx_r3 = ɵɵnextContext();
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", ctx_r3.dt.emptyMessageTemplate)("ngTemplateOutletContext", ɵɵpureFunction2(2, _c21, ctx_r3.columns, ctx_r3.frozen));
+    ɵɵproperty("ngTemplateOutlet", ctx_r3.dt.emptyMessageTemplate)("ngTemplateOutletContext", ɵɵpureFunction2(2, _c222, ctx_r3.columns, ctx_r3.frozen));
   }
 }
 function SortIcon_ng_container_0_SortAltIcon_1_Template(rf, ctx) {
@@ -20030,7 +21651,7 @@ function SortIcon_span_1_Template(rf, ctx) {
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext();
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", ctx_r0.dt.sortIconTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(2, _c152, ctx_r0.sortOrder));
+    ɵɵproperty("ngTemplateOutlet", ctx_r0.dt.sortIconTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(2, _c153, ctx_r0.sortOrder));
   }
 }
 function SortIcon_span_2_Template(rf, ctx) {
@@ -20079,23 +21700,23 @@ function CellEditor_ng_container_1_Template(rf, ctx) {
     ɵɵproperty("ngTemplateOutlet", ctx_r0.outputTemplate);
   }
 }
-var _c222 = ["rb"];
-var _c232 = (a0, a1, a2) => ({
+var _c232 = ["rb"];
+var _c242 = (a0, a1, a2) => ({
   "p-radiobutton-focused": a0,
   "p-radiobutton-checked": a1,
   "p-radiobutton-disabled": a2
 });
-var _c242 = (a0, a1, a2) => ({
+var _c252 = (a0, a1, a2) => ({
   "p-radiobutton-box p-component": true,
   "p-highlight": a0,
   "p-focus": a1,
   "p-disabled": a2
 });
-var _c252 = (a0, a1) => ({
+var _c262 = (a0, a1) => ({
   "p-checkbox-focused": a0,
   "p-checkbox-disabled": a1
 });
-var _c262 = (a0, a1, a2) => ({
+var _c272 = (a0, a1, a2) => ({
   "p-checkbox-box p-component": true,
   "p-highlight": a0,
   "p-focus": a1,
@@ -20137,10 +21758,10 @@ function TableCheckbox_span_6_Template(rf, ctx) {
   if (rf & 2) {
     const ctx_r1 = ɵɵnextContext();
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", ctx_r1.dt.checkboxIconTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(2, _c152, ctx_r1.checked));
+    ɵɵproperty("ngTemplateOutlet", ctx_r1.dt.checkboxIconTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(2, _c153, ctx_r1.checked));
   }
 }
-var _c272 = (a0, a1, a2) => ({
+var _c282 = (a0, a1, a2) => ({
   "p-checkbox-box": true,
   "p-highlight": a0,
   "p-focus": a1,
@@ -20182,27 +21803,27 @@ function TableHeaderCheckbox_span_7_Template(rf, ctx) {
   if (rf & 2) {
     const ctx_r1 = ɵɵnextContext();
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", ctx_r1.dt.headerCheckboxIconTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(2, _c152, ctx_r1.checked));
+    ɵɵproperty("ngTemplateOutlet", ctx_r1.dt.headerCheckboxIconTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(2, _c153, ctx_r1.checked));
   }
 }
-var _c282 = ["icon"];
-var _c292 = ["clearBtn"];
-var _c30 = (a0, a1) => ({
+var _c292 = ["icon"];
+var _c30 = ["clearBtn"];
+var _c31 = (a0, a1) => ({
   "p-column-filter-row": a0,
   "p-column-filter-menu": a1
 });
-var _c31 = (a0, a1) => ({
+var _c322 = (a0, a1) => ({
   "p-column-filter-menu-button-open": a0,
   "p-column-filter-menu-button-active": a1
 });
-var _c322 = (a0) => ({
+var _c332 = (a0) => ({
   "p-hidden-space": a0
 });
-var _c332 = (a0) => ({
+var _c342 = (a0) => ({
   "p-column-filter-overlay p-component p-fluid": true,
   "p-column-filter-overlay-menu": a0
 });
-var _c342 = (a0) => ({
+var _c352 = (a0) => ({
   "p-highlight": a0
 });
 function ColumnFilter_p_columnFilterFormElement_1_Template(rf, ctx) {
@@ -20211,7 +21832,7 @@ function ColumnFilter_p_columnFilterFormElement_1_Template(rf, ctx) {
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext();
-    ɵɵproperty("type", ctx_r0.type)("field", ctx_r0.field)("filterConstraint", ctx_r0.dt.filters[ctx_r0.field])("filterTemplate", ctx_r0.filterTemplate)("placeholder", ctx_r0.placeholder)("minFractionDigits", ctx_r0.minFractionDigits)("maxFractionDigits", ctx_r0.maxFractionDigits)("prefix", ctx_r0.prefix)("suffix", ctx_r0.suffix)("locale", ctx_r0.locale)("localeMatcher", ctx_r0.localeMatcher)("currency", ctx_r0.currency)("currencyDisplay", ctx_r0.currencyDisplay)("useGrouping", ctx_r0.useGrouping)("showButtons", ctx_r0.showButtons);
+    ɵɵproperty("type", ctx_r0.type)("field", ctx_r0.field)("ariaLabel", ctx_r0.ariaLabel)("filterConstraint", ctx_r0.dt.filters[ctx_r0.field])("filterTemplate", ctx_r0.filterTemplate)("placeholder", ctx_r0.placeholder)("minFractionDigits", ctx_r0.minFractionDigits)("maxFractionDigits", ctx_r0.maxFractionDigits)("prefix", ctx_r0.prefix)("suffix", ctx_r0.suffix)("locale", ctx_r0.locale)("localeMatcher", ctx_r0.localeMatcher)("currency", ctx_r0.currency)("currencyDisplay", ctx_r0.currencyDisplay)("useGrouping", ctx_r0.useGrouping)("showButtons", ctx_r0.showButtons);
   }
 }
 function ColumnFilter_button_2_FilterIcon_2_Template(rf, ctx) {
@@ -20258,9 +21879,10 @@ function ColumnFilter_button_2_Template(rf, ctx) {
     ɵɵelementEnd();
   }
   if (rf & 2) {
+    let tmp_5_0;
     const ctx_r0 = ɵɵnextContext();
-    ɵɵproperty("ngClass", ɵɵpureFunction2(6, _c31, ctx_r0.overlayVisible, ctx_r0.hasFilter()));
-    ɵɵattribute("aria-label", ctx_r0.showMenuButtonAriaLabel)("aria-controls", ctx_r0.overlayId)("aria-expanded", ctx_r0.overlayVisible);
+    ɵɵproperty("ngClass", ɵɵpureFunction2(6, _c322, ctx_r0.overlayVisible, ctx_r0.hasFilter()));
+    ɵɵattribute("aria-label", ctx_r0.filterMenuButtonAriaLabel)("aria-controls", ctx_r0.overlayVisible ? ctx_r0.overlayId : null)("aria-expanded", (tmp_5_0 = ctx_r0.overlayVisible) !== null && tmp_5_0 !== void 0 ? tmp_5_0 : false);
     ɵɵadvance(2);
     ɵɵproperty("ngIf", !ctx_r0.filterIconTemplate);
     ɵɵadvance();
@@ -20293,12 +21915,12 @@ function ColumnFilter_button_3_Template(rf, ctx) {
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext();
-    ɵɵproperty("ngClass", ɵɵpureFunction1(4, _c322, !ctx_r0.hasRowFilter()));
+    ɵɵproperty("ngClass", ɵɵpureFunction1(4, _c332, !ctx_r0.hasRowFilter()));
     ɵɵattribute("aria-label", ctx_r0.clearButtonLabel);
     ɵɵadvance(2);
-    ɵɵproperty("ngIf", !ctx_r0.clearIconTemplate);
+    ɵɵproperty("ngIf", !ctx_r0.clearFilterIconTemplate);
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", ctx_r0.clearFilterIcon);
+    ɵɵproperty("ngTemplateOutlet", ctx_r0.clearFilterIconTemplate);
   }
 }
 function ColumnFilter_div_4_ng_container_1_Template(rf, ctx) {
@@ -20330,7 +21952,7 @@ function ColumnFilter_div_4_ul_2_li_1_Template(rf, ctx) {
     const matchMode_r7 = ctx.$implicit;
     const i_r8 = ctx.index;
     const ctx_r0 = ɵɵnextContext(3);
-    ɵɵproperty("ngClass", ɵɵpureFunction1(3, _c342, ctx_r0.isRowMatchModeSelected(matchMode_r7.value)));
+    ɵɵproperty("ngClass", ɵɵpureFunction1(3, _c352, ctx_r0.isRowMatchModeSelected(matchMode_r7.value)));
     ɵɵattribute("tabindex", i_r8 === 0 ? "0" : null);
     ɵɵadvance();
     ɵɵtextInterpolate1(" ", matchMode_r7.label, " ");
@@ -20370,7 +21992,7 @@ function ColumnFilter_div_4_ul_2_Template(rf, ctx) {
 function ColumnFilter_div_4_ng_template_3_div_0_Template(rf, ctx) {
   if (rf & 1) {
     const _r9 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "div", 32)(1, "p-dropdown", 33);
+    ɵɵelementStart(0, "div", 30)(1, "p-dropdown", 31);
     ɵɵlistener("ngModelChange", function ColumnFilter_div_4_ng_template_3_div_0_Template_p_dropdown_ngModelChange_1_listener($event) {
       ɵɵrestoreView(_r9);
       const ctx_r0 = ɵɵnextContext(3);
@@ -20387,7 +22009,7 @@ function ColumnFilter_div_4_ng_template_3_div_0_Template(rf, ctx) {
 function ColumnFilter_div_4_ng_template_3_div_2_p_dropdown_1_Template(rf, ctx) {
   if (rf & 1) {
     const _r10 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "p-dropdown", 38);
+    ɵɵelementStart(0, "p-dropdown", 36);
     ɵɵlistener("ngModelChange", function ColumnFilter_div_4_ng_template_3_div_2_p_dropdown_1_Template_p_dropdown_ngModelChange_0_listener($event) {
       ɵɵrestoreView(_r10);
       const fieldConstraint_r11 = ɵɵnextContext().$implicit;
@@ -20404,7 +22026,10 @@ function ColumnFilter_div_4_ng_template_3_div_2_p_dropdown_1_Template(rf, ctx) {
 }
 function ColumnFilter_div_4_ng_template_3_div_2_button_4_TrashIcon_1_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelement(0, "TrashIcon");
+    ɵɵelement(0, "TrashIcon", 12);
+  }
+  if (rf & 2) {
+    ɵɵproperty("styleClass", "p-button-icon-left");
   }
 }
 function ColumnFilter_div_4_ng_template_3_div_2_button_4_2_ng_template_0_Template(rf, ctx) {
@@ -20417,18 +22042,19 @@ function ColumnFilter_div_4_ng_template_3_div_2_button_4_2_Template(rf, ctx) {
 function ColumnFilter_div_4_ng_template_3_div_2_button_4_Template(rf, ctx) {
   if (rf & 1) {
     const _r12 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "button", 39);
+    ɵɵelementStart(0, "button", 37);
     ɵɵlistener("click", function ColumnFilter_div_4_ng_template_3_div_2_button_4_Template_button_click_0_listener() {
       ɵɵrestoreView(_r12);
       const fieldConstraint_r11 = ɵɵnextContext().$implicit;
       const ctx_r0 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r0.removeConstraint(fieldConstraint_r11));
     });
-    ɵɵtemplate(1, ColumnFilter_div_4_ng_template_3_div_2_button_4_TrashIcon_1_Template, 1, 0, "TrashIcon", 16)(2, ColumnFilter_div_4_ng_template_3_div_2_button_4_2_Template, 1, 0, null, 14);
+    ɵɵtemplate(1, ColumnFilter_div_4_ng_template_3_div_2_button_4_TrashIcon_1_Template, 1, 1, "TrashIcon", 10)(2, ColumnFilter_div_4_ng_template_3_div_2_button_4_2_Template, 1, 0, null, 14);
     ɵɵelementEnd();
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext(4);
+    ɵɵproperty("label", ctx_r0.removeRuleButtonLabel);
     ɵɵattribute("aria-label", ctx_r0.removeRuleButtonLabel);
     ɵɵadvance();
     ɵɵproperty("ngIf", !ctx_r0.removeRuleIconTemplate);
@@ -20438,11 +22064,11 @@ function ColumnFilter_div_4_ng_template_3_div_2_button_4_Template(rf, ctx) {
 }
 function ColumnFilter_div_4_ng_template_3_div_2_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelementStart(0, "div", 34);
-    ɵɵtemplate(1, ColumnFilter_div_4_ng_template_3_div_2_p_dropdown_1_Template, 1, 2, "p-dropdown", 35);
-    ɵɵelement(2, "p-columnFilterFormElement", 36);
+    ɵɵelementStart(0, "div", 32);
+    ɵɵtemplate(1, ColumnFilter_div_4_ng_template_3_div_2_p_dropdown_1_Template, 1, 2, "p-dropdown", 33);
+    ɵɵelement(2, "p-columnFilterFormElement", 34);
     ɵɵelementStart(3, "div");
-    ɵɵtemplate(4, ColumnFilter_div_4_ng_template_3_div_2_button_4_Template, 3, 3, "button", 37);
+    ɵɵtemplate(4, ColumnFilter_div_4_ng_template_3_div_2_button_4_Template, 3, 4, "button", 35);
     ɵɵelementEnd()();
   }
   if (rf & 2) {
@@ -20458,7 +22084,10 @@ function ColumnFilter_div_4_ng_template_3_div_2_Template(rf, ctx) {
 }
 function ColumnFilter_div_4_ng_template_3_div_3_PlusIcon_2_Template(rf, ctx) {
   if (rf & 1) {
-    ɵɵelement(0, "PlusIcon");
+    ɵɵelement(0, "PlusIcon", 12);
+  }
+  if (rf & 2) {
+    ɵɵproperty("styleClass", "p-button-icon-left");
   }
 }
 function ColumnFilter_div_4_ng_template_3_div_3_3_ng_template_0_Template(rf, ctx) {
@@ -20471,18 +22100,19 @@ function ColumnFilter_div_4_ng_template_3_div_3_3_Template(rf, ctx) {
 function ColumnFilter_div_4_ng_template_3_div_3_Template(rf, ctx) {
   if (rf & 1) {
     const _r13 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "div", 40)(1, "button", 41);
+    ɵɵelementStart(0, "div", 38)(1, "button", 39);
     ɵɵlistener("click", function ColumnFilter_div_4_ng_template_3_div_3_Template_button_click_1_listener() {
       ɵɵrestoreView(_r13);
       const ctx_r0 = ɵɵnextContext(3);
       return ɵɵresetView(ctx_r0.addConstraint());
     });
-    ɵɵtemplate(2, ColumnFilter_div_4_ng_template_3_div_3_PlusIcon_2_Template, 1, 0, "PlusIcon", 16)(3, ColumnFilter_div_4_ng_template_3_div_3_3_Template, 1, 0, null, 14);
+    ɵɵtemplate(2, ColumnFilter_div_4_ng_template_3_div_3_PlusIcon_2_Template, 1, 1, "PlusIcon", 10)(3, ColumnFilter_div_4_ng_template_3_div_3_3_Template, 1, 0, null, 14);
     ɵɵelementEnd()();
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext(3);
     ɵɵadvance();
+    ɵɵproperty("label", ctx_r0.addRuleButtonLabel);
     ɵɵattribute("aria-label", ctx_r0.addRuleButtonLabel);
     ɵɵadvance();
     ɵɵproperty("ngIf", !ctx_r0.addRuleIconTemplate);
@@ -20490,36 +22120,52 @@ function ColumnFilter_div_4_ng_template_3_div_3_Template(rf, ctx) {
     ɵɵproperty("ngTemplateOutlet", ctx_r0.addRuleIconTemplate);
   }
 }
-function ColumnFilter_div_4_ng_template_3_button_5_Template(rf, ctx) {
+function ColumnFilter_div_4_ng_template_3_div_4_button_1_Template(rf, ctx) {
   if (rf & 1) {
     const _r14 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "button", 42, 2);
-    ɵɵlistener("click", function ColumnFilter_div_4_ng_template_3_button_5_Template_button_click_0_listener() {
+    ɵɵelementStart(0, "button", 43, 2);
+    ɵɵlistener("click", function ColumnFilter_div_4_ng_template_3_div_4_button_1_Template_button_click_0_listener() {
       ɵɵrestoreView(_r14);
-      const ctx_r0 = ɵɵnextContext(3);
+      const ctx_r0 = ɵɵnextContext(4);
       return ɵɵresetView(ctx_r0.clearFilter());
     });
     ɵɵelementEnd();
   }
   if (rf & 2) {
-    const ctx_r0 = ɵɵnextContext(3);
+    const ctx_r0 = ɵɵnextContext(4);
+    ɵɵproperty("label", ctx_r0.clearButtonLabel);
     ɵɵattribute("aria-label", ctx_r0.clearButtonLabel);
   }
 }
-function ColumnFilter_div_4_ng_template_3_button_6_Template(rf, ctx) {
+function ColumnFilter_div_4_ng_template_3_div_4_button_2_Template(rf, ctx) {
   if (rf & 1) {
     const _r15 = ɵɵgetCurrentView();
-    ɵɵelementStart(0, "button", 43);
-    ɵɵlistener("click", function ColumnFilter_div_4_ng_template_3_button_6_Template_button_click_0_listener() {
+    ɵɵelementStart(0, "button", 44);
+    ɵɵlistener("click", function ColumnFilter_div_4_ng_template_3_div_4_button_2_Template_button_click_0_listener() {
       ɵɵrestoreView(_r15);
-      const ctx_r0 = ɵɵnextContext(3);
+      const ctx_r0 = ɵɵnextContext(4);
       return ɵɵresetView(ctx_r0.applyFilter());
     });
     ɵɵelementEnd();
   }
   if (rf & 2) {
-    const ctx_r0 = ɵɵnextContext(3);
+    const ctx_r0 = ɵɵnextContext(4);
+    ɵɵproperty("label", ctx_r0.applyButtonLabel);
     ɵɵattribute("aria-label", ctx_r0.applyButtonLabel);
+  }
+}
+function ColumnFilter_div_4_ng_template_3_div_4_Template(rf, ctx) {
+  if (rf & 1) {
+    ɵɵelementStart(0, "div", 40);
+    ɵɵtemplate(1, ColumnFilter_div_4_ng_template_3_div_4_button_1_Template, 2, 2, "button", 41)(2, ColumnFilter_div_4_ng_template_3_div_4_button_2_Template, 1, 2, "button", 42);
+    ɵɵelementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r0 = ɵɵnextContext(3);
+    ɵɵadvance();
+    ɵɵproperty("ngIf", ctx_r0.showClearButton);
+    ɵɵadvance();
+    ɵɵproperty("ngIf", ctx_r0.showApplyButton);
   }
 }
 function ColumnFilter_div_4_ng_template_3_Template(rf, ctx) {
@@ -20528,10 +22174,7 @@ function ColumnFilter_div_4_ng_template_3_Template(rf, ctx) {
     ɵɵelementStart(1, "div", 26);
     ɵɵtemplate(2, ColumnFilter_div_4_ng_template_3_div_2_Template, 5, 16, "div", 27);
     ɵɵelementEnd();
-    ɵɵtemplate(3, ColumnFilter_div_4_ng_template_3_div_3_Template, 4, 3, "div", 28);
-    ɵɵelementStart(4, "div", 29);
-    ɵɵtemplate(5, ColumnFilter_div_4_ng_template_3_button_5_Template, 2, 1, "button", 30)(6, ColumnFilter_div_4_ng_template_3_button_6_Template, 1, 1, "button", 31);
-    ɵɵelementEnd();
+    ɵɵtemplate(3, ColumnFilter_div_4_ng_template_3_div_3_Template, 4, 4, "div", 28)(4, ColumnFilter_div_4_ng_template_3_div_4_Template, 3, 2, "div", 29);
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext(2);
@@ -20540,10 +22183,8 @@ function ColumnFilter_div_4_ng_template_3_Template(rf, ctx) {
     ɵɵproperty("ngForOf", ctx_r0.fieldConstraints);
     ɵɵadvance();
     ɵɵproperty("ngIf", ctx_r0.isShowAddConstraint);
-    ɵɵadvance(2);
-    ɵɵproperty("ngIf", ctx_r0.showClearButton);
     ɵɵadvance();
-    ɵɵproperty("ngIf", ctx_r0.showApplyButton);
+    ɵɵproperty("ngIf", ctx_r0.showButtons);
   }
 }
 function ColumnFilter_div_4_ng_container_5_Template(rf, ctx) {
@@ -20572,23 +22213,23 @@ function ColumnFilter_div_4_Template(rf, ctx) {
       const ctx_r0 = ɵɵnextContext();
       return ɵɵresetView(ctx_r0.onEscape());
     });
-    ɵɵtemplate(1, ColumnFilter_div_4_ng_container_1_Template, 1, 0, "ng-container", 18)(2, ColumnFilter_div_4_ul_2_Template, 5, 2, "ul", 19)(3, ColumnFilter_div_4_ng_template_3_Template, 7, 5, "ng-template", null, 1, ɵɵtemplateRefExtractor)(5, ColumnFilter_div_4_ng_container_5_Template, 1, 0, "ng-container", 18);
+    ɵɵtemplate(1, ColumnFilter_div_4_ng_container_1_Template, 1, 0, "ng-container", 18)(2, ColumnFilter_div_4_ul_2_Template, 5, 2, "ul", 19)(3, ColumnFilter_div_4_ng_template_3_Template, 5, 4, "ng-template", null, 1, ɵɵtemplateRefExtractor)(5, ColumnFilter_div_4_ng_container_5_Template, 1, 0, "ng-container", 18);
     ɵɵelementEnd();
   }
   if (rf & 2) {
     const menu_r16 = ɵɵreference(4);
     const ctx_r0 = ɵɵnextContext();
-    ɵɵproperty("ngClass", ɵɵpureFunction1(10, _c332, ctx_r0.display === "menu"))("id", ctx_r0.overlayId)("@overlayAnimation", "visible");
+    ɵɵproperty("ngClass", ɵɵpureFunction1(10, _c342, ctx_r0.display === "menu"))("id", ctx_r0.overlayId)("@overlayAnimation", "visible");
     ɵɵattribute("aria-modal", true);
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", ctx_r0.headerTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(12, _c152, ctx_r0.field));
+    ɵɵproperty("ngTemplateOutlet", ctx_r0.headerTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(12, _c153, ctx_r0.field));
     ɵɵadvance();
     ɵɵproperty("ngIf", ctx_r0.display === "row")("ngIfElse", menu_r16);
     ɵɵadvance(3);
-    ɵɵproperty("ngTemplateOutlet", ctx_r0.footerTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(14, _c152, ctx_r0.field));
+    ɵɵproperty("ngTemplateOutlet", ctx_r0.footerTemplate)("ngTemplateOutletContext", ɵɵpureFunction1(14, _c153, ctx_r0.field));
   }
 }
-var _c352 = (a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15) => ({
+var _c362 = (a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15) => ({
   $implicit: a0,
   filterCallback: a1,
   type: a2,
@@ -20620,7 +22261,7 @@ function ColumnFilterFormElement_ng_container_0_Template(rf, ctx) {
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext();
     ɵɵadvance();
-    ɵɵproperty("ngTemplateOutlet", ctx_r0.filterTemplate)("ngTemplateOutletContext", ɵɵpureFunctionV(2, _c352, [ctx_r0.filterConstraint.value, ctx_r0.filterCallback, ctx_r0.type, ctx_r0.field, ctx_r0.filterConstraint, ctx_r0.placeholder, ctx_r0.minFractionDigits, ctx_r0.maxFractionDigits, ctx_r0.prefix, ctx_r0.suffix, ctx_r0.locale, ctx_r0.localeMatcher, ctx_r0.currency, ctx_r0.currencyDisplay, ctx_r0.useGrouping, ctx_r0.showButtons]));
+    ɵɵproperty("ngTemplateOutlet", ctx_r0.filterTemplate)("ngTemplateOutletContext", ɵɵpureFunctionV(2, _c362, [ctx_r0.filterConstraint == null ? null : ctx_r0.filterConstraint.value, ctx_r0.filterCallback, ctx_r0.type, ctx_r0.field, ctx_r0.filterConstraint, ctx_r0.placeholder, ctx_r0.minFractionDigits, ctx_r0.maxFractionDigits, ctx_r0.prefix, ctx_r0.suffix, ctx_r0.locale, ctx_r0.localeMatcher, ctx_r0.currency, ctx_r0.currencyDisplay, ctx_r0.useGrouping, ctx_r0.showButtons]));
   }
 }
 function ColumnFilterFormElement_ng_template_1_input_1_Template(rf, ctx) {
@@ -20640,7 +22281,7 @@ function ColumnFilterFormElement_ng_template_1_input_1_Template(rf, ctx) {
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext(2);
-    ɵɵproperty("value", ctx_r0.filterConstraint == null ? null : ctx_r0.filterConstraint.value);
+    ɵɵproperty("ariaLabel", ctx_r0.ariaLabel)("value", ctx_r0.filterConstraint == null ? null : ctx_r0.filterConstraint.value);
     ɵɵattribute("placeholder", ctx_r0.placeholder);
   }
 }
@@ -20661,7 +22302,7 @@ function ColumnFilterFormElement_ng_template_1_p_inputNumber_2_Template(rf, ctx)
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext(2);
-    ɵɵproperty("ngModel", ctx_r0.filterConstraint == null ? null : ctx_r0.filterConstraint.value)("showButtons", ctx_r0.showButtons)("minFractionDigits", ctx_r0.minFractionDigits)("maxFractionDigits", ctx_r0.maxFractionDigits)("prefix", ctx_r0.prefix)("suffix", ctx_r0.suffix)("placeholder", ctx_r0.placeholder)("mode", ctx_r0.currency ? "currency" : "decimal")("locale", ctx_r0.locale)("localeMatcher", ctx_r0.localeMatcher)("currency", ctx_r0.currency)("currencyDisplay", ctx_r0.currencyDisplay)("useGrouping", ctx_r0.useGrouping);
+    ɵɵproperty("ngModel", ctx_r0.filterConstraint == null ? null : ctx_r0.filterConstraint.value)("showButtons", ctx_r0.showButtons)("minFractionDigits", ctx_r0.minFractionDigits)("maxFractionDigits", ctx_r0.maxFractionDigits)("ariaLabel", ctx_r0.ariaLabel)("prefix", ctx_r0.prefix)("suffix", ctx_r0.suffix)("placeholder", ctx_r0.placeholder)("mode", ctx_r0.currency ? "currency" : "decimal")("locale", ctx_r0.locale)("localeMatcher", ctx_r0.localeMatcher)("currency", ctx_r0.currency)("currencyDisplay", ctx_r0.currencyDisplay)("useGrouping", ctx_r0.useGrouping);
   }
 }
 function ColumnFilterFormElement_ng_template_1_p_triStateCheckbox_3_Template(rf, ctx) {
@@ -20677,7 +22318,7 @@ function ColumnFilterFormElement_ng_template_1_p_triStateCheckbox_3_Template(rf,
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext(2);
-    ɵɵproperty("ngModel", ctx_r0.filterConstraint == null ? null : ctx_r0.filterConstraint.value);
+    ɵɵproperty("ariaLabel", ctx_r0.ariaLabel)("ngModel", ctx_r0.filterConstraint == null ? null : ctx_r0.filterConstraint.value);
   }
 }
 function ColumnFilterFormElement_ng_template_1_p_calendar_4_Template(rf, ctx) {
@@ -20693,13 +22334,13 @@ function ColumnFilterFormElement_ng_template_1_p_calendar_4_Template(rf, ctx) {
   }
   if (rf & 2) {
     const ctx_r0 = ɵɵnextContext(2);
-    ɵɵproperty("placeholder", ctx_r0.placeholder)("ngModel", ctx_r0.filterConstraint == null ? null : ctx_r0.filterConstraint.value);
+    ɵɵproperty("ariaLabel", ctx_r0.ariaLabel)("placeholder", ctx_r0.placeholder)("ngModel", ctx_r0.filterConstraint == null ? null : ctx_r0.filterConstraint.value);
   }
 }
 function ColumnFilterFormElement_ng_template_1_Template(rf, ctx) {
   if (rf & 1) {
     ɵɵelementContainerStart(0, 3);
-    ɵɵtemplate(1, ColumnFilterFormElement_ng_template_1_input_1_Template, 1, 2, "input", 4)(2, ColumnFilterFormElement_ng_template_1_p_inputNumber_2_Template, 1, 13, "p-inputNumber", 5)(3, ColumnFilterFormElement_ng_template_1_p_triStateCheckbox_3_Template, 1, 1, "p-triStateCheckbox", 6)(4, ColumnFilterFormElement_ng_template_1_p_calendar_4_Template, 1, 2, "p-calendar", 7);
+    ɵɵtemplate(1, ColumnFilterFormElement_ng_template_1_input_1_Template, 1, 3, "input", 4)(2, ColumnFilterFormElement_ng_template_1_p_inputNumber_2_Template, 1, 14, "p-inputNumber", 5)(3, ColumnFilterFormElement_ng_template_1_p_triStateCheckbox_3_Template, 1, 2, "p-triStateCheckbox", 6)(4, ColumnFilterFormElement_ng_template_1_p_calendar_4_Template, 1, 3, "p-calendar", 7);
     ɵɵelementContainerEnd();
   }
   if (rf & 2) {
@@ -20722,7 +22363,9 @@ var TableService = class _TableService {
   valueSource = new Subject();
   totalRecordsSource = new Subject();
   columnsSource = new Subject();
+  isHeaderCheckboxSelection = new Subject();
   sortSource$ = this.sortSource.asObservable();
+  isHeaderCheckboxSelection$ = this.isHeaderCheckboxSelection.asObservable();
   selectionSource$ = this.selectionSource.asObservable();
   contextMenuSource$ = this.contextMenuSource.asObservable();
   valueSource$ = this.valueSource.asObservable();
@@ -20745,6 +22388,9 @@ var TableService = class _TableService {
   }
   onColumnsChange(columns) {
     this.columnsSource.next(columns);
+  }
+  onHeaderCheckboxSelection(value) {
+    this.isHeaderCheckboxSelection.next(value);
   }
   static ɵfac = function TableService_Factory(t) {
     return new (t || _TableService)();
@@ -20770,6 +22416,7 @@ var Table = class _Table {
   filterService;
   overlayService;
   config;
+  domSanitizer;
   /**
    * An array of objects to represent dynamic columns that are frozen.
    * @group Props
@@ -20920,7 +22567,7 @@ var Table = class _Table {
    * Defines whether metaKey should be considered for the selection. On touch enabled devices, metaKeySelection is turned off automatically.
    * @group Props
    */
-  metaKeySelection = true;
+  metaKeySelection = false;
   /**
    * Defines if the row is selectable.
    * @group Props
@@ -21450,6 +23097,7 @@ var Table = class _Table {
   sortIconTemplate;
   checkboxIconTemplate;
   headerCheckboxIconTemplate;
+  paginatorDropdownIconTemplate;
   paginatorFirstPageLinkIconTemplate;
   paginatorLastPageLinkIconTemplate;
   paginatorPreviousPageLinkIconTemplate;
@@ -21494,7 +23142,7 @@ var Table = class _Table {
   styleElement;
   responsiveStyleElement;
   window;
-  constructor(document2, platformId, renderer, el, zone, tableService, cd, filterService, overlayService, config) {
+  constructor(document2, platformId, renderer, el, zone, tableService, cd, filterService, overlayService, config, domSanitizer) {
     this.document = document2;
     this.platformId = platformId;
     this.renderer = renderer;
@@ -21505,6 +23153,7 @@ var Table = class _Table {
     this.filterService = filterService;
     this.overlayService = overlayService;
     this.config = config;
+    this.domSanitizer = domSanitizer;
     this.window = this.document.defaultView;
   }
   ngOnInit() {
@@ -21516,7 +23165,7 @@ var Table = class _Table {
         this.restoringFilter = false;
       }
     }
-    if (this.responsiveLayout === "stack" && !this.scrollable) {
+    if (this.responsiveLayout === "stack") {
       this.createResponsiveStyle();
     }
     this.initialized = true;
@@ -21584,6 +23233,9 @@ var Table = class _Table {
         case "paginatorright":
           this.paginatorRightTemplate = item.template;
           break;
+        case "paginatordropdownicon":
+          this.paginatorDropdownIconTemplate = item.template;
+          break;
         case "paginatordropdownitem":
           this.paginatorDropdownItemTemplate = item.template;
           break;
@@ -21643,10 +23295,13 @@ var Table = class _Table {
       this.tableService.onValueChange(simpleChange.value.currentValue);
     }
     if (simpleChange.columns) {
-      this._columns = simpleChange.columns.currentValue;
-      this.tableService.onColumnsChange(simpleChange.columns.currentValue);
+      if (!this.isStateful()) {
+        this._columns = simpleChange.columns.currentValue;
+        this.tableService.onColumnsChange(simpleChange.columns.currentValue);
+      }
       if (this._columns && this.isStateful() && this.reorderableColumns && !this.columnOrderStateRestored) {
         this.restoreColumnOrder();
+        this.tableService.onColumnsChange(this._columns);
       }
     }
     if (simpleChange.sortField) {
@@ -22110,7 +23765,7 @@ var Table = class _Table {
       }
     }
   }
-  selectRange(event2, rowIndex) {
+  selectRange(event2, rowIndex, isMetaKeySelection) {
     let rangeStart, rangeEnd;
     if (this.anchorRowIndex > rowIndex) {
       rangeStart = rowIndex;
@@ -22124,11 +23779,12 @@ var Table = class _Table {
     }
     if (this.lazy && this.paginator) {
       rangeStart -= this.first;
+      rangeEnd -= this.first;
     }
     let rangeRowsData = [];
     for (let i = rangeStart; i <= rangeEnd; i++) {
       let rangeRowData = this.filteredValue ? this.filteredValue[i] : this.value[i];
-      if (!this.isSelected(rangeRowData)) {
+      if (!this.isSelected(rangeRowData) && !isMetaKeySelection) {
         if (!this.isRowSelectable(rangeRowData, rowIndex)) {
           continue;
         }
@@ -22512,37 +24168,24 @@ var Table = class _Table {
         data = data ? [...this.frozenValue, ...data] : this.frozenValue;
       }
     }
-    for (let i = 0; i < columns.length; i++) {
-      let column = columns[i];
-      if (column.exportable !== false && column.field) {
-        csv += '"' + this.getExportHeader(column) + '"';
-        if (i < columns.length - 1) {
-          csv += this.csvSeparator;
-        }
-      }
+    const exportableColumns = columns.filter((column) => column.exportable !== false && column.field);
+    csv += exportableColumns.map((column) => '"' + this.getExportHeader(column) + '"').join(this.csvSeparator);
+    const body = data.map((record) => exportableColumns.map((column) => {
+      let cellData = ObjectUtils.resolveFieldData(record, column.field);
+      if (cellData != null) {
+        if (this.exportFunction) {
+          cellData = this.exportFunction({
+            data: cellData,
+            field: column.field
+          });
+        } else cellData = String(cellData).replace(/"/g, '""');
+      } else cellData = "";
+      return '"' + cellData + '"';
+    }).join(this.csvSeparator)).join("\n");
+    if (body.length) {
+      csv += "\n" + body;
     }
-    data.forEach((record, i) => {
-      csv += "\n";
-      for (let i2 = 0; i2 < columns.length; i2++) {
-        let column = columns[i2];
-        if (column.exportable !== false && column.field) {
-          let cellData = ObjectUtils.resolveFieldData(record, column.field);
-          if (cellData != null) {
-            if (this.exportFunction) {
-              cellData = this.exportFunction({
-                data: cellData,
-                field: column.field
-              });
-            } else cellData = String(cellData).replace(/"/g, '""');
-          } else cellData = "";
-          csv += '"' + cellData + '"';
-          if (i2 < columns.length - 1) {
-            csv += this.csvSeparator;
-          }
-        }
-      }
-    });
-    let blob = new Blob([csv], {
+    let blob = new Blob([new Uint8Array([239, 187, 191]), csv], {
       type: "text/csv;charset=utf-8;"
     });
     let link = this.renderer.createElement("a");
@@ -22654,10 +24297,10 @@ var Table = class _Table {
     delete this.editingRowKeys[dataKeyValue];
   }
   toggleRow(rowData, event2) {
-    if (!this.dataKey) {
-      throw new Error("dataKey must be defined to use row expansion");
+    if (!this.dataKey && !this.groupRowsBy) {
+      throw new Error("dataKey or groupRowsBy must be defined to use row expansion");
     }
-    let dataKeyValue = String(ObjectUtils.resolveFieldData(rowData, this.dataKey));
+    let dataKeyValue = this.groupRowsBy ? String(ObjectUtils.resolveFieldData(rowData, this.groupRowsBy)) : String(ObjectUtils.resolveFieldData(rowData, this.dataKey));
     if (this.expandedRowKeys[dataKeyValue] != null) {
       delete this.expandedRowKeys[dataKeyValue];
       this.onRowCollapse.emit({
@@ -22682,7 +24325,7 @@ var Table = class _Table {
     }
   }
   isRowExpanded(rowData) {
-    return this.expandedRowKeys[String(ObjectUtils.resolveFieldData(rowData, this.dataKey))] === true;
+    return this.groupRowsBy ? this.expandedRowKeys[String(ObjectUtils.resolveFieldData(rowData, this.groupRowsBy))] === true : this.expandedRowKeys[String(ObjectUtils.resolveFieldData(rowData, this.dataKey))] === true;
   }
   isRowEditing(rowData) {
     return this.editingRowKeys[String(ObjectUtils.resolveFieldData(rowData, this.dataKey))] === true;
@@ -22695,9 +24338,13 @@ var Table = class _Table {
   }
   onColumnResizeBegin(event2) {
     let containerLeft = DomHandler.getOffset(this.containerViewChild?.nativeElement).left;
-    this.resizeColumnElement = event2.target.parentElement;
+    this.resizeColumnElement = event2.target.closest("th");
     this.columnResizing = true;
-    this.lastResizerHelperX = event2.pageX - containerLeft + this.containerViewChild?.nativeElement.scrollLeft;
+    if (event2.type == "touchstart") {
+      this.lastResizerHelperX = event2.changedTouches[0].clientX - containerLeft + this.containerViewChild?.nativeElement.scrollLeft;
+    } else {
+      this.lastResizerHelperX = event2.pageX - containerLeft + this.containerViewChild?.nativeElement.scrollLeft;
+    }
     this.onColumnResize(event2);
     event2.preventDefault();
   }
@@ -22706,24 +24353,29 @@ var Table = class _Table {
     DomHandler.addClass(this.containerViewChild?.nativeElement, "p-unselectable-text");
     this.resizeHelperViewChild.nativeElement.style.height = this.containerViewChild?.nativeElement.offsetHeight + "px";
     this.resizeHelperViewChild.nativeElement.style.top = "0px";
-    this.resizeHelperViewChild.nativeElement.style.left = event2.pageX - containerLeft + this.containerViewChild?.nativeElement.scrollLeft + "px";
+    if (event2.type == "touchmove") {
+      this.resizeHelperViewChild.nativeElement.style.left = event2.changedTouches[0].clientX - containerLeft + this.containerViewChild?.nativeElement.scrollLeft + "px";
+    } else {
+      this.resizeHelperViewChild.nativeElement.style.left = event2.pageX - containerLeft + this.containerViewChild?.nativeElement.scrollLeft + "px";
+    }
     this.resizeHelperViewChild.nativeElement.style.display = "block";
   }
   onColumnResizeEnd() {
-    let delta = this.resizeHelperViewChild?.nativeElement.offsetLeft - this.lastResizerHelperX;
-    let columnWidth = this.resizeColumnElement.offsetWidth;
-    let newColumnWidth = columnWidth + delta;
-    let minWidth = this.resizeColumnElement.style.minWidth.replace(/[^\d.]/g, "") || 15;
+    const delta = this.resizeHelperViewChild?.nativeElement.offsetLeft - this.lastResizerHelperX;
+    const columnWidth = this.resizeColumnElement.offsetWidth;
+    const newColumnWidth = columnWidth + delta;
+    const elementMinWidth = this.resizeColumnElement.style.minWidth.replace(/[^\d.]/g, "");
+    const minWidth = elementMinWidth ? parseFloat(elementMinWidth) : 15;
     if (newColumnWidth >= minWidth) {
       if (this.columnResizeMode === "fit") {
-        let nextColumn = this.resizeColumnElement.nextElementSibling;
-        let nextColumnWidth = nextColumn.offsetWidth - delta;
+        const nextColumn = this.resizeColumnElement.nextElementSibling;
+        const nextColumnWidth = nextColumn.offsetWidth - delta;
         if (newColumnWidth > 15 && nextColumnWidth > 15) {
           this.resizeTableCells(newColumnWidth, nextColumnWidth);
         }
       } else if (this.columnResizeMode === "expand") {
         this._initialColWidths = this._totalTableWidth();
-        let tableWidth = this.tableViewChild?.nativeElement.offsetWidth + delta;
+        const tableWidth = this.tableViewChild?.nativeElement.offsetWidth + delta;
         this.setResizeTableWidth(tableWidth + "px");
         this.resizeTableCells(newColumnWidth, null);
       }
@@ -22815,7 +24467,7 @@ var Table = class _Table {
           });
         }
       }
-      if (this.resizableColumns && this.resizeColumnElement && this.resizeColumnElement.isSameNode(this.draggedColumn)) {
+      if (this.resizableColumns && this.resizeColumnElement) {
         let width = this.columnResizeMode === "expand" ? this._initialColWidths : this._totalTableWidth();
         ObjectUtils.reorderArray(width, dragIndex + 1, dropIndex + 1);
         this.updateStyleElement(width, dragIndex, null, null);
@@ -22847,7 +24499,7 @@ var Table = class _Table {
                 }
             `;
     });
-    this.renderer.setProperty(this.styleElement, "innerHTML", innerHTML);
+    this.renderer.setProperty(this.styleElement, "innerHTML", this.domSanitizer.bypassSecurityTrustStyle(innerHTML));
   }
   onRowDragStart(event2, index) {
     this.rowDragging = true;
@@ -23014,7 +24666,11 @@ var Table = class _Table {
   }
   saveColumnWidths(state2) {
     let widths = [];
-    let headers = DomHandler.find(this.containerViewChild?.nativeElement, ".p-datatable-thead > tr > th");
+    let headers = [];
+    const container = this.containerViewChild?.nativeElement;
+    if (container) {
+      headers = DomHandler.find(container, ".p-datatable-thead > tr > th");
+    }
     headers.forEach((header) => widths.push(DomHandler.getOuterWidth(header)));
     state2.columnWidths = widths.join(",");
     if (this.columnResizeMode === "expand") {
@@ -23044,7 +24700,7 @@ var Table = class _Table {
                         }
                     `;
         });
-        this.styleElement.innerHTML = innerHTML;
+        this.styleElement.textContent = innerHTML;
       }
     }
   }
@@ -23089,6 +24745,7 @@ var Table = class _Table {
   createStyleElement() {
     this.styleElement = this.renderer.createElement("style");
     this.styleElement.type = "text/css";
+    DomHandler.setAttribute(this.styleElement, "nonce", this.config?.csp()?.nonce);
     this.renderer.appendChild(this.document.head, this.styleElement);
   }
   getGroupRowsMeta() {
@@ -23102,6 +24759,7 @@ var Table = class _Table {
       if (!this.responsiveStyleElement) {
         this.responsiveStyleElement = this.renderer.createElement("style");
         this.responsiveStyleElement.type = "text/css";
+        DomHandler.setAttribute(this.responsiveStyleElement, "nonce", this.config?.csp()?.nonce);
         this.renderer.appendChild(this.document.head, this.responsiveStyleElement);
         let innerHTML = `
     @media screen and (max-width: ${this.breakpoint}) {
@@ -23132,7 +24790,7 @@ var Table = class _Table {
         }
     }
     `;
-        this.renderer.setProperty(this.responsiveStyleElement, "innerHTML", innerHTML);
+        this.renderer.setProperty(this.responsiveStyleElement, "innerHTML", this.domSanitizer.bypassSecurityTrustStyle(innerHTML));
       }
     }
   }
@@ -23155,8 +24813,11 @@ var Table = class _Table {
     this.destroyStyleElement();
     this.destroyResponsiveStyle();
   }
+  getPaginatorStyleClasses(className) {
+    return [this.paginatorStyleClass, className].filter((c) => !!c).join(" ").trim();
+  }
   static ɵfac = function Table_Factory(t) {
-    return new (t || _Table)(ɵɵdirectiveInject(DOCUMENT), ɵɵdirectiveInject(PLATFORM_ID), ɵɵdirectiveInject(Renderer2), ɵɵdirectiveInject(ElementRef), ɵɵdirectiveInject(NgZone), ɵɵdirectiveInject(TableService), ɵɵdirectiveInject(ChangeDetectorRef), ɵɵdirectiveInject(FilterService), ɵɵdirectiveInject(OverlayService), ɵɵdirectiveInject(PrimeNGConfig));
+    return new (t || _Table)(ɵɵdirectiveInject(DOCUMENT), ɵɵdirectiveInject(PLATFORM_ID), ɵɵdirectiveInject(Renderer2), ɵɵdirectiveInject(ElementRef), ɵɵdirectiveInject(NgZone), ɵɵdirectiveInject(TableService), ɵɵdirectiveInject(ChangeDetectorRef), ɵɵdirectiveInject(FilterService), ɵɵdirectiveInject(OverlayService), ɵɵdirectiveInject(PrimeNGConfig), ɵɵdirectiveInject(DomSanitizer));
   };
   static ɵcmp = ɵɵdefineComponent({
     type: _Table,
@@ -23173,7 +24834,7 @@ var Table = class _Table {
     viewQuery: function Table_Query(rf, ctx) {
       if (rf & 1) {
         ɵɵviewQuery(_c012, 5);
-        ɵɵviewQuery(_c111, 5);
+        ɵɵviewQuery(_c115, 5);
         ɵɵviewQuery(_c29, 5);
         ɵɵviewQuery(_c36, 5);
         ɵɵviewQuery(_c45, 5);
@@ -23203,71 +24864,71 @@ var Table = class _Table {
       styleClass: "styleClass",
       tableStyle: "tableStyle",
       tableStyleClass: "tableStyleClass",
-      paginator: "paginator",
-      pageLinks: "pageLinks",
+      paginator: [InputFlags.HasDecoratorInputTransform, "paginator", "paginator", booleanAttribute],
+      pageLinks: [InputFlags.HasDecoratorInputTransform, "pageLinks", "pageLinks", numberAttribute],
       rowsPerPageOptions: "rowsPerPageOptions",
-      alwaysShowPaginator: "alwaysShowPaginator",
+      alwaysShowPaginator: [InputFlags.HasDecoratorInputTransform, "alwaysShowPaginator", "alwaysShowPaginator", booleanAttribute],
       paginatorPosition: "paginatorPosition",
       paginatorStyleClass: "paginatorStyleClass",
       paginatorDropdownAppendTo: "paginatorDropdownAppendTo",
       paginatorDropdownScrollHeight: "paginatorDropdownScrollHeight",
       currentPageReportTemplate: "currentPageReportTemplate",
-      showCurrentPageReport: "showCurrentPageReport",
-      showJumpToPageDropdown: "showJumpToPageDropdown",
-      showJumpToPageInput: "showJumpToPageInput",
-      showFirstLastIcon: "showFirstLastIcon",
-      showPageLinks: "showPageLinks",
-      defaultSortOrder: "defaultSortOrder",
+      showCurrentPageReport: [InputFlags.HasDecoratorInputTransform, "showCurrentPageReport", "showCurrentPageReport", booleanAttribute],
+      showJumpToPageDropdown: [InputFlags.HasDecoratorInputTransform, "showJumpToPageDropdown", "showJumpToPageDropdown", booleanAttribute],
+      showJumpToPageInput: [InputFlags.HasDecoratorInputTransform, "showJumpToPageInput", "showJumpToPageInput", booleanAttribute],
+      showFirstLastIcon: [InputFlags.HasDecoratorInputTransform, "showFirstLastIcon", "showFirstLastIcon", booleanAttribute],
+      showPageLinks: [InputFlags.HasDecoratorInputTransform, "showPageLinks", "showPageLinks", booleanAttribute],
+      defaultSortOrder: [InputFlags.HasDecoratorInputTransform, "defaultSortOrder", "defaultSortOrder", numberAttribute],
       sortMode: "sortMode",
-      resetPageOnSort: "resetPageOnSort",
+      resetPageOnSort: [InputFlags.HasDecoratorInputTransform, "resetPageOnSort", "resetPageOnSort", booleanAttribute],
       selectionMode: "selectionMode",
-      selectionPageOnly: "selectionPageOnly",
+      selectionPageOnly: [InputFlags.HasDecoratorInputTransform, "selectionPageOnly", "selectionPageOnly", booleanAttribute],
       contextMenuSelection: "contextMenuSelection",
       contextMenuSelectionMode: "contextMenuSelectionMode",
       dataKey: "dataKey",
-      metaKeySelection: "metaKeySelection",
+      metaKeySelection: [InputFlags.HasDecoratorInputTransform, "metaKeySelection", "metaKeySelection", booleanAttribute],
       rowSelectable: "rowSelectable",
       rowTrackBy: "rowTrackBy",
-      lazy: "lazy",
-      lazyLoadOnInit: "lazyLoadOnInit",
+      lazy: [InputFlags.HasDecoratorInputTransform, "lazy", "lazy", booleanAttribute],
+      lazyLoadOnInit: [InputFlags.HasDecoratorInputTransform, "lazyLoadOnInit", "lazyLoadOnInit", booleanAttribute],
       compareSelectionBy: "compareSelectionBy",
       csvSeparator: "csvSeparator",
       exportFilename: "exportFilename",
       filters: "filters",
       globalFilterFields: "globalFilterFields",
-      filterDelay: "filterDelay",
+      filterDelay: [InputFlags.HasDecoratorInputTransform, "filterDelay", "filterDelay", numberAttribute],
       filterLocale: "filterLocale",
       expandedRowKeys: "expandedRowKeys",
       editingRowKeys: "editingRowKeys",
       rowExpandMode: "rowExpandMode",
-      scrollable: "scrollable",
+      scrollable: [InputFlags.HasDecoratorInputTransform, "scrollable", "scrollable", booleanAttribute],
       scrollDirection: "scrollDirection",
       rowGroupMode: "rowGroupMode",
       scrollHeight: "scrollHeight",
-      virtualScroll: "virtualScroll",
-      virtualScrollItemSize: "virtualScrollItemSize",
+      virtualScroll: [InputFlags.HasDecoratorInputTransform, "virtualScroll", "virtualScroll", booleanAttribute],
+      virtualScrollItemSize: [InputFlags.HasDecoratorInputTransform, "virtualScrollItemSize", "virtualScrollItemSize", numberAttribute],
       virtualScrollOptions: "virtualScrollOptions",
-      virtualScrollDelay: "virtualScrollDelay",
+      virtualScrollDelay: [InputFlags.HasDecoratorInputTransform, "virtualScrollDelay", "virtualScrollDelay", numberAttribute],
       frozenWidth: "frozenWidth",
       responsive: "responsive",
       contextMenu: "contextMenu",
-      resizableColumns: "resizableColumns",
+      resizableColumns: [InputFlags.HasDecoratorInputTransform, "resizableColumns", "resizableColumns", booleanAttribute],
       columnResizeMode: "columnResizeMode",
-      reorderableColumns: "reorderableColumns",
-      loading: "loading",
+      reorderableColumns: [InputFlags.HasDecoratorInputTransform, "reorderableColumns", "reorderableColumns", booleanAttribute],
+      loading: [InputFlags.HasDecoratorInputTransform, "loading", "loading", booleanAttribute],
       loadingIcon: "loadingIcon",
-      showLoader: "showLoader",
-      rowHover: "rowHover",
-      customSort: "customSort",
-      showInitialSortBadge: "showInitialSortBadge",
-      autoLayout: "autoLayout",
+      showLoader: [InputFlags.HasDecoratorInputTransform, "showLoader", "showLoader", booleanAttribute],
+      rowHover: [InputFlags.HasDecoratorInputTransform, "rowHover", "rowHover", booleanAttribute],
+      customSort: [InputFlags.HasDecoratorInputTransform, "customSort", "customSort", booleanAttribute],
+      showInitialSortBadge: [InputFlags.HasDecoratorInputTransform, "showInitialSortBadge", "showInitialSortBadge", booleanAttribute],
+      autoLayout: [InputFlags.HasDecoratorInputTransform, "autoLayout", "autoLayout", booleanAttribute],
       exportFunction: "exportFunction",
       exportHeader: "exportHeader",
       stateKey: "stateKey",
       stateStorage: "stateStorage",
       editMode: "editMode",
       groupRowsBy: "groupRowsBy",
-      groupRowsByOrder: "groupRowsByOrder",
+      groupRowsByOrder: [InputFlags.HasDecoratorInputTransform, "groupRowsByOrder", "groupRowsByOrder", numberAttribute],
       responsiveLayout: "responsiveLayout",
       breakpoint: "breakpoint",
       paginatorLocale: "paginatorLocale",
@@ -23309,18 +24970,18 @@ var Table = class _Table {
       onStateSave: "onStateSave",
       onStateRestore: "onStateRestore"
     },
-    features: [ɵɵProvidersFeature([TableService]), ɵɵNgOnChangesFeature],
+    features: [ɵɵProvidersFeature([TableService]), ɵɵInputTransformsFeature, ɵɵNgOnChangesFeature],
     decls: 16,
     vars: 22,
-    consts: [["container", ""], ["wrapper", ""], ["buildInTable", ""], ["scroller", ""], ["table", ""], ["thead", ""], ["tfoot", ""], ["resizeHelper", ""], ["reorderIndicatorUp", ""], ["reorderIndicatorDown", ""], [3, "ngStyle", "ngClass"], ["class", "p-datatable-loading-overlay p-component-overlay", 4, "ngIf"], ["class", "p-datatable-header", 4, "ngIf"], ["styleClass", "p-paginator-top", 3, "rows", "first", "totalRecords", "pageLinkSize", "alwaysShow", "rowsPerPageOptions", "templateLeft", "templateRight", "dropdownAppendTo", "dropdownScrollHeight", "currentPageReportTemplate", "showFirstLastIcon", "dropdownItemTemplate", "showCurrentPageReport", "showJumpToPageDropdown", "showJumpToPageInput", "showPageLinks", "styleClass", "locale", "onPageChange", 4, "ngIf"], [1, "p-datatable-wrapper", 3, "ngStyle"], [3, "items", "columns", "style", "scrollHeight", "itemSize", "step", "delay", "inline", "lazy", "loaderDisabled", "showSpacer", "showLoader", "options", "autoSize", "onLazyLoad", 4, "ngIf"], [4, "ngIf"], ["styleClass", "p-paginator-bottom", 3, "rows", "first", "totalRecords", "pageLinkSize", "alwaysShow", "rowsPerPageOptions", "templateLeft", "templateRight", "dropdownAppendTo", "dropdownScrollHeight", "currentPageReportTemplate", "showFirstLastIcon", "dropdownItemTemplate", "showCurrentPageReport", "showJumpToPageDropdown", "showJumpToPageInput", "showPageLinks", "styleClass", "locale", "onPageChange", 4, "ngIf"], ["class", "p-datatable-footer", 4, "ngIf"], ["class", "p-column-resizer-helper", "style", "display:none", 4, "ngIf"], ["class", "p-datatable-reorder-indicator-up", "style", "display: none;", 4, "ngIf"], ["class", "p-datatable-reorder-indicator-down", "style", "display: none;", 4, "ngIf"], [1, "p-datatable-loading-overlay", "p-component-overlay"], [3, "class", 4, "ngIf"], [3, "spin", "styleClass", 4, "ngIf"], ["class", "p-datatable-loading-icon", 4, "ngIf"], [3, "spin", "styleClass"], [1, "p-datatable-loading-icon"], [4, "ngTemplateOutlet"], [1, "p-datatable-header"], ["styleClass", "p-paginator-top", 3, "onPageChange", "rows", "first", "totalRecords", "pageLinkSize", "alwaysShow", "rowsPerPageOptions", "templateLeft", "templateRight", "dropdownAppendTo", "dropdownScrollHeight", "currentPageReportTemplate", "showFirstLastIcon", "dropdownItemTemplate", "showCurrentPageReport", "showJumpToPageDropdown", "showJumpToPageInput", "showPageLinks", "styleClass", "locale"], ["pTemplate", "firstpagelinkicon"], ["pTemplate", "previouspagelinkicon"], ["pTemplate", "lastpagelinkicon"], ["pTemplate", "nextpagelinkicon"], [3, "onLazyLoad", "items", "columns", "scrollHeight", "itemSize", "step", "delay", "inline", "lazy", "loaderDisabled", "showSpacer", "showLoader", "options", "autoSize"], ["pTemplate", "content"], [4, "ngTemplateOutlet", "ngTemplateOutletContext"], ["role", "table", 3, "ngClass"], ["role", "rowgroup", 1, "p-datatable-thead"], ["role", "rowgroup", "class", "p-datatable-tbody p-datatable-frozen-tbody", 3, "value", "frozenRows", "pTableBody", "pTableBodyTemplate", "frozen", 4, "ngIf"], ["role", "rowgroup", 1, "p-datatable-tbody", 3, "ngClass", "value", "pTableBody", "pTableBodyTemplate", "scrollerOptions"], ["role", "rowgroup", "class", "p-datatable-scroller-spacer", 3, "style", 4, "ngIf"], ["role", "rowgroup", "class", "p-datatable-tfoot", 4, "ngIf"], ["role", "rowgroup", 1, "p-datatable-tbody", "p-datatable-frozen-tbody", 3, "value", "frozenRows", "pTableBody", "pTableBodyTemplate", "frozen"], ["role", "rowgroup", 1, "p-datatable-scroller-spacer"], ["role", "rowgroup", 1, "p-datatable-tfoot"], ["styleClass", "p-paginator-bottom", 3, "onPageChange", "rows", "first", "totalRecords", "pageLinkSize", "alwaysShow", "rowsPerPageOptions", "templateLeft", "templateRight", "dropdownAppendTo", "dropdownScrollHeight", "currentPageReportTemplate", "showFirstLastIcon", "dropdownItemTemplate", "showCurrentPageReport", "showJumpToPageDropdown", "showJumpToPageInput", "showPageLinks", "styleClass", "locale"], [1, "p-datatable-footer"], [1, "p-column-resizer-helper", 2, "display", "none"], [1, "p-datatable-reorder-indicator-up", 2, "display", "none"], [1, "p-datatable-reorder-indicator-down", 2, "display", "none"]],
+    consts: [["container", ""], ["wrapper", ""], ["buildInTable", ""], ["scroller", ""], ["table", ""], ["thead", ""], ["tfoot", ""], ["resizeHelper", ""], ["reorderIndicatorUp", ""], ["reorderIndicatorDown", ""], [3, "ngStyle", "ngClass"], ["class", "p-datatable-loading-overlay p-component-overlay", 4, "ngIf"], ["class", "p-datatable-header", 4, "ngIf"], [3, "rows", "first", "totalRecords", "pageLinkSize", "alwaysShow", "rowsPerPageOptions", "templateLeft", "templateRight", "dropdownAppendTo", "dropdownScrollHeight", "currentPageReportTemplate", "showFirstLastIcon", "dropdownItemTemplate", "showCurrentPageReport", "showJumpToPageDropdown", "showJumpToPageInput", "showPageLinks", "styleClass", "locale", "onPageChange", 4, "ngIf"], [1, "p-datatable-wrapper", 3, "ngStyle"], [3, "items", "columns", "style", "scrollHeight", "itemSize", "step", "delay", "inline", "autoSize", "lazy", "loaderDisabled", "showSpacer", "showLoader", "options", "onLazyLoad", 4, "ngIf"], [4, "ngIf"], ["class", "p-datatable-footer", 4, "ngIf"], ["class", "p-column-resizer-helper", 3, "ngStyle", 4, "ngIf"], ["class", "p-datatable-reorder-indicator-up", 3, "ngStyle", 4, "ngIf"], ["class", "p-datatable-reorder-indicator-down", 3, "ngStyle", 4, "ngIf"], [1, "p-datatable-loading-overlay", "p-component-overlay"], [3, "class", 4, "ngIf"], [3, "spin", "styleClass", 4, "ngIf"], ["class", "p-datatable-loading-icon", 4, "ngIf"], [3, "spin", "styleClass"], [1, "p-datatable-loading-icon"], [4, "ngTemplateOutlet"], [1, "p-datatable-header"], [3, "onPageChange", "rows", "first", "totalRecords", "pageLinkSize", "alwaysShow", "rowsPerPageOptions", "templateLeft", "templateRight", "dropdownAppendTo", "dropdownScrollHeight", "currentPageReportTemplate", "showFirstLastIcon", "dropdownItemTemplate", "showCurrentPageReport", "showJumpToPageDropdown", "showJumpToPageInput", "showPageLinks", "styleClass", "locale"], ["pTemplate", "dropdownicon"], ["pTemplate", "firstpagelinkicon"], ["pTemplate", "previouspagelinkicon"], ["pTemplate", "lastpagelinkicon"], ["pTemplate", "nextpagelinkicon"], [3, "onLazyLoad", "items", "columns", "scrollHeight", "itemSize", "step", "delay", "inline", "autoSize", "lazy", "loaderDisabled", "showSpacer", "showLoader", "options"], ["pTemplate", "content"], [4, "ngTemplateOutlet", "ngTemplateOutletContext"], ["role", "table", 3, "ngClass", "ngStyle"], ["role", "rowgroup", 1, "p-datatable-thead"], ["role", "rowgroup", "class", "p-datatable-tbody p-datatable-frozen-tbody", 3, "value", "frozenRows", "pTableBody", "pTableBodyTemplate", "frozen", 4, "ngIf"], ["role", "rowgroup", 1, "p-datatable-tbody", 3, "ngClass", "ngStyle", "value", "pTableBody", "pTableBodyTemplate", "scrollerOptions"], ["role", "rowgroup", "class", "p-datatable-scroller-spacer", 3, "ngStyle", 4, "ngIf"], ["role", "rowgroup", "class", "p-datatable-tfoot", 4, "ngIf"], ["role", "rowgroup", 1, "p-datatable-tbody", "p-datatable-frozen-tbody", 3, "value", "frozenRows", "pTableBody", "pTableBodyTemplate", "frozen"], ["role", "rowgroup", 1, "p-datatable-scroller-spacer", 3, "ngStyle"], ["role", "rowgroup", 1, "p-datatable-tfoot"], [1, "p-datatable-footer"], [1, "p-column-resizer-helper", 3, "ngStyle"], [1, "p-datatable-reorder-indicator-up", 3, "ngStyle"], [1, "p-datatable-reorder-indicator-down", 3, "ngStyle"]],
     template: function Table_Template(rf, ctx) {
       if (rf & 1) {
         ɵɵelementStart(0, "div", 10, 0);
-        ɵɵtemplate(2, Table_div_2_Template, 3, 2, "div", 11)(3, Table_div_3_Template, 2, 1, "div", 12)(4, Table_p_paginator_4_Template, 5, 23, "p-paginator", 13);
+        ɵɵtemplate(2, Table_div_2_Template, 3, 2, "div", 11)(3, Table_div_3_Template, 2, 1, "div", 12)(4, Table_p_paginator_4_Template, 6, 24, "p-paginator", 13);
         ɵɵelementStart(5, "div", 14, 1);
-        ɵɵtemplate(7, Table_p_scroller_7_Template, 3, 17, "p-scroller", 15)(8, Table_ng_container_8_Template, 2, 7, "ng-container", 16)(9, Table_ng_template_9_Template, 10, 28, "ng-template", null, 2, ɵɵtemplateRefExtractor);
+        ɵɵtemplate(7, Table_p_scroller_7_Template, 3, 17, "p-scroller", 15)(8, Table_ng_container_8_Template, 2, 7, "ng-container", 16)(9, Table_ng_template_9_Template, 10, 26, "ng-template", null, 2, ɵɵtemplateRefExtractor);
         ɵɵelementEnd();
-        ɵɵtemplate(11, Table_p_paginator_11_Template, 5, 23, "p-paginator", 17)(12, Table_div_12_Template, 2, 1, "div", 18)(13, Table_div_13_Template, 2, 0, "div", 19)(14, Table_span_14_Template, 4, 2, "span", 20)(15, Table_span_15_Template, 4, 2, "span", 21);
+        ɵɵtemplate(11, Table_p_paginator_11_Template, 6, 24, "p-paginator", 13)(12, Table_div_12_Template, 2, 1, "div", 17)(13, Table_div_13_Template, 2, 2, "div", 18)(14, Table_span_14_Template, 4, 4, "span", 19)(15, Table_span_15_Template, 4, 4, "span", 20);
         ɵɵelementEnd();
       }
       if (rf & 2) {
@@ -23386,7 +25047,6 @@ var Table = class _Table {
                 [first]="first"
                 [totalRecords]="totalRecords"
                 [pageLinkSize]="pageLinks"
-                styleClass="p-paginator-top"
                 [alwaysShow]="alwaysShowPaginator"
                 (onPageChange)="onPageChange($event)"
                 [rowsPerPageOptions]="rowsPerPageOptions"
@@ -23402,9 +25062,13 @@ var Table = class _Table {
                 [showJumpToPageDropdown]="showJumpToPageDropdown"
                 [showJumpToPageInput]="showJumpToPageInput"
                 [showPageLinks]="showPageLinks"
-                [styleClass]="paginatorStyleClass"
+                [styleClass]="getPaginatorStyleClasses('p-paginator-top')"
                 [locale]="paginatorLocale"
             >
+                <ng-template pTemplate="dropdownicon" *ngIf="paginatorDropdownIconTemplate">
+                    <ng-container *ngTemplateOutlet="paginatorDropdownIconTemplate"></ng-container>
+                </ng-template>
+
                 <ng-template pTemplate="firstpagelinkicon" *ngIf="paginatorFirstPageLinkIconTemplate">
                     <ng-container *ngTemplateOutlet="paginatorFirstPageLinkIconTemplate"></ng-container>
                 </ng-template>
@@ -23434,13 +25098,13 @@ var Table = class _Table {
                     [step]="rows"
                     [delay]="lazy ? virtualScrollDelay : 0"
                     [inline]="true"
+                    [autoSize]="true"
                     [lazy]="lazy"
                     (onLazyLoad)="onLazyItemLoad($event)"
                     [loaderDisabled]="true"
                     [showSpacer]="false"
                     [showLoader]="loadingBodyTemplate"
                     [options]="virtualScrollOptions"
-                    [autoSize]="true"
                 >
                     <ng-template pTemplate="content" let-items let-scrollerOptions="options">
                         <ng-container *ngTemplateOutlet="buildInTable; context: { $implicit: items, options: scrollerOptions }"></ng-container>
@@ -23456,7 +25120,7 @@ var Table = class _Table {
                         role="table"
                         [ngClass]="{ 'p-datatable-table': true, 'p-datatable-scrollable-table': scrollable, 'p-datatable-resizable-table': resizableColumns, 'p-datatable-resizable-table-fit': resizableColumns && columnResizeMode === 'fit' }"
                         [class]="tableStyleClass"
-                        [style]="tableStyle"
+                        [ngStyle]="tableStyle"
                         [attr.id]="id + '-table'"
                     >
                         <ng-container *ngTemplateOutlet="colGroupTemplate; context: { $implicit: scrollerOptions.columns }"></ng-container>
@@ -23477,7 +25141,7 @@ var Table = class _Table {
                             role="rowgroup"
                             class="p-datatable-tbody"
                             [ngClass]="scrollerOptions.contentStyleClass"
-                            [style]="scrollerOptions.contentStyle"
+                            [ngStyle]="scrollerOptions.contentStyle"
                             [value]="dataToRender(scrollerOptions.rows)"
                             [pTableBody]="scrollerOptions.columns"
                             [pTableBodyTemplate]="bodyTemplate"
@@ -23486,7 +25150,7 @@ var Table = class _Table {
                         <tbody
                             role="rowgroup"
                             *ngIf="scrollerOptions.spacerStyle"
-                            [style]="'height: calc(' + scrollerOptions.spacerStyle.height + ' - ' + scrollerOptions.rows.length * scrollerOptions.itemSize + 'px);'"
+                            [ngStyle]="{ height: 'calc(' + scrollerOptions.spacerStyle.height + ' - ' + scrollerOptions.rows.length * scrollerOptions.itemSize + 'px)' }"
                             class="p-datatable-scroller-spacer"
                         ></tbody>
                         <tfoot role="rowgroup" *ngIf="footerGroupedTemplate || footerTemplate" #tfoot class="p-datatable-tfoot">
@@ -23501,7 +25165,6 @@ var Table = class _Table {
                 [first]="first"
                 [totalRecords]="totalRecords"
                 [pageLinkSize]="pageLinks"
-                styleClass="p-paginator-bottom"
                 [alwaysShow]="alwaysShowPaginator"
                 (onPageChange)="onPageChange($event)"
                 [rowsPerPageOptions]="rowsPerPageOptions"
@@ -23517,9 +25180,13 @@ var Table = class _Table {
                 [showJumpToPageDropdown]="showJumpToPageDropdown"
                 [showJumpToPageInput]="showJumpToPageInput"
                 [showPageLinks]="showPageLinks"
-                [styleClass]="paginatorStyleClass"
+                [styleClass]="getPaginatorStyleClasses('p-paginator-bottom')"
                 [locale]="paginatorLocale"
             >
+                <ng-template pTemplate="dropdownicon" *ngIf="paginatorDropdownIconTemplate">
+                    <ng-container *ngTemplateOutlet="paginatorDropdownIconTemplate"></ng-container>
+                </ng-template>
+
                 <ng-template pTemplate="firstpagelinkicon" *ngIf="paginatorFirstPageLinkIconTemplate">
                     <ng-container *ngTemplateOutlet="paginatorFirstPageLinkIconTemplate"></ng-container>
                 </ng-template>
@@ -23541,12 +25208,33 @@ var Table = class _Table {
                 <ng-container *ngTemplateOutlet="summaryTemplate"></ng-container>
             </div>
 
-            <div #resizeHelper class="p-column-resizer-helper" style="display:none" *ngIf="resizableColumns"></div>
-            <span #reorderIndicatorUp class="p-datatable-reorder-indicator-up" style="display: none;" *ngIf="reorderableColumns">
+            <div
+                #resizeHelper
+                class="p-column-resizer-helper"
+                [ngStyle]="{
+                    display: 'none'
+                }"
+                *ngIf="resizableColumns"
+            ></div>
+            <span
+                #reorderIndicatorUp
+                class="p-datatable-reorder-indicator-up"
+                [ngStyle]="{
+                    display: 'none'
+                }"
+                *ngIf="reorderableColumns"
+            >
                 <ArrowDownIcon *ngIf="!reorderIndicatorUpIconTemplate" />
                 <ng-template *ngTemplateOutlet="reorderIndicatorUpIconTemplate"></ng-template>
             </span>
-            <span #reorderIndicatorDown class="p-datatable-reorder-indicator-down" style="display: none;" *ngIf="reorderableColumns">
+            <span
+                #reorderIndicatorDown
+                class="p-datatable-reorder-indicator-down"
+                [ngStyle]="{
+                    display: 'none'
+                }"
+                *ngIf="reorderableColumns"
+            >
                 <ArrowUpIcon *ngIf="!reorderIndicatorDownIconTemplate" />
                 <ng-template *ngTemplateOutlet="reorderIndicatorDownIconTemplate"></ng-template>
             </span>
@@ -23588,6 +25276,8 @@ var Table = class _Table {
     type: OverlayService
   }, {
     type: PrimeNGConfig
+  }, {
+    type: DomSanitizer
   }], {
     frozenColumns: [{
       type: Input
@@ -23608,16 +25298,25 @@ var Table = class _Table {
       type: Input
     }],
     paginator: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     pageLinks: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     rowsPerPageOptions: [{
       type: Input
     }],
     alwaysShowPaginator: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     paginatorPosition: [{
       type: Input
@@ -23635,34 +25334,58 @@ var Table = class _Table {
       type: Input
     }],
     showCurrentPageReport: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     showJumpToPageDropdown: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     showJumpToPageInput: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     showFirstLastIcon: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     showPageLinks: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     defaultSortOrder: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     sortMode: [{
       type: Input
     }],
     resetPageOnSort: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     selectionMode: [{
       type: Input
     }],
     selectionPageOnly: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     contextMenuSelection: [{
       type: Input
@@ -23677,7 +25400,10 @@ var Table = class _Table {
       type: Input
     }],
     metaKeySelection: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     rowSelectable: [{
       type: Input
@@ -23686,10 +25412,16 @@ var Table = class _Table {
       type: Input
     }],
     lazy: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     lazyLoadOnInit: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     compareSelectionBy: [{
       type: Input
@@ -23707,7 +25439,10 @@ var Table = class _Table {
       type: Input
     }],
     filterDelay: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     filterLocale: [{
       type: Input
@@ -23722,7 +25457,10 @@ var Table = class _Table {
       type: Input
     }],
     scrollable: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     scrollDirection: [{
       type: Input
@@ -23734,16 +25472,25 @@ var Table = class _Table {
       type: Input
     }],
     virtualScroll: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     virtualScrollItemSize: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     virtualScrollOptions: [{
       type: Input
     }],
     virtualScrollDelay: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     frozenWidth: [{
       type: Input
@@ -23755,34 +25502,58 @@ var Table = class _Table {
       type: Input
     }],
     resizableColumns: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     columnResizeMode: [{
       type: Input
     }],
     reorderableColumns: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     loading: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     loadingIcon: [{
       type: Input
     }],
     showLoader: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     rowHover: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     customSort: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     showInitialSortBadge: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     autoLayout: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     exportFunction: [{
       type: Input
@@ -23803,7 +25574,10 @@ var Table = class _Table {
       type: Input
     }],
     groupRowsByOrder: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     responsiveLayout: [{
       type: Input
@@ -24003,7 +25777,7 @@ var TableBody = class _TableBody {
   }
   shouldRenderRowGroupHeader(value, rowData, i) {
     let currentRowFieldData = ObjectUtils.resolveFieldData(rowData, this.dt.groupRowsBy);
-    let prevRowData = value[i - 1];
+    let prevRowData = value[i - (1 + this.dt._first)];
     if (prevRowData) {
       let previousRowFieldData = ObjectUtils.resolveFieldData(prevRowData, this.dt.groupRowsBy);
       return currentRowFieldData !== previousRowFieldData;
@@ -24013,7 +25787,7 @@ var TableBody = class _TableBody {
   }
   shouldRenderRowGroupFooter(value, rowData, i) {
     let currentRowFieldData = ObjectUtils.resolveFieldData(rowData, this.dt.groupRowsBy);
-    let nextRowData = value[i + 1];
+    let nextRowData = value[i + (1 + this.dt._first)];
     if (nextRowData) {
       let nextRowFieldData = ObjectUtils.resolveFieldData(nextRowData, this.dt.groupRowsBy);
       return currentRowFieldData !== nextRowFieldData;
@@ -24083,11 +25857,12 @@ var TableBody = class _TableBody {
       columns: [InputFlags.None, "pTableBody", "columns"],
       template: [InputFlags.None, "pTableBodyTemplate", "template"],
       value: "value",
-      frozen: "frozen",
-      frozenRows: "frozenRows",
+      frozen: [InputFlags.HasDecoratorInputTransform, "frozen", "frozen", booleanAttribute],
+      frozenRows: [InputFlags.HasDecoratorInputTransform, "frozenRows", "frozenRows", booleanAttribute],
       scrollerOptions: "scrollerOptions"
     },
-    attrs: _c162,
+    features: [ɵɵInputTransformsFeature],
+    attrs: _c172,
     decls: 5,
     vars: 5,
     consts: [[4, "ngIf"], ["ngFor", "", 3, "ngForOf", "ngForTrackBy"], ["role", "row", 4, "ngIf"], ["role", "row"], [4, "ngTemplateOutlet", "ngTemplateOutletContext"]],
@@ -24119,7 +25894,7 @@ var TableBody = class _TableBody {
       template: `
         <ng-container *ngIf="!dt.expandedRowTemplate">
             <ng-template ngFor let-rowData let-rowIndex="index" [ngForOf]="value" [ngForTrackBy]="dt.rowTrackBy">
-                <ng-container *ngIf="dt.groupHeaderTemplate && !dt.virtualScroll && dt.rowGroupMode === 'subheader' && shouldRenderRowGroupHeader(value, rowData, rowIndex)" role="row">
+                <ng-container *ngIf="dt.groupHeaderTemplate && !dt.virtualScroll && dt.rowGroupMode === 'subheader' && shouldRenderRowGroupHeader(value, rowData, getRowIndex(rowIndex))" role="row">
                     <ng-container
                         *ngTemplateOutlet="dt.groupHeaderTemplate; context: { $implicit: rowData, rowIndex: getRowIndex(rowIndex), columns: columns, editing: dt.editMode === 'row' && dt.isRowEditing(rowData), frozen: frozen }"
                     ></ng-container>
@@ -24224,10 +25999,16 @@ var TableBody = class _TableBody {
       type: Input
     }],
     frozen: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     frozenRows: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     scrollerOptions: [{
       type: Input
@@ -24273,6 +26054,7 @@ var RowGroupHeader = class _RowGroupHeader {
 })();
 var FrozenColumn = class _FrozenColumn {
   el;
+  zone;
   get frozen() {
     return this._frozen;
   }
@@ -24281,13 +26063,17 @@ var FrozenColumn = class _FrozenColumn {
     this.updateStickyPosition();
   }
   alignFrozen = "left";
-  constructor(el) {
+  constructor(el, zone) {
     this.el = el;
+    this.zone = zone;
   }
-  ngAfterViewInit() {
-    setTimeout(() => {
-      this.updateStickyPosition();
-    }, 1e3);
+  ngAfterViewChecked() {
+    this.zone.runOutsideAngular(() => {
+      this.recalculateColumns();
+    });
+  }
+  recalculateColumns() {
+    this.updateStickyPosition();
   }
   _frozen = true;
   updateStickyPosition() {
@@ -24318,7 +26104,7 @@ var FrozenColumn = class _FrozenColumn {
     }
   }
   static ɵfac = function FrozenColumn_Factory(t) {
-    return new (t || _FrozenColumn)(ɵɵdirectiveInject(ElementRef));
+    return new (t || _FrozenColumn)(ɵɵdirectiveInject(ElementRef), ɵɵdirectiveInject(NgZone));
   };
   static ɵdir = ɵɵdefineDirective({
     type: _FrozenColumn,
@@ -24326,6 +26112,11 @@ var FrozenColumn = class _FrozenColumn {
     hostAttrs: [1, "p-element"],
     hostVars: 2,
     hostBindings: function FrozenColumn_HostBindings(rf, ctx) {
+      if (rf & 1) {
+        ɵɵlistener("resize", function FrozenColumn_resize_HostBindingHandler($event) {
+          return ctx.recalculateColumns($event);
+        }, false, ɵɵresolveWindow);
+      }
       if (rf & 2) {
         ɵɵclassProp("p-frozen-column", ctx.frozen);
       }
@@ -24348,12 +26139,18 @@ var FrozenColumn = class _FrozenColumn {
     }]
   }], () => [{
     type: ElementRef
+  }, {
+    type: NgZone
   }], {
     frozen: [{
       type: Input
     }],
     alignFrozen: [{
       type: Input
+    }],
+    recalculateColumns: [{
+      type: HostListener,
+      args: ["window:resize", ["$event"]]
     }]
   });
 })();
@@ -24434,8 +26231,9 @@ var SortableColumn = class _SortableColumn {
     },
     inputs: {
       field: [InputFlags.None, "pSortableColumn", "field"],
-      pSortableColumnDisabled: "pSortableColumnDisabled"
-    }
+      pSortableColumnDisabled: [InputFlags.HasDecoratorInputTransform, "pSortableColumnDisabled", "pSortableColumnDisabled", booleanAttribute]
+    },
+    features: [ɵɵInputTransformsFeature]
   });
 };
 (() => {
@@ -24460,7 +26258,10 @@ var SortableColumn = class _SortableColumn {
       args: ["pSortableColumn"]
     }],
     pSortableColumnDisabled: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     onClick: [{
       type: HostListener,
@@ -24655,10 +26456,10 @@ var SelectableRow = class _SelectableRow {
         this.onEnterKey(event2);
         break;
       default:
-        if (event2.code === "KeyA" && (event2.metaKey || event2.ctrlKey)) {
-          const data = this.dt.dataToRender(this.dt.rows);
+        if (event2.code === "KeyA" && (event2.metaKey || event2.ctrlKey) && this.dt.selectionMode === "multiple") {
+          const data = this.dt.dataToRender(this.dt.processedData);
           this.dt.selection = [...data];
-          this.dt.selectRange(event2, data.length - 1);
+          this.dt.selectRange(event2, data.length - 1, true);
           event2.preventDefault();
         }
         break;
@@ -24721,23 +26522,28 @@ var SelectableRow = class _SelectableRow {
     event2.preventDefault();
   }
   onSpaceKey(event2) {
-    this.onEnterKey(event2);
-    if (event2.shiftKey && this.dt.selection !== null) {
-      const data = this.dt.dataToRender(this.dt.rows);
-      let index;
-      if (ObjectUtils.isNotEmpty(this.dt.selection) && this.dt.selection.length > 0) {
-        let firstSelectedRowIndex, lastSelectedRowIndex;
-        firstSelectedRowIndex = ObjectUtils.findIndexInList(this.dt.selection[0], data);
-        lastSelectedRowIndex = ObjectUtils.findIndexInList(this.dt.selection[this.dt.selection.length - 1], data);
-        index = this.index <= firstSelectedRowIndex ? lastSelectedRowIndex : firstSelectedRowIndex;
-      } else {
-        index = ObjectUtils.findIndexInList(this.dt.selection, data);
+    const isInput = event2.target instanceof HTMLInputElement || event2.target instanceof HTMLSelectElement || event2.target instanceof HTMLTextAreaElement;
+    if (isInput) {
+      return;
+    } else {
+      this.onEnterKey(event2);
+      if (event2.shiftKey && this.dt.selection !== null) {
+        const data = this.dt.dataToRender(this.dt.rows);
+        let index;
+        if (ObjectUtils.isNotEmpty(this.dt.selection) && this.dt.selection.length > 0) {
+          let firstSelectedRowIndex, lastSelectedRowIndex;
+          firstSelectedRowIndex = ObjectUtils.findIndexInList(this.dt.selection[0], data);
+          lastSelectedRowIndex = ObjectUtils.findIndexInList(this.dt.selection[this.dt.selection.length - 1], data);
+          index = this.index <= firstSelectedRowIndex ? lastSelectedRowIndex : firstSelectedRowIndex;
+        } else {
+          index = ObjectUtils.findIndexInList(this.dt.selection, data);
+        }
+        this.dt.anchorRowIndex = index;
+        this.dt.selection = index !== this.index ? data.slice(Math.min(index, this.index), Math.max(index, this.index) + 1) : [this.data];
+        this.dt.selectRange(event2, this.index);
       }
-      this.dt.anchorRowIndex = index;
-      this.dt.selection = index !== this.index ? data.slice(Math.min(index, this.index), Math.max(index, this.index) + 1) : [this.data];
-      this.dt.selectRange(event2, this.index);
+      event2.preventDefault();
     }
-    event2.preventDefault();
   }
   focusRowChange(firstFocusableRow, currentFocusedRow) {
     firstFocusableRow.tabIndex = "-1";
@@ -24804,8 +26610,9 @@ var SelectableRow = class _SelectableRow {
     inputs: {
       data: [InputFlags.None, "pSelectableRow", "data"],
       index: [InputFlags.None, "pSelectableRowIndex", "index"],
-      pSelectableRowDisabled: "pSelectableRowDisabled"
-    }
+      pSelectableRowDisabled: [InputFlags.HasDecoratorInputTransform, "pSelectableRowDisabled", "pSelectableRowDisabled", booleanAttribute]
+    },
+    features: [ɵɵInputTransformsFeature]
   });
 };
 (() => {
@@ -24838,7 +26645,10 @@ var SelectableRow = class _SelectableRow {
       args: ["pSelectableRowIndex"]
     }],
     pSelectableRowDisabled: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     onClick: [{
       type: HostListener,
@@ -24914,8 +26724,9 @@ var SelectableRowDblClick = class _SelectableRowDblClick {
     inputs: {
       data: [InputFlags.None, "pSelectableRowDblClick", "data"],
       index: [InputFlags.None, "pSelectableRowIndex", "index"],
-      pSelectableRowDisabled: "pSelectableRowDisabled"
-    }
+      pSelectableRowDisabled: [InputFlags.HasDecoratorInputTransform, "pSelectableRowDisabled", "pSelectableRowDisabled", booleanAttribute]
+    },
+    features: [ɵɵInputTransformsFeature]
   });
 };
 (() => {
@@ -24943,7 +26754,10 @@ var SelectableRowDblClick = class _SelectableRowDblClick {
       args: ["pSelectableRowIndex"]
     }],
     pSelectableRowDisabled: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     onClick: [{
       type: HostListener,
@@ -25011,8 +26825,9 @@ var ContextMenuRow = class _ContextMenuRow {
     inputs: {
       data: [InputFlags.None, "pContextMenuRow", "data"],
       index: [InputFlags.None, "pContextMenuRowIndex", "index"],
-      pContextMenuRowDisabled: "pContextMenuRowDisabled"
-    }
+      pContextMenuRowDisabled: [InputFlags.HasDecoratorInputTransform, "pContextMenuRowDisabled", "pContextMenuRowDisabled", booleanAttribute]
+    },
+    features: [ɵɵInputTransformsFeature]
   });
 };
 (() => {
@@ -25042,7 +26857,10 @@ var ContextMenuRow = class _ContextMenuRow {
       args: ["pContextMenuRowIndex"]
     }],
     pContextMenuRowDisabled: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     onContextMenu: [{
       type: HostListener,
@@ -25082,8 +26900,9 @@ var RowToggler = class _RowToggler {
     },
     inputs: {
       data: [InputFlags.None, "pRowToggler", "data"],
-      pRowTogglerDisabled: "pRowTogglerDisabled"
-    }
+      pRowTogglerDisabled: [InputFlags.HasDecoratorInputTransform, "pRowTogglerDisabled", "pRowTogglerDisabled", booleanAttribute]
+    },
+    features: [ɵɵInputTransformsFeature]
   });
 };
 (() => {
@@ -25103,7 +26922,10 @@ var RowToggler = class _RowToggler {
       args: ["pRowToggler"]
     }],
     pRowTogglerDisabled: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     onClick: [{
       type: HostListener,
@@ -25121,6 +26943,9 @@ var ResizableColumn = class _ResizableColumn {
   pResizableColumnDisabled;
   resizer;
   resizerMouseDownListener;
+  resizerTouchStartListener;
+  resizerTouchMoveListener;
+  resizerTouchEndListener;
   documentMouseMoveListener;
   documentMouseUpListener;
   constructor(document2, platformId, renderer, dt, el, zone) {
@@ -25140,6 +26965,7 @@ var ResizableColumn = class _ResizableColumn {
         this.renderer.appendChild(this.el.nativeElement, this.resizer);
         this.zone.runOutsideAngular(() => {
           this.resizerMouseDownListener = this.renderer.listen(this.resizer, "mousedown", this.onMouseDown.bind(this));
+          this.resizerTouchStartListener = this.renderer.listen(this.resizer, "touchstart", this.onTouchStart.bind(this));
         });
       }
     }
@@ -25148,6 +26974,8 @@ var ResizableColumn = class _ResizableColumn {
     this.zone.runOutsideAngular(() => {
       this.documentMouseMoveListener = this.renderer.listen(this.document, "mousemove", this.onDocumentMouseMove.bind(this));
       this.documentMouseUpListener = this.renderer.listen(this.document, "mouseup", this.onDocumentMouseUp.bind(this));
+      this.resizerTouchMoveListener = this.renderer.listen(this.resizer, "touchmove", this.onTouchMove.bind(this));
+      this.resizerTouchEndListener = this.renderer.listen(this.resizer, "touchend", this.onTouchEnd.bind(this));
     });
   }
   unbindDocumentEvents() {
@@ -25159,17 +26987,34 @@ var ResizableColumn = class _ResizableColumn {
       this.documentMouseUpListener();
       this.documentMouseUpListener = null;
     }
+    if (this.resizerTouchMoveListener) {
+      this.resizerTouchMoveListener();
+      this.resizerTouchMoveListener = null;
+    }
+    if (this.resizerTouchEndListener) {
+      this.resizerTouchEndListener();
+      this.resizerTouchEndListener = null;
+    }
   }
   onMouseDown(event2) {
-    if (event2.which === 1) {
-      this.dt.onColumnResizeBegin(event2);
-      this.bindDocumentEvents();
-    }
+    this.dt.onColumnResizeBegin(event2);
+    this.bindDocumentEvents();
+  }
+  onTouchStart(event2) {
+    this.dt.onColumnResizeBegin(event2);
+    this.bindDocumentEvents();
+  }
+  onTouchMove(event2) {
+    this.dt.onColumnResize(event2);
   }
   onDocumentMouseMove(event2) {
     this.dt.onColumnResize(event2);
   }
   onDocumentMouseUp(event2) {
+    this.dt.onColumnResizeEnd();
+    this.unbindDocumentEvents();
+  }
+  onTouchEnd(event2) {
     this.dt.onColumnResizeEnd();
     this.unbindDocumentEvents();
   }
@@ -25191,8 +27036,9 @@ var ResizableColumn = class _ResizableColumn {
     selectors: [["", "pResizableColumn", ""]],
     hostAttrs: [1, "p-element"],
     inputs: {
-      pResizableColumnDisabled: "pResizableColumnDisabled"
-    }
+      pResizableColumnDisabled: [InputFlags.HasDecoratorInputTransform, "pResizableColumnDisabled", "pResizableColumnDisabled", booleanAttribute]
+    },
+    features: [ɵɵInputTransformsFeature]
   });
 };
 (() => {
@@ -25226,7 +27072,10 @@ var ResizableColumn = class _ResizableColumn {
     type: NgZone
   }], {
     pResizableColumnDisabled: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }]
   });
 })();
@@ -25321,16 +27170,21 @@ var ReorderableColumn = class _ReorderableColumn {
     type: _ReorderableColumn,
     selectors: [["", "pReorderableColumn", ""]],
     hostAttrs: [1, "p-element"],
+    hostVars: 2,
     hostBindings: function ReorderableColumn_HostBindings(rf, ctx) {
       if (rf & 1) {
         ɵɵlistener("drop", function ReorderableColumn_drop_HostBindingHandler($event) {
           return ctx.onDrop($event);
         });
       }
+      if (rf & 2) {
+        ɵɵstyleProp("cursor", ctx.isEnabled() ? "move" : "default");
+      }
     },
     inputs: {
-      pReorderableColumnDisabled: "pReorderableColumnDisabled"
-    }
+      pReorderableColumnDisabled: [InputFlags.HasDecoratorInputTransform, "pReorderableColumnDisabled", "pReorderableColumnDisabled", booleanAttribute]
+    },
+    features: [ɵɵInputTransformsFeature]
   });
 };
 (() => {
@@ -25339,7 +27193,8 @@ var ReorderableColumn = class _ReorderableColumn {
     args: [{
       selector: "[pReorderableColumn]",
       host: {
-        class: "p-element"
+        class: "p-element",
+        "[style.cursor]": 'isEnabled() ? "move" : "default"'
       }
     }]
   }], () => [{
@@ -25358,7 +27213,10 @@ var ReorderableColumn = class _ReorderableColumn {
     type: NgZone
   }], {
     pReorderableColumnDisabled: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     onDrop: [{
       type: HostListener,
@@ -25381,10 +27239,10 @@ var EditableColumn = class _EditableColumn {
     this.el = el;
     this.zone = zone;
   }
-  ngOnChanges({
-    data
-  }) {
-    if (this.el.nativeElement && !data.firstChange) {
+  ngOnChanges(changes) {
+    if (changes.pEditableColumnDisabled?.currentValue === true && DomHandler.hasClass(this.el.nativeElement, "p-cell-editing")) {
+      this.closeEditingCell(false, new Event("cancel"));
+    } else if (changes.data?.firstChange === false && this.el.nativeElement) {
       this.dt.updateEditingCell(this.el.nativeElement, this.data, this.field, this.rowIndex);
     }
   }
@@ -25676,10 +27534,10 @@ var EditableColumn = class _EditableColumn {
       data: [InputFlags.None, "pEditableColumn", "data"],
       field: [InputFlags.None, "pEditableColumnField", "field"],
       rowIndex: [InputFlags.None, "pEditableColumnRowIndex", "rowIndex"],
-      pEditableColumnDisabled: "pEditableColumnDisabled",
+      pEditableColumnDisabled: [InputFlags.HasDecoratorInputTransform, "pEditableColumnDisabled", "pEditableColumnDisabled", booleanAttribute],
       pFocusCellSelector: "pFocusCellSelector"
     },
-    features: [ɵɵNgOnChangesFeature]
+    features: [ɵɵInputTransformsFeature, ɵɵNgOnChangesFeature]
   });
 };
 (() => {
@@ -25711,7 +27569,10 @@ var EditableColumn = class _EditableColumn {
       args: ["pEditableColumnRowIndex"]
     }],
     pEditableColumnDisabled: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     pFocusCellSelector: [{
       type: Input
@@ -25779,8 +27640,9 @@ var EditableRow = class _EditableRow {
     hostAttrs: [1, "p-element"],
     inputs: {
       data: [InputFlags.None, "pEditableRow", "data"],
-      pEditableRowDisabled: "pEditableRowDisabled"
-    }
+      pEditableRowDisabled: [InputFlags.HasDecoratorInputTransform, "pEditableRowDisabled", "pEditableRowDisabled", booleanAttribute]
+    },
+    features: [ɵɵInputTransformsFeature]
   });
 };
 (() => {
@@ -25800,7 +27662,10 @@ var EditableRow = class _EditableRow {
       args: ["pEditableRow"]
     }],
     pEditableRowDisabled: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }]
   });
 })();
@@ -26096,7 +27961,7 @@ var TableRadioButton = class _TableRadioButton {
     selectors: [["p-tableRadioButton"]],
     viewQuery: function TableRadioButton_Query(rf, ctx) {
       if (rf & 1) {
-        ɵɵviewQuery(_c222, 5);
+        ɵɵviewQuery(_c232, 5);
       }
       if (rf & 2) {
         let _t;
@@ -26105,13 +27970,14 @@ var TableRadioButton = class _TableRadioButton {
     },
     hostAttrs: [1, "p-element"],
     inputs: {
-      disabled: "disabled",
+      disabled: [InputFlags.HasDecoratorInputTransform, "disabled", "disabled", booleanAttribute],
       value: "value",
-      index: "index",
+      index: [InputFlags.HasDecoratorInputTransform, "index", "index", numberAttribute],
       inputId: "inputId",
       name: "name",
       ariaLabel: "ariaLabel"
     },
+    features: [ɵɵInputTransformsFeature],
     decls: 7,
     vars: 16,
     consts: [["rb", ""], ["box", ""], [1, "p-radiobutton", "p-component", 3, "click", "ngClass"], [1, "p-hidden-accessible"], ["type", "radio", 3, "focus", "blur", "checked", "disabled", "tabindex"], [3, "ngClass"], [1, "p-radiobutton-icon"]],
@@ -26137,12 +28003,12 @@ var TableRadioButton = class _TableRadioButton {
         ɵɵelementEnd()();
       }
       if (rf & 2) {
-        ɵɵproperty("ngClass", ɵɵpureFunction3(8, _c232, ctx.focused, ctx.checked, ctx.disabled));
+        ɵɵproperty("ngClass", ɵɵpureFunction3(8, _c242, ctx.focused, ctx.checked, ctx.disabled));
         ɵɵadvance(2);
         ɵɵproperty("checked", ctx.checked)("disabled", ctx.disabled)("tabindex", ctx.disabled ? null : "0");
         ɵɵattribute("id", ctx.inputId)("name", ctx.name)("aria-label", ctx.ariaLabel);
         ɵɵadvance(2);
-        ɵɵproperty("ngClass", ɵɵpureFunction3(12, _c242, ctx.checked, ctx.focused, ctx.disabled));
+        ɵɵproperty("ngClass", ɵɵpureFunction3(12, _c252, ctx.checked, ctx.focused, ctx.disabled));
       }
     },
     dependencies: [NgClass],
@@ -26177,13 +28043,19 @@ var TableRadioButton = class _TableRadioButton {
     type: ChangeDetectorRef
   }], {
     disabled: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     value: [{
       type: Input
     }],
     index: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     inputId: [{
       type: Input
@@ -26214,14 +28086,21 @@ var TableCheckbox = class _TableCheckbox {
   checked;
   focused;
   subscription;
+  tableHeaderCheckboxSubscription;
+  isTableHeaderCheckboxSelection = false;
   constructor(dt, tableService, cd) {
     this.dt = dt;
     this.tableService = tableService;
     this.cd = cd;
     this.subscription = this.dt.tableService.selectionSource$.subscribe(() => {
-      this.checked = this.dt.isSelected(this.value);
+      setTimeout(() => {
+        this.checked = this.isTableHeaderCheckboxSelection ? this.dt.isSelected(this.value) && !this.disabled : this.dt.isSelected(this.value);
+        this.cd.markForCheck();
+      });
       this.ariaLabel = this.ariaLabel || this.dt.config.translation.aria ? this.checked ? this.dt.config.translation.aria.selectRow : this.dt.config.translation.aria.unselectRow : void 0;
-      this.cd.markForCheck();
+    });
+    this.tableHeaderCheckboxSubscription = this.dt.tableService.isHeaderCheckboxSelection$.subscribe((val) => {
+      this.isTableHeaderCheckboxSelection = val;
     });
   }
   ngOnInit() {
@@ -26233,6 +28112,7 @@ var TableCheckbox = class _TableCheckbox {
         originalEvent: event2,
         rowIndex: this.index
       }, this.value);
+      this.tableService.onHeaderCheckboxSelection(false);
     }
     DomHandler.clearSelection();
   }
@@ -26246,6 +28126,9 @@ var TableCheckbox = class _TableCheckbox {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+    if (this.tableHeaderCheckboxSubscription) {
+      this.tableHeaderCheckboxSubscription.unsubscribe();
+    }
   }
   static ɵfac = function TableCheckbox_Factory(t) {
     return new (t || _TableCheckbox)(ɵɵdirectiveInject(Table), ɵɵdirectiveInject(TableService), ɵɵdirectiveInject(ChangeDetectorRef));
@@ -26255,14 +28138,15 @@ var TableCheckbox = class _TableCheckbox {
     selectors: [["p-tableCheckbox"]],
     hostAttrs: [1, "p-element"],
     inputs: {
-      disabled: "disabled",
+      disabled: [InputFlags.HasDecoratorInputTransform, "disabled", "disabled", booleanAttribute],
       value: "value",
-      index: "index",
+      index: [InputFlags.HasDecoratorInputTransform, "index", "index", numberAttribute],
       inputId: "inputId",
       name: "name",
-      required: "required",
+      required: [InputFlags.HasDecoratorInputTransform, "required", "required", booleanAttribute],
       ariaLabel: "ariaLabel"
     },
+    features: [ɵɵInputTransformsFeature],
     decls: 7,
     vars: 18,
     consts: [["box", ""], [1, "p-checkbox", "p-component", 3, "click", "ngClass"], [1, "p-hidden-accessible"], ["type", "checkbox", 3, "focus", "blur", "checked", "disabled", "tabindex"], [3, "ngClass"], [4, "ngIf"], [3, "styleClass", 4, "ngIf"], [3, "styleClass"], [4, "ngTemplateOutlet", "ngTemplateOutletContext"]],
@@ -26288,12 +28172,12 @@ var TableCheckbox = class _TableCheckbox {
         ɵɵelementEnd()();
       }
       if (rf & 2) {
-        ɵɵproperty("ngClass", ɵɵpureFunction2(11, _c252, ctx.focused, ctx.disabled));
+        ɵɵproperty("ngClass", ɵɵpureFunction2(11, _c262, ctx.focused, ctx.disabled));
         ɵɵadvance(2);
         ɵɵproperty("checked", ctx.checked)("disabled", ctx.disabled)("tabindex", ctx.disabled ? null : "0");
         ɵɵattribute("id", ctx.inputId)("name", ctx.name)("required", ctx.required)("aria-label", ctx.ariaLabel);
         ɵɵadvance();
-        ɵɵproperty("ngClass", ɵɵpureFunction3(14, _c262, ctx.checked, ctx.focused, ctx.disabled));
+        ɵɵproperty("ngClass", ɵɵpureFunction3(14, _c272, ctx.checked, ctx.focused, ctx.disabled));
         ɵɵadvance(2);
         ɵɵproperty("ngIf", !ctx.dt.checkboxIconTemplate);
         ɵɵadvance();
@@ -26350,13 +28234,19 @@ var TableCheckbox = class _TableCheckbox {
     type: ChangeDetectorRef
   }], {
     disabled: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     value: [{
       type: Input
     }],
     index: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     inputId: [{
       type: Input
@@ -26365,7 +28255,10 @@ var TableCheckbox = class _TableCheckbox {
       type: Input
     }],
     required: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     ariaLabel: [{
       type: Input
@@ -26384,6 +28277,7 @@ var TableHeaderCheckbox = class _TableHeaderCheckbox {
   focused;
   selectionChangeSubscription;
   valueChangeSubscription;
+  tableHeaderCheckboxSubscription;
   constructor(dt, tableService, cd) {
     this.dt = dt;
     this.tableService = tableService;
@@ -26402,6 +28296,7 @@ var TableHeaderCheckbox = class _TableHeaderCheckbox {
   onClick(event2) {
     if (!this.disabled) {
       if (this.dt.value && this.dt.value.length > 0) {
+        this.tableService.onHeaderCheckboxSelection(true);
         this.dt.toggleRowsWithCheckbox(event2, !this.checked);
       }
     }
@@ -26446,11 +28341,12 @@ var TableHeaderCheckbox = class _TableHeaderCheckbox {
     selectors: [["p-tableHeaderCheckbox"]],
     hostAttrs: [1, "p-element"],
     inputs: {
-      disabled: "disabled",
+      disabled: [InputFlags.HasDecoratorInputTransform, "disabled", "disabled", booleanAttribute],
       inputId: "inputId",
       name: "name",
       ariaLabel: "ariaLabel"
     },
+    features: [ɵɵInputTransformsFeature],
     decls: 8,
     vars: 17,
     consts: [["cb", ""], ["box", ""], [1, "p-checkbox", "p-component", 3, "click", "ngClass"], [1, "p-hidden-accessible"], ["type", "checkbox", 3, "focus", "blur", "tabindex", "checked", "disabled"], [3, "ngClass"], [4, "ngIf"], ["class", "p-checkbox-icon", 4, "ngIf"], [3, "styleClass", 4, "ngIf"], [3, "styleClass"], [1, "p-checkbox-icon"], [4, "ngTemplateOutlet", "ngTemplateOutletContext"]],
@@ -26476,12 +28372,12 @@ var TableHeaderCheckbox = class _TableHeaderCheckbox {
         ɵɵelementEnd()();
       }
       if (rf & 2) {
-        ɵɵproperty("ngClass", ɵɵpureFunction2(10, _c252, ctx.focused, ctx.isDisabled()));
+        ɵɵproperty("ngClass", ɵɵpureFunction2(10, _c262, ctx.focused, ctx.isDisabled()));
         ɵɵadvance(2);
         ɵɵproperty("tabindex", ctx.disabled ? null : "0")("checked", ctx.checked)("disabled", ctx.isDisabled());
         ɵɵattribute("id", ctx.inputId)("name", ctx.name)("aria-label", ctx.ariaLabel);
         ɵɵadvance(2);
-        ɵɵproperty("ngClass", ɵɵpureFunction3(13, _c272, ctx.checked, ctx.focused, ctx.isDisabled()));
+        ɵɵproperty("ngClass", ɵɵpureFunction3(13, _c282, ctx.checked, ctx.focused, ctx.isDisabled()));
         ɵɵadvance(2);
         ɵɵproperty("ngIf", !ctx.dt.headerCheckboxIconTemplate);
         ɵɵadvance();
@@ -26527,7 +28423,10 @@ var TableHeaderCheckbox = class _TableHeaderCheckbox {
     type: ChangeDetectorRef
   }], {
     disabled: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     inputId: [{
       type: Input
@@ -26627,8 +28526,18 @@ var ReorderableRow = class _ReorderableRow {
     }
   }
   onMouseDown(event2) {
-    if (DomHandler.hasClass(event2.target, "p-datatable-reorderablerow-handle")) this.el.nativeElement.draggable = true;
-    else this.el.nativeElement.draggable = false;
+    const targetElement = event2.target;
+    const isHandleClicked = this.isHandleElement(targetElement);
+    this.el.nativeElement.draggable = isHandleClicked;
+  }
+  isHandleElement(element) {
+    if (element?.classList.contains("p-datatable-reorderablerow-handle")) {
+      return true;
+    }
+    if (element?.parentElement && !["TD", "TR"].includes(element?.parentElement?.tagName)) {
+      return this.isHandleElement(element?.parentElement);
+    }
+    return false;
   }
   onDragStart(event2) {
     this.dt.onRowDragStart(event2, this.index);
@@ -26672,8 +28581,9 @@ var ReorderableRow = class _ReorderableRow {
     },
     inputs: {
       index: [InputFlags.None, "pReorderableRow", "index"],
-      pReorderableRowDisabled: "pReorderableRowDisabled"
-    }
+      pReorderableRowDisabled: [InputFlags.HasDecoratorInputTransform, "pReorderableRowDisabled", "pReorderableRowDisabled", booleanAttribute]
+    },
+    features: [ɵɵInputTransformsFeature]
   });
 };
 (() => {
@@ -26699,7 +28609,10 @@ var ReorderableRow = class _ReorderableRow {
       args: ["pReorderableRow"]
     }],
     pReorderableRowDisabled: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     onDrop: [{
       type: HostListener,
@@ -26715,31 +28628,149 @@ var ColumnFilter = class _ColumnFilter {
   config;
   overlayService;
   cd;
+  /**
+   * Property represented by the column.
+   * @group Props
+   */
   field;
+  /**
+   * Type of the input.
+   * @group Props
+   */
   type = "text";
+  /**
+   * Filter display.
+   * @group Props
+   */
   display = "row";
+  /**
+   * Decides whether to display filter menu popup.
+   * @group Props
+   */
   showMenu = true;
+  /**
+   * Filter match mode.
+   * @group Props
+   */
   matchMode;
+  /**
+   * Filter operator.
+   * @defaultValue 'AND'
+   * @group Props
+   */
   operator = FilterOperator.AND;
+  /**
+   * Decides whether to display filter operator.
+   * @group Props
+   */
   showOperator = true;
+  /**
+   * Decides whether to display clear filter button.
+   * @group Props
+   */
   showClearButton = true;
+  /**
+   * Decides whether to display apply filter button.
+   * @group Props
+   */
   showApplyButton = true;
+  /**
+   * Decides whether to display filter match modes.
+   * @group Props
+   */
   showMatchModes = true;
+  /**
+   * Decides whether to display add filter button.
+   * @group Props
+   */
   showAddButton = true;
+  /**
+   * Decides whether to close popup on clear button click.
+   * @group Props
+   */
   hideOnClear = false;
+  /**
+   * Filter placeholder.
+   * @group Props
+   */
   placeholder;
+  /**
+   * Filter match mode options.
+   * @group Props
+   */
   matchModeOptions;
+  /**
+   * Defines maximum amount of constraints.
+   * @group Props
+   */
   maxConstraints = 2;
+  /**
+   * Defines minimum fraction of digits.
+   * @group Props
+   */
   minFractionDigits;
+  /**
+   * Defines maximum fraction of digits.
+   * @group Props
+   */
   maxFractionDigits;
+  /**
+   * Defines prefix of the filter.
+   * @group Props
+   */
   prefix;
+  /**
+   * Defines suffix of the filter.
+   * @group Props
+   */
   suffix;
+  /**
+   * Defines filter locale.
+   * @group Props
+   */
   locale;
+  /**
+   * Defines filter locale matcher.
+   * @group Props
+   */
   localeMatcher;
+  /**
+   * Enables currency input.
+   * @group Props
+   */
   currency;
+  /**
+   * Defines the display of the currency input.
+   * @group Props
+   */
   currencyDisplay;
+  /**
+   * Defines if filter grouping will be enabled.
+   * @group Props
+   */
   useGrouping = true;
+  /**
+   * Defines the visibility of buttons.
+   * @group Props
+   */
   showButtons = true;
+  /**
+   * Defines the aria-label of the form element.
+   * @group Props
+   */
+  ariaLabel;
+  /**
+   * Callback to invoke on overlay is shown.
+   * @param {AnimationEvent} originalEvent - animation event.
+   * @group Emits
+   */
+  onShow = new EventEmitter();
+  /**
+   * Callback to invoke on overlay is hidden.
+   * @param {AnimationEvent} originalEvent - animation event.
+   * @group Emits
+   */
+  onHide = new EventEmitter();
   icon;
   clearButtonViewChild;
   templates;
@@ -26750,6 +28781,7 @@ var ColumnFilter = class _ColumnFilter {
   filterIconTemplate;
   removeRuleIconTemplate;
   addRuleIconTemplate;
+  clearFilterIconTemplate;
   operatorOptions;
   overlayVisible;
   overlay;
@@ -26778,6 +28810,9 @@ var ColumnFilter = class _ColumnFilter {
   get isShowAddConstraint() {
     return this.showAddButton && this.type !== "boolean" && this.fieldConstraints && this.fieldConstraints.length < this.maxConstraints;
   }
+  get showMenuButtonLabel() {
+    return this.config.getTranslation(TranslationKeys.SHOW_FILTER_MENU);
+  }
   get applyButtonLabel() {
     return this.config.getTranslation(TranslationKeys.APPLY);
   }
@@ -26794,7 +28829,7 @@ var ColumnFilter = class _ColumnFilter {
     return this.config.getTranslation(TranslationKeys.NO_FILTER);
   }
   get filterMenuButtonAriaLabel() {
-    return this.config.translation ? this.overlayVisible ? this.config.translation.aria.showFilterMenu : this.config.translation.aria.hideFilterMenu : void 0;
+    return this.config.translation ? this.overlayVisible ? this.config.translation.aria.hideFilterMenu : this.config.translation.aria.showFilterMenu : void 0;
   }
   get removeRuleButtonAriaLabel() {
     return this.config.translation ? this.config.translation.removeRule : void 0;
@@ -26859,6 +28894,9 @@ var ColumnFilter = class _ColumnFilter {
         case "filtericon":
           this.filterIconTemplate = item.template;
           break;
+        case "clearfiltericon":
+          this.clearFilterIconTemplate = item.template;
+          break;
         case "removeruleicon":
           this.removeRuleIconTemplate = item.template;
           break;
@@ -26889,8 +28927,11 @@ var ColumnFilter = class _ColumnFilter {
     }
   }
   onRowMatchModeChange(matchMode) {
-    this.dt.filters[this.field].matchMode = matchMode;
-    this.dt._filter();
+    const fieldFilter = this.dt.filters[this.field];
+    fieldFilter.matchMode = matchMode;
+    if (fieldFilter.value) {
+      this.dt._filter();
+    }
     this.hide();
   }
   onRowMatchModeKeyDown(event2) {
@@ -26921,7 +28962,7 @@ var ColumnFilter = class _ColumnFilter {
     this.hide();
   }
   isRowMatchModeSelected(matchMode) {
-    return this.dt.filters[this.field].matchMode === matchMode;
+    return this.dt.filters[this.field]?.matchMode === matchMode;
   }
   addConstraint() {
     this.dt.filters[this.field].push({
@@ -26933,7 +28974,9 @@ var ColumnFilter = class _ColumnFilter {
   }
   removeConstraint(filterMeta) {
     this.dt.filters[this.field] = this.dt.filters[this.field].filter((meta) => meta !== filterMeta);
-    this.dt._filter();
+    if (!this.showApplyButton) {
+      this.dt._filter();
+    }
     DomHandler.focus(this.clearButtonViewChild.nativeElement);
   }
   onOperatorChange(value) {
@@ -26966,10 +29009,13 @@ var ColumnFilter = class _ColumnFilter {
           event2.preventDefault();
         }
         break;
+      case "Enter":
+        this.toggleMenu();
+        event2.preventDefault();
+        break;
     }
   }
   onEscape() {
-    this.overlayVisible = false;
     this.icon?.nativeElement.focus();
   }
   findNextItem(item) {
@@ -27001,6 +29047,9 @@ var ColumnFilter = class _ColumnFilter {
           }
         };
         this.overlaySubscription = this.overlayService.clickObservable.subscribe(this.overlayEventListener);
+        this.onShow.emit({
+          originalEvent: event2
+        });
         break;
       case "void":
         this.onOverlayHide();
@@ -27017,6 +29066,9 @@ var ColumnFilter = class _ColumnFilter {
         break;
       case "void":
         zindexutils.clear(event2.element);
+        this.onHide.emit({
+          originalEvent: event2
+        });
         break;
     }
   }
@@ -27050,13 +29102,18 @@ var ColumnFilter = class _ColumnFilter {
     return false;
   }
   isOutsideClicked(event2) {
-    return !(this.overlay?.isSameNode(event2.target) || this.overlay?.contains(event2.target) || this.icon?.nativeElement.isSameNode(event2.target) || this.icon?.nativeElement.contains(event2.target) || DomHandler.hasClass(event2.target, "p-column-filter-add-button") || DomHandler.hasClass(event2.target.parentElement, "p-column-filter-add-button") || DomHandler.hasClass(event2.target, "p-column-filter-remove-button") || DomHandler.hasClass(event2.target.parentElement, "p-column-filter-remove-button"));
+    return !(DomHandler.hasClass(this.overlay?.nextElementSibling, "p-overlay") || this.overlay?.isSameNode(event2.target) || this.overlay?.contains(event2.target) || this.icon?.nativeElement.isSameNode(event2.target) || this.icon?.nativeElement.contains(event2.target) || DomHandler.hasClass(event2.target, "p-column-filter-add-button") || DomHandler.hasClass(event2.target.parentElement, "p-column-filter-add-button") || DomHandler.hasClass(event2.target, "p-column-filter-remove-button") || DomHandler.hasClass(event2.target.parentElement, "p-column-filter-remove-button"));
   }
   bindDocumentClickListener() {
     if (!this.documentClickListener) {
       const documentTarget = this.el ? this.el.nativeElement.ownerDocument : "document";
-      this.documentClickListener = this.renderer.listen(documentTarget, "click", (event2) => {
-        if (this.overlayVisible && !this.selfClick && this.isOutsideClicked(event2)) {
+      this.documentClickListener = this.renderer.listen(documentTarget, "mousedown", (event2) => {
+        let isDateDialog = false;
+        document.querySelectorAll('[role="dialog"]').forEach((d) => {
+          if (DomHandler.hasClass(d, "p-datepicker")) isDateDialog = true;
+        });
+        const targetIsColumnFilterMenuButton = event2.target.closest(".p-column-filter-menu-button");
+        if (this.overlayVisible && this.isOutsideClicked(event2) && (targetIsColumnFilterMenuButton || !isDateDialog)) {
           this.hide();
         }
         this.selfClick = false;
@@ -27152,8 +29209,8 @@ var ColumnFilter = class _ColumnFilter {
     },
     viewQuery: function ColumnFilter_Query(rf, ctx) {
       if (rf & 1) {
-        ɵɵviewQuery(_c282, 5);
         ɵɵviewQuery(_c292, 5);
+        ɵɵviewQuery(_c30, 5);
       }
       if (rf & 2) {
         let _t;
@@ -27166,40 +29223,46 @@ var ColumnFilter = class _ColumnFilter {
       field: "field",
       type: "type",
       display: "display",
-      showMenu: "showMenu",
+      showMenu: [InputFlags.HasDecoratorInputTransform, "showMenu", "showMenu", booleanAttribute],
       matchMode: "matchMode",
       operator: "operator",
-      showOperator: "showOperator",
-      showClearButton: "showClearButton",
-      showApplyButton: "showApplyButton",
-      showMatchModes: "showMatchModes",
-      showAddButton: "showAddButton",
-      hideOnClear: "hideOnClear",
+      showOperator: [InputFlags.HasDecoratorInputTransform, "showOperator", "showOperator", booleanAttribute],
+      showClearButton: [InputFlags.HasDecoratorInputTransform, "showClearButton", "showClearButton", booleanAttribute],
+      showApplyButton: [InputFlags.HasDecoratorInputTransform, "showApplyButton", "showApplyButton", booleanAttribute],
+      showMatchModes: [InputFlags.HasDecoratorInputTransform, "showMatchModes", "showMatchModes", booleanAttribute],
+      showAddButton: [InputFlags.HasDecoratorInputTransform, "showAddButton", "showAddButton", booleanAttribute],
+      hideOnClear: [InputFlags.HasDecoratorInputTransform, "hideOnClear", "hideOnClear", booleanAttribute],
       placeholder: "placeholder",
       matchModeOptions: "matchModeOptions",
-      maxConstraints: "maxConstraints",
-      minFractionDigits: "minFractionDigits",
-      maxFractionDigits: "maxFractionDigits",
+      maxConstraints: [InputFlags.HasDecoratorInputTransform, "maxConstraints", "maxConstraints", numberAttribute],
+      minFractionDigits: [InputFlags.HasDecoratorInputTransform, "minFractionDigits", "minFractionDigits", (value) => numberAttribute(value, null)],
+      maxFractionDigits: [InputFlags.HasDecoratorInputTransform, "maxFractionDigits", "maxFractionDigits", (value) => numberAttribute(value, null)],
       prefix: "prefix",
       suffix: "suffix",
       locale: "locale",
       localeMatcher: "localeMatcher",
       currency: "currency",
       currencyDisplay: "currencyDisplay",
-      useGrouping: "useGrouping",
-      showButtons: "showButtons"
+      useGrouping: [InputFlags.HasDecoratorInputTransform, "useGrouping", "useGrouping", booleanAttribute],
+      showButtons: [InputFlags.HasDecoratorInputTransform, "showButtons", "showButtons", booleanAttribute],
+      ariaLabel: "ariaLabel"
     },
+    outputs: {
+      onShow: "onShow",
+      onHide: "onHide"
+    },
+    features: [ɵɵInputTransformsFeature],
     decls: 5,
     vars: 8,
-    consts: [["icon", ""], ["menu", ""], ["clearBtn", ""], [1, "p-column-filter", 3, "ngClass"], ["class", "p-fluid", 3, "type", "field", "filterConstraint", "filterTemplate", "placeholder", "minFractionDigits", "maxFractionDigits", "prefix", "suffix", "locale", "localeMatcher", "currency", "currencyDisplay", "useGrouping", "showButtons", 4, "ngIf"], ["type", "button", "class", "p-column-filter-menu-button p-link", "aria-haspopup", "true", 3, "ngClass", "click", "keydown", 4, "ngIf"], ["type", "button", "class", "p-column-filter-clear-button p-link", 3, "ngClass", "click", 4, "ngIf"], ["role", "dialog", 3, "ngClass", "id", "click", "keydown.escape", 4, "ngIf"], [1, "p-fluid", 3, "type", "field", "filterConstraint", "filterTemplate", "placeholder", "minFractionDigits", "maxFractionDigits", "prefix", "suffix", "locale", "localeMatcher", "currency", "currencyDisplay", "useGrouping", "showButtons"], ["type", "button", "aria-haspopup", "true", 1, "p-column-filter-menu-button", "p-link", 3, "click", "keydown", "ngClass"], [3, "styleClass", 4, "ngIf"], ["class", "pi-filter-icon", 4, "ngIf"], [3, "styleClass"], [1, "pi-filter-icon"], [4, "ngTemplateOutlet"], ["type", "button", 1, "p-column-filter-clear-button", "p-link", 3, "click", "ngClass"], [4, "ngIf"], ["role", "dialog", 3, "click", "keydown.escape", "ngClass", "id"], [4, "ngTemplateOutlet", "ngTemplateOutletContext"], ["class", "p-column-filter-row-items", 4, "ngIf", "ngIfElse"], [1, "p-column-filter-row-items"], ["class", "p-column-filter-row-item", 3, "ngClass", "click", "keydown", "keydown.enter", 4, "ngFor", "ngForOf"], [1, "p-column-filter-separator"], [1, "p-column-filter-row-item", 3, "click", "keydown", "keydown.enter"], [1, "p-column-filter-row-item", 3, "click", "keydown", "keydown.enter", "ngClass"], ["class", "p-column-filter-operator", 4, "ngIf"], [1, "p-column-filter-constraints"], ["class", "p-column-filter-constraint", 4, "ngFor", "ngForOf"], ["class", "p-column-filter-add-rule", 4, "ngIf"], [1, "p-column-filter-buttonbar"], ["type", "button", "pButton", "", "class", "p-button-outlined p-button-sm", "pRipple", "", 3, "click", 4, "ngIf"], ["type", "button", "pButton", "", "class", "p-button-sm", "pRipple", "", 3, "click", 4, "ngIf"], [1, "p-column-filter-operator"], ["styleClass", "p-column-filter-operator-dropdown", 3, "ngModelChange", "options", "ngModel"], [1, "p-column-filter-constraint"], ["styleClass", "p-column-filter-matchmode-dropdown", 3, "options", "ngModel", "ngModelChange", 4, "ngIf"], [3, "type", "field", "filterConstraint", "filterTemplate", "placeholder", "minFractionDigits", "maxFractionDigits", "prefix", "suffix", "locale", "localeMatcher", "currency", "currencyDisplay", "useGrouping"], ["type", "button", "pButton", "", "class", "p-column-filter-remove-button p-button-text p-button-danger p-button-sm", "pRipple", "", 3, "click", 4, "ngIf"], ["styleClass", "p-column-filter-matchmode-dropdown", 3, "ngModelChange", "options", "ngModel"], ["type", "button", "pButton", "", "pRipple", "", 1, "p-column-filter-remove-button", "p-button-text", "p-button-danger", "p-button-sm", 3, "click"], [1, "p-column-filter-add-rule"], ["type", "button", "pButton", "", "pRipple", "", 1, "p-column-filter-add-button", "p-button-text", "p-button-sm", 3, "click"], ["type", "button", "pButton", "", "pRipple", "", 1, "p-button-outlined", "p-button-sm", 3, "click"], ["type", "button", "pButton", "", "pRipple", "", 1, "p-button-sm", 3, "click"]],
+    consts: [["icon", ""], ["menu", ""], ["clearBtn", ""], [1, "p-column-filter", 3, "ngClass"], ["class", "p-fluid", 3, "type", "field", "ariaLabel", "filterConstraint", "filterTemplate", "placeholder", "minFractionDigits", "maxFractionDigits", "prefix", "suffix", "locale", "localeMatcher", "currency", "currencyDisplay", "useGrouping", "showButtons", 4, "ngIf"], ["type", "button", "class", "p-column-filter-menu-button p-link", "aria-haspopup", "true", 3, "ngClass", "click", "keydown", 4, "ngIf"], ["type", "button", "class", "p-column-filter-clear-button p-link", 3, "ngClass", "click", 4, "ngIf"], ["role", "dialog", 3, "ngClass", "id", "click", "keydown.escape", 4, "ngIf"], [1, "p-fluid", 3, "type", "field", "ariaLabel", "filterConstraint", "filterTemplate", "placeholder", "minFractionDigits", "maxFractionDigits", "prefix", "suffix", "locale", "localeMatcher", "currency", "currencyDisplay", "useGrouping", "showButtons"], ["type", "button", "aria-haspopup", "true", 1, "p-column-filter-menu-button", "p-link", 3, "click", "keydown", "ngClass"], [3, "styleClass", 4, "ngIf"], ["class", "pi-filter-icon", 4, "ngIf"], [3, "styleClass"], [1, "pi-filter-icon"], [4, "ngTemplateOutlet"], ["type", "button", 1, "p-column-filter-clear-button", "p-link", 3, "click", "ngClass"], [4, "ngIf"], ["role", "dialog", 3, "click", "keydown.escape", "ngClass", "id"], [4, "ngTemplateOutlet", "ngTemplateOutletContext"], ["class", "p-column-filter-row-items", 4, "ngIf", "ngIfElse"], [1, "p-column-filter-row-items"], ["class", "p-column-filter-row-item", 3, "ngClass", "click", "keydown", "keydown.enter", 4, "ngFor", "ngForOf"], [1, "p-column-filter-separator"], [1, "p-column-filter-row-item", 3, "click", "keydown", "keydown.enter"], [1, "p-column-filter-row-item", 3, "click", "keydown", "keydown.enter", "ngClass"], ["class", "p-column-filter-operator", 4, "ngIf"], [1, "p-column-filter-constraints"], ["class", "p-column-filter-constraint", 4, "ngFor", "ngForOf"], ["class", "p-column-filter-add-rule", 4, "ngIf"], ["class", "p-column-filter-buttonbar", 4, "ngIf"], [1, "p-column-filter-operator"], ["styleClass", "p-column-filter-operator-dropdown", 3, "ngModelChange", "options", "ngModel"], [1, "p-column-filter-constraint"], ["styleClass", "p-column-filter-matchmode-dropdown", 3, "options", "ngModel", "ngModelChange", 4, "ngIf"], [3, "type", "field", "filterConstraint", "filterTemplate", "placeholder", "minFractionDigits", "maxFractionDigits", "prefix", "suffix", "locale", "localeMatcher", "currency", "currencyDisplay", "useGrouping"], ["type", "button", "pButton", "", "class", "p-column-filter-remove-button p-button-text p-button-danger p-button-sm", "pRipple", "", 3, "label", "click", 4, "ngIf"], ["styleClass", "p-column-filter-matchmode-dropdown", 3, "ngModelChange", "options", "ngModel"], ["type", "button", "pButton", "", "pRipple", "", 1, "p-column-filter-remove-button", "p-button-text", "p-button-danger", "p-button-sm", 3, "click", "label"], [1, "p-column-filter-add-rule"], ["type", "button", "pButton", "", "pRipple", "", 1, "p-column-filter-add-button", "p-button-text", "p-button-sm", 3, "click", "label"], [1, "p-column-filter-buttonbar"], ["type", "button", "pButton", "", "class", "p-button-outlined p-button-sm", "pRipple", "", 3, "label", "click", 4, "ngIf"], ["type", "button", "pButton", "", "class", "p-button-sm", "pRipple", "", 3, "label", "click", 4, "ngIf"], ["type", "button", "pButton", "", "pRipple", "", 1, "p-button-outlined", "p-button-sm", 3, "click", "label"], ["type", "button", "pButton", "", "pRipple", "", 1, "p-button-sm", 3, "click", "label"]],
     template: function ColumnFilter_Template(rf, ctx) {
       if (rf & 1) {
         ɵɵelementStart(0, "div", 3);
-        ɵɵtemplate(1, ColumnFilter_p_columnFilterFormElement_1_Template, 1, 15, "p-columnFilterFormElement", 4)(2, ColumnFilter_button_2_Template, 4, 9, "button", 5)(3, ColumnFilter_button_3_Template, 4, 6, "button", 6)(4, ColumnFilter_div_4_Template, 6, 16, "div", 7);
+        ɵɵtemplate(1, ColumnFilter_p_columnFilterFormElement_1_Template, 1, 16, "p-columnFilterFormElement", 4)(2, ColumnFilter_button_2_Template, 4, 9, "button", 5)(3, ColumnFilter_button_3_Template, 4, 6, "button", 6)(4, ColumnFilter_div_4_Template, 6, 16, "div", 7);
         ɵɵelementEnd();
       }
       if (rf & 2) {
-        ɵɵproperty("ngClass", ɵɵpureFunction2(5, _c30, ctx.display === "row", ctx.display === "menu"));
+        ɵɵproperty("ngClass", ɵɵpureFunction2(5, _c31, ctx.display === "row", ctx.display === "menu"));
         ɵɵadvance();
         ɵɵproperty("ngIf", ctx.display === "row");
         ɵɵadvance();
@@ -27210,7 +29273,7 @@ var ColumnFilter = class _ColumnFilter {
         ɵɵproperty("ngIf", ctx.showMenu && ctx.overlayVisible);
       }
     },
-    dependencies: () => [NgClass, NgForOf, NgIf, NgTemplateOutlet, Dropdown, NgControlStatus, NgModel, ButtonDirective, FilterIcon, FilterSlashIcon, ColumnFilterFormElement],
+    dependencies: () => [NgClass, NgForOf, NgIf, NgTemplateOutlet, Dropdown, NgControlStatus, NgModel, ButtonDirective, FilterIcon, FilterSlashIcon, PlusIcon, TrashIcon, ColumnFilterFormElement],
     encapsulation: 2,
     data: {
       animation: [trigger("overlayAnimation", [transition(":enter", [style({
@@ -27234,6 +29297,7 @@ var ColumnFilter = class _ColumnFilter {
                 class="p-fluid"
                 [type]="type"
                 [field]="field"
+                [ariaLabel]="ariaLabel"
                 [filterConstraint]="dt.filters[field]"
                 [filterTemplate]="filterTemplate"
                 [placeholder]="placeholder"
@@ -27254,9 +29318,9 @@ var ColumnFilter = class _ColumnFilter {
                 type="button"
                 class="p-column-filter-menu-button p-link"
                 aria-haspopup="true"
-                [attr.aria-label]="showMenuButtonAriaLabel"
-                [attr.aria-controls]="overlayId"
-                [attr.aria-expanded]="overlayVisible"
+                [attr.aria-label]="filterMenuButtonAriaLabel"
+                [attr.aria-controls]="overlayVisible ? overlayId : null"
+                [attr.aria-expanded]="overlayVisible ?? false"
                 [ngClass]="{ 'p-column-filter-menu-button-open': overlayVisible, 'p-column-filter-menu-button-active': hasFilter() }"
                 (click)="toggleMenu()"
                 (keydown)="onToggleButtonKeyDown($event)"
@@ -27267,8 +29331,8 @@ var ColumnFilter = class _ColumnFilter {
                 </span>
             </button>
             <button #icon *ngIf="showClearButton && display === 'row'" [ngClass]="{ 'p-hidden-space': !hasRowFilter() }" type="button" class="p-column-filter-clear-button p-link" (click)="clearFilter()" [attr.aria-label]="clearButtonLabel">
-                <FilterSlashIcon *ngIf="!clearIconTemplate" />
-                <ng-template *ngTemplateOutlet="clearFilterIcon"></ng-template>
+                <FilterSlashIcon *ngIf="!clearFilterIconTemplate" />
+                <ng-template *ngTemplateOutlet="clearFilterIconTemplate"></ng-template>
             </button>
             <div
                 *ngIf="showMenu && overlayVisible"
@@ -27336,22 +29400,23 @@ var ColumnFilter = class _ColumnFilter {
                                     (click)="removeConstraint(fieldConstraint)"
                                     pRipple
                                     [attr.aria-label]="removeRuleButtonLabel"
+                                    [label]="removeRuleButtonLabel"
                                 >
-                                    <TrashIcon *ngIf="!removeRuleIconTemplate" />
+                                    <TrashIcon *ngIf="!removeRuleIconTemplate" [styleClass]="'p-button-icon-left'" />
                                     <ng-template *ngTemplateOutlet="removeRuleIconTemplate"></ng-template>
                                 </button>
                             </div>
                         </div>
                     </div>
                     <div class="p-column-filter-add-rule" *ngIf="isShowAddConstraint">
-                        <button type="button" pButton [attr.aria-label]="addRuleButtonLabel" class="p-column-filter-add-button p-button-text p-button-sm" (click)="addConstraint()" pRipple>
-                            <PlusIcon *ngIf="!addRuleIconTemplate" />
+                        <button type="button" pButton [label]="addRuleButtonLabel" [attr.aria-label]="addRuleButtonLabel" class="p-column-filter-add-button p-button-text p-button-sm" (click)="addConstraint()" pRipple>
+                            <PlusIcon *ngIf="!addRuleIconTemplate" [styleClass]="'p-button-icon-left'" />
                             <ng-template *ngTemplateOutlet="addRuleIconTemplate"></ng-template>
                         </button>
                     </div>
-                    <div class="p-column-filter-buttonbar">
-                        <button #clearBtn *ngIf="showClearButton" type="button" pButton class="p-button-outlined p-button-sm" (click)="clearFilter()" [attr.aria-label]="clearButtonLabel" pRipple></button>
-                        <button *ngIf="showApplyButton" type="button" pButton (click)="applyFilter()" class="p-button-sm" [attr.aria-label]="applyButtonLabel" pRipple></button>
+                    <div class="p-column-filter-buttonbar" *ngIf="showButtons">
+                        <button #clearBtn *ngIf="showClearButton" type="button" pButton class="p-button-outlined p-button-sm" (click)="clearFilter()" [attr.aria-label]="clearButtonLabel" [label]="clearButtonLabel" pRipple></button>
+                        <button *ngIf="showApplyButton" type="button" pButton (click)="applyFilter()" class="p-button-sm" [label]="applyButtonLabel" pRipple [attr.aria-label]="applyButtonLabel"></button>
                     </div>
                 </ng-template>
                 <ng-container *ngTemplateOutlet="footerTemplate; context: { $implicit: field }"></ng-container>
@@ -27398,7 +29463,10 @@ var ColumnFilter = class _ColumnFilter {
       type: Input
     }],
     showMenu: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     matchMode: [{
       type: Input
@@ -27407,22 +29475,40 @@ var ColumnFilter = class _ColumnFilter {
       type: Input
     }],
     showOperator: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     showClearButton: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     showApplyButton: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     showMatchModes: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     showAddButton: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     hideOnClear: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     placeholder: [{
       type: Input
@@ -27431,13 +29517,22 @@ var ColumnFilter = class _ColumnFilter {
       type: Input
     }],
     maxConstraints: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: numberAttribute
+      }]
     }],
     minFractionDigits: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: (value) => numberAttribute(value, null)
+      }]
     }],
     maxFractionDigits: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: (value) => numberAttribute(value, null)
+      }]
     }],
     prefix: [{
       type: Input
@@ -27458,10 +29553,25 @@ var ColumnFilter = class _ColumnFilter {
       type: Input
     }],
     useGrouping: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
     }],
     showButtons: [{
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
+    }],
+    ariaLabel: [{
       type: Input
+    }],
+    onShow: [{
+      type: Output
+    }],
+    onHide: [{
+      type: Output
     }],
     icon: [{
       type: ViewChild,
@@ -27494,6 +29604,7 @@ var ColumnFilterFormElement = class _ColumnFilterFormElement {
   currency;
   currencyDisplay;
   useGrouping = true;
+  ariaLabel;
   get showButtons() {
     return this.colFilter.showButtons;
   }
@@ -27537,19 +29648,21 @@ var ColumnFilterFormElement = class _ColumnFilterFormElement {
       filterConstraint: "filterConstraint",
       filterTemplate: "filterTemplate",
       placeholder: "placeholder",
-      minFractionDigits: "minFractionDigits",
-      maxFractionDigits: "maxFractionDigits",
+      minFractionDigits: [InputFlags.HasDecoratorInputTransform, "minFractionDigits", "minFractionDigits", (value) => numberAttribute(value, null)],
+      maxFractionDigits: [InputFlags.HasDecoratorInputTransform, "maxFractionDigits", "maxFractionDigits", (value) => numberAttribute(value, null)],
       prefix: "prefix",
       suffix: "suffix",
       locale: "locale",
       localeMatcher: "localeMatcher",
       currency: "currency",
       currencyDisplay: "currencyDisplay",
-      useGrouping: "useGrouping"
+      useGrouping: [InputFlags.HasDecoratorInputTransform, "useGrouping", "useGrouping", booleanAttribute],
+      ariaLabel: "ariaLabel"
     },
+    features: [ɵɵInputTransformsFeature],
     decls: 3,
     vars: 2,
-    consts: [["builtInElement", ""], [4, "ngIf", "ngIfElse"], [4, "ngTemplateOutlet", "ngTemplateOutletContext"], [3, "ngSwitch"], ["type", "text", "pInputText", "", 3, "value", "input", "keydown.enter", 4, "ngSwitchCase"], [3, "ngModel", "showButtons", "minFractionDigits", "maxFractionDigits", "prefix", "suffix", "placeholder", "mode", "locale", "localeMatcher", "currency", "currencyDisplay", "useGrouping", "ngModelChange", "onKeyDown", 4, "ngSwitchCase"], [3, "ngModel", "ngModelChange", 4, "ngSwitchCase"], [3, "placeholder", "ngModel", "ngModelChange", 4, "ngSwitchCase"], ["type", "text", "pInputText", "", 3, "input", "keydown.enter", "value"], [3, "ngModelChange", "onKeyDown", "ngModel", "showButtons", "minFractionDigits", "maxFractionDigits", "prefix", "suffix", "placeholder", "mode", "locale", "localeMatcher", "currency", "currencyDisplay", "useGrouping"], [3, "ngModelChange", "ngModel"], [3, "ngModelChange", "placeholder", "ngModel"]],
+    consts: [["builtInElement", ""], [4, "ngIf", "ngIfElse"], [4, "ngTemplateOutlet", "ngTemplateOutletContext"], [3, "ngSwitch"], ["type", "text", "pInputText", "", 3, "ariaLabel", "value", "input", "keydown.enter", 4, "ngSwitchCase"], [3, "ngModel", "showButtons", "minFractionDigits", "maxFractionDigits", "ariaLabel", "prefix", "suffix", "placeholder", "mode", "locale", "localeMatcher", "currency", "currencyDisplay", "useGrouping", "ngModelChange", "onKeyDown", 4, "ngSwitchCase"], [3, "ariaLabel", "ngModel", "ngModelChange", 4, "ngSwitchCase"], ["appendTo", "body", 3, "ariaLabel", "placeholder", "ngModel", "ngModelChange", 4, "ngSwitchCase"], ["type", "text", "pInputText", "", 3, "input", "keydown.enter", "ariaLabel", "value"], [3, "ngModelChange", "onKeyDown", "ngModel", "showButtons", "minFractionDigits", "maxFractionDigits", "ariaLabel", "prefix", "suffix", "placeholder", "mode", "locale", "localeMatcher", "currency", "currencyDisplay", "useGrouping"], [3, "ngModelChange", "ariaLabel", "ngModel"], ["appendTo", "body", 3, "ngModelChange", "ariaLabel", "placeholder", "ngModel"]],
     template: function ColumnFilterFormElement_Template(rf, ctx) {
       if (rf & 1) {
         ɵɵtemplate(0, ColumnFilterFormElement_ng_container_0_Template, 2, 19, "ng-container", 1)(1, ColumnFilterFormElement_ng_template_1_Template, 5, 5, "ng-template", null, 0, ɵɵtemplateRefExtractor);
@@ -27574,7 +29687,7 @@ var ColumnFilterFormElement = class _ColumnFilterFormElement {
                 *ngTemplateOutlet="
                     filterTemplate;
                     context: {
-                        $implicit: filterConstraint.value,
+                        $implicit: filterConstraint?.value,
                         filterCallback: filterCallback,
                         type: type,
                         field: field,
@@ -27596,7 +29709,16 @@ var ColumnFilterFormElement = class _ColumnFilterFormElement {
         </ng-container>
         <ng-template #builtInElement>
             <ng-container [ngSwitch]="type">
-                <input *ngSwitchCase="'text'" type="text" pInputText [value]="filterConstraint?.value" (input)="onModelChange($event.target.value)" (keydown.enter)="onTextInputEnterKeyDown($event)" [attr.placeholder]="placeholder" />
+                <input
+                    *ngSwitchCase="'text'"
+                    type="text"
+                    [ariaLabel]="ariaLabel"
+                    pInputText
+                    [value]="filterConstraint?.value"
+                    (input)="onModelChange($event.target.value)"
+                    (keydown.enter)="onTextInputEnterKeyDown($event)"
+                    [attr.placeholder]="placeholder"
+                />
                 <p-inputNumber
                     *ngSwitchCase="'numeric'"
                     [ngModel]="filterConstraint?.value"
@@ -27605,6 +29727,7 @@ var ColumnFilterFormElement = class _ColumnFilterFormElement {
                     [showButtons]="showButtons"
                     [minFractionDigits]="minFractionDigits"
                     [maxFractionDigits]="maxFractionDigits"
+                    [ariaLabel]="ariaLabel"
                     [prefix]="prefix"
                     [suffix]="suffix"
                     [placeholder]="placeholder"
@@ -27615,8 +29738,8 @@ var ColumnFilterFormElement = class _ColumnFilterFormElement {
                     [currencyDisplay]="currencyDisplay"
                     [useGrouping]="useGrouping"
                 ></p-inputNumber>
-                <p-triStateCheckbox *ngSwitchCase="'boolean'" [ngModel]="filterConstraint?.value" (ngModelChange)="onModelChange($event)"></p-triStateCheckbox>
-                <p-calendar *ngSwitchCase="'date'" [placeholder]="placeholder" [ngModel]="filterConstraint?.value" (ngModelChange)="onModelChange($event)"></p-calendar>
+                <p-triStateCheckbox [ariaLabel]="ariaLabel" *ngSwitchCase="'boolean'" [ngModel]="filterConstraint?.value" (ngModelChange)="onModelChange($event)"></p-triStateCheckbox>
+                <p-calendar [ariaLabel]="ariaLabel" *ngSwitchCase="'date'" [placeholder]="placeholder" [ngModel]="filterConstraint?.value" (ngModelChange)="onModelChange($event)" appendTo="body"></p-calendar>
             </ng-container>
         </ng-template>
     `,
@@ -27646,10 +29769,16 @@ var ColumnFilterFormElement = class _ColumnFilterFormElement {
       type: Input
     }],
     minFractionDigits: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: (value) => numberAttribute(value, null)
+      }]
     }],
     maxFractionDigits: [{
-      type: Input
+      type: Input,
+      args: [{
+        transform: (value) => numberAttribute(value, null)
+      }]
     }],
     prefix: [{
       type: Input
@@ -27670,6 +29799,12 @@ var ColumnFilterFormElement = class _ColumnFilterFormElement {
       type: Input
     }],
     useGrouping: [{
+      type: Input,
+      args: [{
+        transform: booleanAttribute
+      }]
+    }],
+    ariaLabel: [{
       type: Input
     }]
   });
@@ -27681,18 +29816,18 @@ var TableModule = class _TableModule {
   static ɵmod = ɵɵdefineNgModule({
     type: _TableModule,
     declarations: [Table, SortableColumn, FrozenColumn, RowGroupHeader, SelectableRow, RowToggler, ContextMenuRow, ResizableColumn, ReorderableColumn, EditableColumn, CellEditor, TableBody, SortIcon, TableRadioButton, TableCheckbox, TableHeaderCheckbox, ReorderableRowHandle, ReorderableRow, SelectableRowDblClick, EditableRow, InitEditableRow, SaveEditableRow, CancelEditableRow, ColumnFilter, ColumnFilterFormElement],
-    imports: [CommonModule, PaginatorModule, InputTextModule, DropdownModule, FormsModule, ButtonModule, SelectButtonModule, CalendarModule, InputNumberModule, TriStateCheckboxModule, ScrollerModule, ArrowDownIcon, ArrowUpIcon, SpinnerIcon, SortAltIcon, SortAmountUpAltIcon, SortAmountDownIcon, CheckIcon, FilterIcon, FilterSlashIcon],
+    imports: [CommonModule, PaginatorModule, InputTextModule, DropdownModule, FormsModule, ButtonModule, SelectButtonModule, CalendarModule, InputNumberModule, TriStateCheckboxModule, ScrollerModule, ArrowDownIcon, ArrowUpIcon, SpinnerIcon, SortAltIcon, SortAmountUpAltIcon, SortAmountDownIcon, CheckIcon, FilterIcon, FilterSlashIcon, PlusIcon, TrashIcon],
     exports: [Table, SharedModule, SortableColumn, FrozenColumn, RowGroupHeader, SelectableRow, RowToggler, ContextMenuRow, ResizableColumn, ReorderableColumn, EditableColumn, CellEditor, SortIcon, TableRadioButton, TableCheckbox, TableHeaderCheckbox, ReorderableRowHandle, ReorderableRow, SelectableRowDblClick, EditableRow, InitEditableRow, SaveEditableRow, CancelEditableRow, ColumnFilter, ColumnFilterFormElement, ScrollerModule]
   });
   static ɵinj = ɵɵdefineInjector({
-    imports: [CommonModule, PaginatorModule, InputTextModule, DropdownModule, FormsModule, ButtonModule, SelectButtonModule, CalendarModule, InputNumberModule, TriStateCheckboxModule, ScrollerModule, ArrowDownIcon, ArrowUpIcon, SpinnerIcon, SortAltIcon, SortAmountUpAltIcon, SortAmountDownIcon, CheckIcon, FilterIcon, FilterSlashIcon, SharedModule, ScrollerModule]
+    imports: [CommonModule, PaginatorModule, InputTextModule, DropdownModule, FormsModule, ButtonModule, SelectButtonModule, CalendarModule, InputNumberModule, TriStateCheckboxModule, ScrollerModule, ArrowDownIcon, ArrowUpIcon, SpinnerIcon, SortAltIcon, SortAmountUpAltIcon, SortAmountDownIcon, CheckIcon, FilterIcon, FilterSlashIcon, PlusIcon, TrashIcon, SharedModule, ScrollerModule]
   });
 };
 (() => {
   (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(TableModule, [{
     type: NgModule,
     args: [{
-      imports: [CommonModule, PaginatorModule, InputTextModule, DropdownModule, FormsModule, ButtonModule, SelectButtonModule, CalendarModule, InputNumberModule, TriStateCheckboxModule, ScrollerModule, ArrowDownIcon, ArrowUpIcon, SpinnerIcon, SortAltIcon, SortAmountUpAltIcon, SortAmountDownIcon, CheckIcon, FilterIcon, FilterSlashIcon],
+      imports: [CommonModule, PaginatorModule, InputTextModule, DropdownModule, FormsModule, ButtonModule, SelectButtonModule, CalendarModule, InputNumberModule, TriStateCheckboxModule, ScrollerModule, ArrowDownIcon, ArrowUpIcon, SpinnerIcon, SortAltIcon, SortAmountUpAltIcon, SortAmountDownIcon, CheckIcon, FilterIcon, FilterSlashIcon, PlusIcon, TrashIcon],
       exports: [Table, SharedModule, SortableColumn, FrozenColumn, RowGroupHeader, SelectableRow, RowToggler, ContextMenuRow, ResizableColumn, ReorderableColumn, EditableColumn, CellEditor, SortIcon, TableRadioButton, TableCheckbox, TableHeaderCheckbox, ReorderableRowHandle, ReorderableRow, SelectableRowDblClick, EditableRow, InitEditableRow, SaveEditableRow, CancelEditableRow, ColumnFilter, ColumnFilterFormElement, ScrollerModule],
       declarations: [Table, SortableColumn, FrozenColumn, RowGroupHeader, SelectableRow, RowToggler, ContextMenuRow, ResizableColumn, ReorderableColumn, EditableColumn, CellEditor, TableBody, SortIcon, TableRadioButton, TableCheckbox, TableHeaderCheckbox, ReorderableRowHandle, ReorderableRow, SelectableRowDblClick, EditableRow, InitEditableRow, SaveEditableRow, CancelEditableRow, ColumnFilter, ColumnFilterFormElement]
     }]

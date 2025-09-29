@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ChartConfiguration } from 'chart.js';
-import { Observable, forkJoin, timer } from 'rxjs';
+import { Observable, Subscription, forkJoin, timer } from 'rxjs';
 import { switchMap, map } from 'rxjs/operators';
 import { Contact } from '../../../core/interfaces/contact.interface';
 import { Campaign } from '../../../core/interfaces/campaign.interface';
@@ -9,6 +9,8 @@ import { ContactsService } from '../../../core/services/contacts.service';
 import { CampaignsService } from '../../../core/services/campaign.service';
 import { TemplatesService } from '../../../core/services/template.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { ThemeService } from '../../../core/services/theme.service';
+import { DashboardService, ChartData } from '../../../core/services/dashboard.service';
 
 @Component({
   selector: 'app-home',
@@ -17,6 +19,8 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class HomeComponent implements OnInit {
   public userName: string = '';
+   isDarkMode = false;
+  private themeSubscription!: Subscription;
 
   contacts$!: Observable<Contact[]>;
   campaigns$!: Observable<Campaign[]>;
@@ -36,17 +40,26 @@ export class HomeComponent implements OnInit {
     private contactsService: ContactsService,
     private campaignsService: CampaignsService,
     private templatesService: TemplatesService,
-    private authService: AuthService
+    private authService: AuthService,
+    private themeService: ThemeService,
+     private dashboardService: DashboardService
   ) {}
 
   ngOnInit() {
+
+     // Subscribe to theme changes to update the icon
+    this.themeSubscription = this.themeService.currentTheme$.subscribe(theme => {
+      this.isDarkMode = (theme === 'dark');
+      });
     // Fetch logged-in user
     const userStr = localStorage.getItem('user');
     this.userName = userStr ? JSON.parse(userStr)?.username || 'User' : 'User';
 
+
     const wsId = this.getWorkspaceId();
 
     // Polling campaigns with audience & contacts every 10s
+    
     this.campaigns$ = timer(0, 10000).pipe(
       switchMap(() => this.campaignsService.getCampaigns()),
       switchMap(campaigns => {
@@ -87,6 +100,84 @@ export class HomeComponent implements OnInit {
     this.templates$ = timer(0, 10000).pipe(
       switchMap(() => this.templatesService.getTemplates())
     );
+
+     this.loadDashboardData();
+  
+ 
+  }
+
+  loadDashboardData(): void {
+    const wsId = this.getWorkspaceId();
+  // Fetch summary card stats
+  this.dashboardService.getStats(wsId).subscribe(stats => {
+    this.totalCampaigns = stats.totalCampaigns;
+    this.totalAudience = stats.totalAudience;
+    this.totalMessages = stats.totalMessages;
+  });
+
+  // Set a default date range (e.g., last 30 days) and fetch chart data
+  const endDate = new Date();
+  const startDate = new Date();
+  startDate.setDate(endDate.getDate() - 30);
+  
+  const startStr = startDate.toISOString().split('T')[0];
+  const endStr = endDate.toISOString().split('T')[0];
+
+  this.campaignsDateRange = endStr; // Bind this to your date input
+  this.messagesDateRange = endStr; // Bind this to your date input
+  this.contactsDateRange = endStr; // Bind this to your date input
+
+  this.onCampaignsDateChange(startStr, endStr);
+  this.onMessagesDateChange(startStr, endStr);
+  this.onContactsDateChange(startStr, endStr);
+}
+
+/**
+ * Methods to update charts when the user selects a new date range.
+ */
+onCampaignsDateChange(start: string, end: string): void {
+  this.dashboardService.getCampaignsPerDay(this.getWorkspaceId(), start, end).subscribe(data => {
+    this.campaignsChartData = data;
+  });
+}
+
+onMessagesDateChange(start: string, end: string): void {
+  this.dashboardService.getMessagesPerDay(this.getWorkspaceId(), start, end).subscribe(data => {
+    this.messagesChartData = data;
+  });
+}
+
+onContactsDateChange(start: string, end: string): void {
+  this.dashboardService.getContactsReached(this.getWorkspaceId(), start, end).subscribe(data => {
+    this.contactsChartData = data;
+  });
+}
+
+updateCampaignsChart(): void {
+    const endDate = new Date(this.campaignsDateRange);
+    const startDate = new Date(this.campaignsDateRange);
+    startDate.setDate(endDate.getDate() - 30);
+    this.onCampaignsDateChange(startDate.toISOString().split('T')[0], this.campaignsDateRange);
+  }
+
+  /**
+   * Re-fetches messages chart data for a 30-day period ending on the selected date.
+   */
+  updateMessagesChart(): void {
+    const endDate = new Date(this.messagesDateRange);
+    const startDate = new Date(this.messagesDateRange);
+    startDate.setDate(endDate.getDate() - 30);
+    this.onMessagesDateChange(startDate.toISOString().split('T')[0], this.messagesDateRange);
+  }
+
+  /**
+   * Re-fetches contacts chart data for a 30-day period ending on the selected date.
+   */
+  updateContactsChart(): void {
+    const endDate = new Date(this.contactsDateRange);
+    const startDate = new Date(this.contactsDateRange);
+    startDate.setDate(endDate.getDate() - 30);
+    this.onContactsDateChange(startDate.toISOString().split('T')[0], this.contactsDateRange);
   }
 
   private getWorkspaceId(): string {
@@ -118,24 +209,9 @@ export class HomeComponent implements OnInit {
   }
 
   // ------------------- Chart Data -------------------
-  campaignsChartData: ChartConfiguration<'bar'>['data'] = {
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    datasets: [{ data: [12, 19, 3, 5, 2, 3, 7], label: 'Campaigns', backgroundColor: '#6366f1' }]
-  };
-
-  messagesChartData: ChartConfiguration<'line'>['data'] = {
-    labels: ['Email', 'SMS', 'WhatsApp', 'LinkedIn'],
-    datasets: [
-      { data: [120, 90, 60, 30], label: 'Messages Sent', borderColor: '#f59e42', backgroundColor: 'rgba(245,158,66,0.2)', fill: true }
-    ]
-  };
-
-  contactsChartData: ChartConfiguration<'line'>['data'] = {
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    datasets: [
-      { data: [50, 60, 70, 80, 90, 100, 110], label: 'Contacts Reached', borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.2)', fill: true }
-    ]
-  };
+campaignsChartData: ChartData = { labels: [], datasets: [], };
+messagesChartData: ChartData = { labels: [], datasets: [] };
+contactsChartData: ChartData = { labels: [], datasets: [] };
 
   chartOptions: ChartConfiguration['options'] = {
     responsive: true,
@@ -147,4 +223,18 @@ export class HomeComponent implements OnInit {
     responsive: true,
     plugins: { legend: { display: true, position: 'top' }, tooltip: { enabled: true } }
   };
+
+  ngOnDestroy(): void {
+    // Unsubscribe to prevent memory leaks
+    if (this.themeSubscription) {
+      this.themeSubscription.unsubscribe();
+    }
+  }
+
+  /**
+   * Toggles the application's theme between light and dark mode.
+   */
+  toggleTheme(): void {
+    this.themeService.toggleTheme();
+  }
 }

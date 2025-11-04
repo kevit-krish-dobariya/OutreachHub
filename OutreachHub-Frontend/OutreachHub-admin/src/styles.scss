@@ -1,0 +1,43 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+/* // @import 'primeng/resources/themes/lara-light-blue/theme.css';
+// @import 'primeng/resources/primeng.css';
+// @import 'primeicons/primeicons.css'; */
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #0f172a; /* matches dashboard bg */
+}
+
+
+  .ngx-charts {
+    /* Target all text elements within the chart's SVG for white color */
+    text {
+      fill: #ffffff !important;
+    }
+
+    /* Specifically target the axis labels for a slightly dimmer, more readable color */
+    .axis-label {
+      fill: #cbd5e1 !important; /* text-slate-300 */
+    }
+    
+    /* Target the tick labels (the numbers/dates on the axes) */
+    .tick text {
+      fill: #94a3b8 !important; /* text-slate-400 */
+    }
+
+    /* Target the legend text which is often outside the main SVG */
+    .chart-legend .legend-label-text {
+      color: #ffffff !important;
+    }
+    
+    /* Make the chart grid lines visible but subtle on the dark background */
+    .grid-panel line {
+      stroke: rgba(255, 255, 255, 0.2) !important;
+    }
+  }
+

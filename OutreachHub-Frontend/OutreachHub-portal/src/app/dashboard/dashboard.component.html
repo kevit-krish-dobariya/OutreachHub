@@ -1,0 +1,20 @@
+<app-navbar></app-navbar>
+<router-outlet></router-outlet>
+<!-- Theme Toggle Button -->
+<button (click)="toggleTheme()"
+        class="fixed bottom-8 right-8 z-50 w-14 h-14 rounded-full bg-white dark:bg-gray-800 text-gray-800 dark:text-yellow-400 shadow-lg flex items-center justify-center
+               ring-1 ring-gray-300 dark:ring-gray-600 transition-transform hover:scale-110">
+<svg *ngIf="!isDarkMode" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 24 24" fill="currentColor">
+    <path fill-rule="evenodd" d="M12 2.25c.414 0 .75.336.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5h2.25a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM5.166 17.834a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.166 6.106a.75.75 0 00-1.06 1.06l1.59 1.591a.75.75 0 101.061-1.06l-1.59-1.591z" clip-rule="evenodd" />
+</svg>
+
+<!-- Moon Icon for Dark Mode -->
+<!-- MODIFIED: Replaced with a solid crescent moon icon for better visibility -->
+<svg *ngIf="isDarkMode" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 21.8a9.796 9.796 0 0 1-1.245-19.513l1.286-.163-.843.984a8.285 8.285 0 0 0 8.519 13.383l1.252-.347-.696 1.096A9.755 9.755 0 0 1 12 21.8zM9.647 3.526a8.796 8.796 0 1 0 9.031 14.196 9.048 9.048 0 0 1-1.178.078A9.293 9.293 0 0 1 9.647 3.526z"></path>
+</svg>
+
+
+
+</button>
+<app-footer></app-footer>
